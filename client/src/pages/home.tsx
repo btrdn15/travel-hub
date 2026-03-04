@@ -14,7 +14,7 @@ function HeroSection() {
       <div className="absolute inset-0">
         <img
           src="/images/hero-travel.png"
-          alt="Travel destinations"
+          alt="Аялалын газрууд"
           className="w-full h-full object-cover"
           data-testid="img-hero"
         />
@@ -22,29 +22,29 @@ function HeroSection() {
       </div>
       <div className="relative z-10 text-center max-w-4xl mx-auto px-6">
         <Badge variant="secondary" className="mb-6 text-sm px-4 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">
-          Discover the World
+          Дэлхийг нээ
         </Badge>
         <h1
           className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight tracking-tight"
           data-testid="text-hero-title"
         >
-          Your Next Adventure
+          Таны дараагийн
           <br />
-          <span className="text-primary-foreground/90">Starts Here</span>
+          <span className="text-primary-foreground/90">адал явдал эндээс эхэлнэ</span>
         </h1>
         <p className="text-lg md:text-xl text-white/80 mb-10 max-w-2xl mx-auto leading-relaxed">
-          Explore breathtaking destinations, curated travel routines, and unforgettable experiences crafted just for you.
+          Гайхалтай газрууд, тусгайлан бэлтгэсэн аялалын маршрутууд болон мартагдашгүй туршлагуудыг танд зориулав.
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
           <a href="#routines">
             <Button size="lg" data-testid="button-explore-routines">
-              Explore Routines
+              Маршрутууд үзэх
               <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </a>
           <a href="#brochure">
             <Button size="lg" variant="outline" className="text-white border-white/30 backdrop-blur-sm bg-white/10">
-              View Brochure
+              Брошур үзэх
             </Button>
           </a>
         </div>
@@ -58,12 +58,12 @@ function BrochureSection() {
     <section id="brochure" className="py-20 px-6 bg-muted/30">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-14">
-          <Badge variant="secondary" className="mb-4">Travel Brochure</Badge>
+          <Badge variant="secondary" className="mb-4">Аялалын брошур</Badge>
           <h2 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-brochure-title">
-            Featured Destinations
+            Онцлох газрууд
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-            Browse our curated collection of stunning travel destinations from around the globe.
+            Дэлхийн өнцөг булан бүрээс сонгон цуглуулсан гайхалтай аялалын газруудтай танилцана уу.
           </p>
         </div>
 
@@ -71,7 +71,7 @@ function BrochureSection() {
           <div className="group relative rounded-md overflow-hidden aspect-[4/3] hover-elevate">
             <img
               src="/images/beach-paradise.png"
-              alt="Beach Paradise"
+              alt="Далайн эрэг"
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               data-testid="img-brochure-beach"
             />
@@ -79,17 +79,17 @@ function BrochureSection() {
             <div className="absolute bottom-0 left-0 right-0 p-6">
               <div className="flex items-center gap-2 mb-2">
                 <Palmtree className="h-4 w-4 text-white/80" />
-                <span className="text-white/80 text-sm">Tropical</span>
+                <span className="text-white/80 text-sm">Халуун орон</span>
               </div>
-              <h3 className="text-2xl font-bold text-white">Beach Paradise</h3>
-              <p className="text-white/70 mt-1">Crystal clear waters and pristine sandy beaches</p>
+              <h3 className="text-2xl font-bold text-white">Далайн диваажин</h3>
+              <p className="text-white/70 mt-1">Тунгалаг ус, цэвэрхэн элсэн эрэг</p>
             </div>
           </div>
 
           <div className="group relative rounded-md overflow-hidden aspect-[4/3] hover-elevate">
             <img
               src="/images/temple-tour.png"
-              alt="Temple Tour"
+              alt="Сүм хийд"
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               data-testid="img-brochure-temple"
             />
@@ -97,17 +97,17 @@ function BrochureSection() {
             <div className="absolute bottom-0 left-0 right-0 p-6">
               <div className="flex items-center gap-2 mb-2">
                 <Globe className="h-4 w-4 text-white/80" />
-                <span className="text-white/80 text-sm">Cultural</span>
+                <span className="text-white/80 text-sm">Соёл</span>
               </div>
-              <h3 className="text-2xl font-bold text-white">Temple Exploration</h3>
-              <p className="text-white/70 mt-1">Ancient temples and rich cultural heritage</p>
+              <h3 className="text-2xl font-bold text-white">Сүм хийдийн аялал</h3>
+              <p className="text-white/70 mt-1">Эртний сүм хийд, баялаг соёлын өв</p>
             </div>
           </div>
 
           <div className="group relative rounded-md overflow-hidden aspect-[4/3] hover-elevate">
             <img
               src="/images/mountain-adventure.png"
-              alt="Mountain Adventure"
+              alt="Уулын аялал"
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               data-testid="img-brochure-mountain"
             />
@@ -115,17 +115,17 @@ function BrochureSection() {
             <div className="absolute bottom-0 left-0 right-0 p-6">
               <div className="flex items-center gap-2 mb-2">
                 <Mountain className="h-4 w-4 text-white/80" />
-                <span className="text-white/80 text-sm">Adventure</span>
+                <span className="text-white/80 text-sm">Адал явдал</span>
               </div>
-              <h3 className="text-2xl font-bold text-white">Mountain Trek</h3>
-              <p className="text-white/70 mt-1">Majestic peaks and breathtaking alpine views</p>
+              <h3 className="text-2xl font-bold text-white">Уулын аялал</h3>
+              <p className="text-white/70 mt-1">Сүрлэг оргилууд, гайхамшигт уулсын үзэмж</p>
             </div>
           </div>
 
           <div className="group relative rounded-md overflow-hidden aspect-[4/3] hover-elevate">
             <img
               src="/images/european-city.png"
-              alt="European City"
+              alt="Европын хот"
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               data-testid="img-brochure-europe"
             />
@@ -133,17 +133,17 @@ function BrochureSection() {
             <div className="absolute bottom-0 left-0 right-0 p-6">
               <div className="flex items-center gap-2 mb-2">
                 <MapPin className="h-4 w-4 text-white/80" />
-                <span className="text-white/80 text-sm">City Tour</span>
+                <span className="text-white/80 text-sm">Хотын аялал</span>
               </div>
-              <h3 className="text-2xl font-bold text-white">European Charm</h3>
-              <p className="text-white/70 mt-1">Historic streets and world-class cuisine</p>
+              <h3 className="text-2xl font-bold text-white">Европын сайхан</h3>
+              <p className="text-white/70 mt-1">Түүхэн гудамж, дэлхийн түвшний хоол</p>
             </div>
           </div>
         </div>
 
         <div className="text-center mt-10">
           <p className="text-sm text-muted-foreground italic">
-            More brochure images coming soon. Stay tuned for our full collection!
+            Брошурын зургууд удахгүй нэмэгдэнэ. Хүлээгээрэй!
           </p>
         </div>
       </div>
@@ -157,6 +157,10 @@ function RoutineCard({ routine }: { routine: Routine }) {
     "Temple": "/images/temple-tour.png",
     "Mountain": "/images/mountain-adventure.png",
     "Europe": "/images/european-city.png",
+    "Далай": "/images/beach-paradise.png",
+    "Сүм": "/images/temple-tour.png",
+    "Уул": "/images/mountain-adventure.png",
+    "Европ": "/images/european-city.png",
   };
 
   const matchedImage = routine.image || Object.entries(imageMap).find(([key]) =>
@@ -218,12 +222,12 @@ function RoutinesSection() {
     <section id="routines" className="py-20 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-14">
-          <Badge variant="secondary" className="mb-4">Travel Routines</Badge>
+          <Badge variant="secondary" className="mb-4">Аялалын маршрутууд</Badge>
           <h2 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-routines-title">
-            Our Travel Packages
+            Манай аялалын багцууд
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-            Carefully crafted travel experiences designed to give you the perfect getaway.
+            Танд хамгийн тохиромжтой амралтыг бэлэглэхээр тусгайлан бэлтгэсэн аялалын туршлагууд.
           </p>
         </div>
 
@@ -249,9 +253,9 @@ function RoutinesSection() {
         ) : (
           <div className="text-center py-16">
             <Plane className="h-16 w-16 text-muted-foreground/40 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-muted-foreground mb-2">No Routines Available Yet</h3>
+            <h3 className="text-xl font-semibold text-muted-foreground mb-2">Маршрут байхгүй байна</h3>
             <p className="text-muted-foreground">
-              Our travel routines are being prepared. Check back soon for amazing packages!
+              Аялалын маршрутууд бэлтгэгдэж байна. Удахгүй гайхалтай багцууд нэмэгдэнэ!
             </p>
           </div>
         )}
@@ -262,10 +266,10 @@ function RoutinesSection() {
 
 function StatsSection() {
   const stats = [
-    { icon: Globe, value: "50+", label: "Destinations" },
-    { icon: Plane, value: "200+", label: "Tours Completed" },
-    { icon: Mountain, value: "100%", label: "Satisfaction" },
-    { icon: DollarSign, value: "Best", label: "Price Guarantee" },
+    { icon: Globe, value: "50+", label: "Очих газрууд" },
+    { icon: Plane, value: "200+", label: "Дууссан аялалууд" },
+    { icon: Mountain, value: "100%", label: "Сэтгэл ханамж" },
+    { icon: DollarSign, value: "Шилдэг", label: "Үнийн баталгаа" },
   ];
 
   return (
@@ -293,7 +297,7 @@ function Footer() {
             <span className="text-xl font-bold">TravelWorld</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            Crafting unforgettable travel experiences since 2020.
+            2020 оноос хойш мартагдашгүй аялалын туршлага бүтээж байна.
           </p>
         </div>
       </div>
@@ -317,14 +321,14 @@ export default function HomePage() {
               <Link href="/admin">
                 <Button size="sm" data-testid="button-admin-dashboard">
                   <LayoutDashboard className="h-4 w-4 mr-1.5" />
-                  Dashboard
+                  Хяналтын самбар
                 </Button>
               </Link>
             ) : (
               <Link href="/admin/login">
                 <Button size="sm" variant="outline" data-testid="button-admin-login">
                   <LogIn className="h-4 w-4 mr-1.5" />
-                  Admin Login
+                  Админ нэвтрэх
                 </Button>
               </Link>
             )}

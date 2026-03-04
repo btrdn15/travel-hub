@@ -54,35 +54,35 @@ function RoutineForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title">Нэр</Label>
           <Input
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Bali Beach Getaway"
+            placeholder="жишээ нь: Бали далайн амралт"
             required
             data-testid="input-routine-title"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="destination">Destination</Label>
+          <Label htmlFor="destination">Очих газар</Label>
           <Input
             id="destination"
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
-            placeholder="e.g. Bali, Indonesia"
+            placeholder="жишээ нь: Бали, Индонез"
             required
             data-testid="input-routine-destination"
           />
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">Тайлбар</Label>
         <Textarea
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Describe this travel routine..."
+          placeholder="Энэ аялалын маршрутыг тайлбарлана уу..."
           required
           className="min-h-[100px]"
           data-testid="input-routine-description"
@@ -90,30 +90,30 @@ function RoutineForm({
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="duration">Duration</Label>
+          <Label htmlFor="duration">Хугацаа</Label>
           <Input
             id="duration"
             value={duration}
             onChange={(e) => setDuration(e.target.value)}
-            placeholder="e.g. 5 Days / 4 Nights"
+            placeholder="жишээ нь: 5 хоног / 4 шөнө"
             required
             data-testid="input-routine-duration"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="price">Price ($)</Label>
+          <Label htmlFor="price">Үнэ ($)</Label>
           <Input
             id="price"
             type="number"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            placeholder="e.g. 1200"
+            placeholder="жишээ нь: 1200"
             required
             data-testid="input-routine-price"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="image">Image URL (optional)</Label>
+          <Label htmlFor="image">Зургийн URL (заавал биш)</Label>
           <Input
             id="image"
             value={image}
@@ -124,24 +124,24 @@ function RoutineForm({
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="highlights">Highlights (comma separated)</Label>
+        <Label htmlFor="highlights">Онцлох зүйлс (таслалаар тусгаарлана)</Label>
         <Input
           id="highlights"
           value={highlights}
           onChange={(e) => setHighlights(e.target.value)}
-          placeholder="e.g. Snorkeling, Spa, Sunset Dinner"
+          placeholder="жишээ нь: Шумбалт, Спа, Нар жаргалтын зоог"
           data-testid="input-routine-highlights"
         />
       </div>
       <DialogFooter className="gap-2">
         <Button type="button" variant="outline" onClick={onCancel} data-testid="button-cancel-routine">
-          Cancel
+          Цуцлах
         </Button>
         <Button type="submit" disabled={isPending} data-testid="button-save-routine">
           {isPending ? (
             <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
           ) : null}
-          {routine ? "Update Routine" : "Create Routine"}
+          {routine ? "Маршрут шинэчлэх" : "Маршрут үүсгэх"}
         </Button>
       </DialogFooter>
     </form>
@@ -183,10 +183,10 @@ export default function AdminDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/routines"] });
       setShowCreateDialog(false);
-      toast({ title: "Success", description: "Routine created successfully" });
+      toast({ title: "Амжилттай", description: "Маршрут амжилттай үүсгэгдлээ" });
     },
     onError: (error: any) => {
-      toast({ title: "Error", description: error.message || "Failed to create routine", variant: "destructive" });
+      toast({ title: "Алдаа", description: error.message || "Маршрут үүсгэхэд алдаа гарлаа", variant: "destructive" });
     },
   });
 
@@ -197,10 +197,10 @@ export default function AdminDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/routines"] });
       setEditingRoutine(null);
-      toast({ title: "Success", description: "Routine updated successfully" });
+      toast({ title: "Амжилттай", description: "Маршрут амжилттай шинэчлэгдлээ" });
     },
     onError: (error: any) => {
-      toast({ title: "Error", description: error.message || "Failed to update routine", variant: "destructive" });
+      toast({ title: "Алдаа", description: error.message || "Маршрут шинэчлэхэд алдаа гарлаа", variant: "destructive" });
     },
   });
 
@@ -211,10 +211,10 @@ export default function AdminDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/routines"] });
       setDeletingId(null);
-      toast({ title: "Success", description: "Routine deleted successfully" });
+      toast({ title: "Амжилттай", description: "Маршрут амжилттай устгагдлаа" });
     },
     onError: (error: any) => {
-      toast({ title: "Error", description: error.message || "Failed to delete routine", variant: "destructive" });
+      toast({ title: "Алдаа", description: error.message || "Маршрут устгахад алдаа гарлаа", variant: "destructive" });
     },
   });
 
@@ -224,10 +224,10 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/selections"] });
-      toast({ title: "Selected", description: "Routine added to your service list" });
+      toast({ title: "Сонгосон", description: "Маршрут таны үйлчилгээний жагсаалтад нэмэгдлээ" });
     },
     onError: (error: any) => {
-      toast({ title: "Error", description: error.message || "Failed to select routine", variant: "destructive" });
+      toast({ title: "Алдаа", description: error.message || "Маршрут сонгоход алдаа гарлаа", variant: "destructive" });
     },
   });
 
@@ -237,10 +237,10 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/selections"] });
-      toast({ title: "Removed", description: "Routine removed from your service list" });
+      toast({ title: "Хасагдсан", description: "Маршрут таны үйлчилгээний жагсаалтаас хасагдлаа" });
     },
     onError: (error: any) => {
-      toast({ title: "Error", description: error.message || "Failed to remove selection", variant: "destructive" });
+      toast({ title: "Алдаа", description: error.message || "Маршрут хасахад алдаа гарлаа", variant: "destructive" });
     },
   });
 
@@ -273,7 +273,7 @@ export default function AdminDashboard() {
             <div className="flex items-center gap-2">
               <Badge variant="secondary" data-testid="badge-user-role">
                 <Shield className="h-3 w-3 mr-1" />
-                {isSuperAdmin ? "Super Admin" : "Admin"}
+                {isSuperAdmin ? "Ерөнхий Админ" : "Админ"}
               </Badge>
               <span className="text-sm text-muted-foreground" data-testid="text-username">
                 {user.username}
@@ -281,7 +281,7 @@ export default function AdminDashboard() {
             </div>
             <Button size="sm" variant="outline" onClick={handleLogout} data-testid="button-logout">
               <LogOut className="h-4 w-4 mr-1.5" />
-              Logout
+              Гарах
             </Button>
           </div>
         </div>
@@ -291,18 +291,18 @@ export default function AdminDashboard() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold" data-testid="text-dashboard-title">
-              {isSuperAdmin ? "Admin Dashboard" : "Service Dashboard"}
+              {isSuperAdmin ? "Админ хяналтын самбар" : "Үйлчилгээний самбар"}
             </h1>
             <p className="text-muted-foreground mt-1">
               {isSuperAdmin
-                ? "Manage travel routines, pricing, and admin accounts"
-                : "View and select travel routines to provide services"}
+                ? "Аялалын маршрут, үнэ, админ бүртгэлийг удирдах"
+                : "Аялалын маршрутуудыг сонгон үйлчилгээ үзүүлэх"}
             </p>
           </div>
           {isSuperAdmin && (
             <Button onClick={() => setShowCreateDialog(true)} data-testid="button-create-routine">
               <Plus className="h-4 w-4 mr-1.5" />
-              New Routine
+              Шинэ маршрут
             </Button>
           )}
         </div>
@@ -317,7 +317,7 @@ export default function AdminDashboard() {
                 <p className="text-2xl font-bold" data-testid="text-total-routines">
                   {routines?.length || 0}
                 </p>
-                <p className="text-sm text-muted-foreground">Total Routines</p>
+                <p className="text-sm text-muted-foreground">Нийт маршрутууд</p>
               </div>
             </CardContent>
           </Card>
@@ -332,7 +332,7 @@ export default function AdminDashboard() {
                     ? `$${Math.min(...routines.map((r) => r.price))} - $${Math.max(...routines.map((r) => r.price))}`
                     : "$0"}
                 </p>
-                <p className="text-sm text-muted-foreground">Price Range</p>
+                <p className="text-sm text-muted-foreground">Үнийн хүрээ</p>
               </div>
             </CardContent>
           </Card>
@@ -343,10 +343,10 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {isSuperAdmin ? "Full Control" : `${selectedRoutineIds.size} Selected`}
+                  {isSuperAdmin ? "Бүрэн эрх" : `${selectedRoutineIds.size} сонгосон`}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {isSuperAdmin ? "Super Admin Access" : "My Service Routines"}
+                  {isSuperAdmin ? "Ерөнхий Админ эрх" : "Миний үйлчилгээний маршрутууд"}
                 </p>
               </div>
             </CardContent>
@@ -355,12 +355,12 @@ export default function AdminDashboard() {
 
         <div className="mb-4">
           <h2 className="text-xl font-semibold">
-            {isSuperAdmin ? "Manage Routines" : "Available Routines"}
+            {isSuperAdmin ? "Маршрутууд удирдах" : "Боломжит маршрутууд"}
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
             {isSuperAdmin
-              ? "Create, edit, delete, and manage pricing for all routines"
-              : "Select routines you want to provide as services to customers"}
+              ? "Бүх маршрутуудыг үүсгэх, засах, устгах, үнэ өөрчлөх"
+              : "Харилцагчдад үйлчилгээ үзүүлэх маршрутуудыг сонгоно уу"}
           </p>
         </div>
 
@@ -396,7 +396,7 @@ export default function AdminDashboard() {
                           {!isSuperAdmin && isSelected && (
                             <Badge variant="default" className="flex-shrink-0 text-xs">
                               <Check className="h-3 w-3 mr-0.5" />
-                              Active
+                              Идэвхтэй
                             </Badge>
                           )}
                         </div>
@@ -437,7 +437,7 @@ export default function AdminDashboard() {
                             data-testid={`button-edit-routine-${routine.id}`}
                           >
                             <Pencil className="h-3.5 w-3.5 mr-1" />
-                            Edit
+                            Засах
                           </Button>
                           <Button
                             size="sm"
@@ -447,7 +447,7 @@ export default function AdminDashboard() {
                             data-testid={`button-delete-routine-${routine.id}`}
                           >
                             <Trash2 className="h-3.5 w-3.5 mr-1" />
-                            Delete
+                            Устгах
                           </Button>
                         </>
                       ) : isSelected ? (
@@ -459,7 +459,7 @@ export default function AdminDashboard() {
                           data-testid={`button-deselect-routine-${routine.id}`}
                         >
                           <X className="h-3.5 w-3.5 mr-1" />
-                          Remove from Services
+                          Үйлчилгээнээс хасах
                         </Button>
                       ) : (
                         <Button
@@ -469,7 +469,7 @@ export default function AdminDashboard() {
                           data-testid={`button-select-routine-${routine.id}`}
                         >
                           <Check className="h-3.5 w-3.5 mr-1" />
-                          Select for Service
+                          Үйлчилгээнд сонгох
                         </Button>
                       )}
                     </div>
@@ -482,11 +482,11 @@ export default function AdminDashboard() {
           <Card>
             <CardContent className="p-12 text-center">
               <Package className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-muted-foreground mb-1">No Routines Yet</h3>
+              <h3 className="text-lg font-semibold text-muted-foreground mb-1">Маршрут байхгүй</h3>
               <p className="text-sm text-muted-foreground">
                 {isSuperAdmin
-                  ? "Create your first travel routine to get started."
-                  : "No routines available. Please ask the primary admin to create some."}
+                  ? "Эхний аялалын маршрутаа үүсгэж эхлээрэй."
+                  : "Маршрут байхгүй байна. Ерөнхий админаас маршрут үүсгэхийг хүснэ үү."}
               </p>
             </CardContent>
           </Card>
@@ -496,9 +496,9 @@ export default function AdminDashboard() {
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Create New Routine</DialogTitle>
+            <DialogTitle>Шинэ маршрут үүсгэх</DialogTitle>
             <DialogDescription>
-              Add a new travel routine package for your customers.
+              Харилцагчдад зориулсан шинэ аялалын маршрут нэмэх.
             </DialogDescription>
           </DialogHeader>
           <RoutineForm
@@ -512,9 +512,9 @@ export default function AdminDashboard() {
       <Dialog open={!!editingRoutine} onOpenChange={() => setEditingRoutine(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Edit Routine</DialogTitle>
+            <DialogTitle>Маршрут засах</DialogTitle>
             <DialogDescription>
-              Update the details and pricing for this routine.
+              Энэ маршрутын мэдээлэл болон үнийг шинэчлэх.
             </DialogDescription>
           </DialogHeader>
           {editingRoutine && (
@@ -531,14 +531,14 @@ export default function AdminDashboard() {
       <Dialog open={!!deletingId} onOpenChange={() => setDeletingId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Routine</DialogTitle>
+            <DialogTitle>Маршрут устгах</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this routine? This action cannot be undone.
+              Та энэ маршрутыг устгахдаа итгэлтэй байна уу? Энэ үйлдлийг буцаах боломжгүй.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setDeletingId(null)} data-testid="button-cancel-delete">
-              Cancel
+              Цуцлах
             </Button>
             <Button
               variant="destructive"
@@ -551,7 +551,7 @@ export default function AdminDashboard() {
               ) : (
                 <Trash2 className="h-4 w-4 mr-1.5" />
               )}
-              Delete
+              Устгах
             </Button>
           </DialogFooter>
         </DialogContent>

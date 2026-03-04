@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -13,31 +13,46 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const [loginSuccess, setLoginSuccess] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setLocation("/admin");
+    }
+  }, [user, setLocation]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !password) {
-      toast({ title: "Error", description: "Please fill in all fields", variant: "destructive" });
+      toast({ title: "Алдаа", description: "Бүх талбарыг бөглөнө үү", variant: "destructive" });
       return;
     }
     setIsLoading(true);
     try {
       await login(username, password);
-      toast({ title: "Welcome back!", description: "You have been logged in successfully." });
-      setLocation("/admin");
+      setLoginSuccess(true);
+      toast({ title: "Тавтай морил!", description: "Амжилттай нэвтэрлээ." });
     } catch (error: any) {
       toast({
-        title: "Login Failed",
-        description: error.message?.includes("401") ? "Invalid username or password" : "Something went wrong",
+        title: "Нэвтрэлт амжилтгүй",
+        description: error.message?.includes("401") ? "Хэрэглэгчийн нэр эсвэл нууц үг буруу байна" : "Алдаа гарлаа",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (loginSuccess && !user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -50,7 +65,7 @@ export default function LoginPage() {
           <Link href="/">
             <Button size="sm" variant="ghost" data-testid="button-back-home">
               <ArrowLeft className="h-4 w-4 mr-1.5" />
-              Back to Home
+              Нүүр хуудас руу
             </Button>
           </Link>
         </div>
@@ -62,30 +77,30 @@ export default function LoginPage() {
             <div className="mx-auto mb-4 w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center">
               <LogIn className="h-6 w-6 text-primary" />
             </div>
-            <CardTitle className="text-2xl">Admin Login</CardTitle>
+            <CardTitle className="text-2xl">Админ нэвтрэх</CardTitle>
             <CardDescription>
-              Sign in to manage travel routines and services
+              Аялалын маршрут болон үйлчилгээг удирдахын тулд нэвтэрнэ үү
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="username">Хэрэглэгчийн нэр</Label>
                 <Input
                   id="username"
                   type="text"
-                  placeholder="Enter your username"
+                  placeholder="Хэрэглэгчийн нэрээ оруулна уу"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   data-testid="input-username"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Нууц үг</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder="Нууц үгээ оруулна уу"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   data-testid="input-password"
@@ -95,12 +110,12 @@ export default function LoginPage() {
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
-                    Signing in...
+                    Нэвтэрч байна...
                   </>
                 ) : (
                   <>
                     <LogIn className="h-4 w-4 mr-1.5" />
-                    Sign In
+                    Нэвтрэх
                   </>
                 )}
               </Button>
