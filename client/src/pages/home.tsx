@@ -1,12 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Clock, DollarSign, Plane, Globe, Mountain, Palmtree, ChevronRight, LogIn, LayoutDashboard } from "lucide-react";
-import type { Routine } from "@shared/schema";
+import { Globe, Plane, Mountain, DollarSign, ChevronRight, LogIn, LayoutDashboard } from "lucide-react";
 import brochureFront from "@assets/IMG_7059_1772631193955.jpeg";
 import brochureBack from "@assets/IMG_7060_1772631198093.jpeg";
 
@@ -38,15 +34,10 @@ function HeroSection() {
           Гайхалтай газрууд, тусгайлан бэлтгэсэн аялалын маршрутууд болон мартагдашгүй туршлагуудыг танд зориулав.
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
-          <a href="#routines">
-            <Button size="lg" data-testid="button-explore-routines">
-              Маршрутууд үзэх
-              <ChevronRight className="ml-1 h-4 w-4" />
-            </Button>
-          </a>
           <a href="#brochure">
-            <Button size="lg" variant="outline" className="text-white border-white/30 backdrop-blur-sm bg-white/10">
+            <Button size="lg" data-testid="button-explore-brochure">
               Брошур үзэх
+              <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </a>
         </div>
@@ -98,119 +89,6 @@ function BrochureSection() {
             Дэлгэрэнгүй мэдээлэл авахыг хүсвэл бидэнтэй холбогдоорой.
           </p>
         </div>
-      </div>
-    </section>
-  );
-}
-
-function RoutineCard({ routine }: { routine: Routine }) {
-  const imageMap: Record<string, string> = {
-    "Beach": "/images/beach-paradise.png",
-    "Temple": "/images/temple-tour.png",
-    "Mountain": "/images/mountain-adventure.png",
-    "Europe": "/images/european-city.png",
-    "Далай": "/images/beach-paradise.png",
-    "Сүм": "/images/temple-tour.png",
-    "Уул": "/images/mountain-adventure.png",
-    "Европ": "/images/european-city.png",
-  };
-
-  const matchedImage = routine.image || Object.entries(imageMap).find(([key]) =>
-    routine.title.toLowerCase().includes(key.toLowerCase()) ||
-    routine.destination.toLowerCase().includes(key.toLowerCase())
-  )?.[1] || "/images/hero-travel.png";
-
-  return (
-    <Card className="group overflow-visible" data-testid={`card-routine-${routine.id}`}>
-      <div className="relative aspect-[16/9] overflow-hidden rounded-t-md">
-        <img
-          src={matchedImage}
-          alt={routine.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        <div className="absolute top-3 right-3">
-          <Badge className="bg-primary text-primary-foreground font-semibold">
-            ${routine.price}
-          </Badge>
-        </div>
-      </div>
-      <CardContent className="p-5">
-        <h3 className="text-lg font-semibold mb-2" data-testid={`text-routine-title-${routine.id}`}>
-          {routine.title}
-        </h3>
-        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-          <span className="flex items-center gap-1">
-            <MapPin className="h-3.5 w-3.5" />
-            {routine.destination}
-          </span>
-          <span className="flex items-center gap-1">
-            <Clock className="h-3.5 w-3.5" />
-            {routine.duration}
-          </span>
-        </div>
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-          {routine.description}
-        </p>
-        {routine.highlights && routine.highlights.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {routine.highlights.slice(0, 3).map((h, i) => (
-              <Badge key={i} variant="secondary" className="text-xs">
-                {h}
-              </Badge>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function RoutinesSection() {
-  const { data: routines, isLoading } = useQuery<Routine[]>({
-    queryKey: ["/api/routines"],
-  });
-
-  return (
-    <section id="routines" className="py-20 px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-14">
-          <Badge variant="secondary" className="mb-4">Аялалын маршрутууд</Badge>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-routines-title">
-            Манай аялалын багцууд
-          </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-            Танд хамгийн тохиромжтой амралтыг бэлэглэхээр тусгайлан бэлтгэсэн аялалын туршлагууд.
-          </p>
-        </div>
-
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <Card key={i}>
-                <Skeleton className="aspect-[16/9] rounded-t-md" />
-                <CardContent className="p-5 space-y-3">
-                  <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                  <Skeleton className="h-4 w-full" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : routines && routines.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {routines.map((routine) => (
-              <RoutineCard key={routine.id} routine={routine} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <Plane className="h-16 w-16 text-muted-foreground/40 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-muted-foreground mb-2">Маршрут байхгүй байна</h3>
-            <p className="text-muted-foreground">
-              Аялалын маршрутууд бэлтгэгдэж байна. Удахгүй гайхалтай багцууд нэмэгдэнэ!
-            </p>
-          </div>
-        )}
       </div>
     </section>
   );
@@ -292,7 +170,6 @@ export default function HomePage() {
         <BrochureSection />
         <HeroSection />
         <StatsSection />
-        <RoutinesSection />
         <Footer />
       </main>
     </div>
