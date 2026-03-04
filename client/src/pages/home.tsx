@@ -2,49 +2,9 @@ import { Link } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Globe, Plane, Mountain, DollarSign, ChevronRight, LogIn, LayoutDashboard } from "lucide-react";
+import { Globe, Plane, Mountain, DollarSign, LogIn, LayoutDashboard } from "lucide-react";
 import brochureFront from "@assets/IMG_7059_1772631193955.jpeg";
 import brochureBack from "@assets/IMG_7060_1772631198093.jpeg";
-
-function HeroSection() {
-  return (
-    <section className="relative h-[85vh] min-h-[600px] flex items-center justify-center">
-      <div className="absolute inset-0">
-        <img
-          src="/images/hero-travel.png"
-          alt="Аялалын газрууд"
-          className="w-full h-full object-cover"
-          data-testid="img-hero"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
-      </div>
-      <div className="relative z-10 text-center max-w-4xl mx-auto px-6">
-        <Badge variant="secondary" className="mb-6 text-sm px-4 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">
-          Дэлхийг нээ
-        </Badge>
-        <h1
-          className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight tracking-tight"
-          data-testid="text-hero-title"
-        >
-          Таны дараагийн
-          <br />
-          <span className="text-primary-foreground/90">адал явдал эндээс эхэлнэ</span>
-        </h1>
-        <p className="text-lg md:text-xl text-white/80 mb-10 max-w-2xl mx-auto leading-relaxed">
-          Гайхалтай газрууд, тусгайлан бэлтгэсэн аялалын маршрутууд болон мартагдашгүй туршлагуудыг танд зориулав.
-        </p>
-        <div className="flex flex-wrap gap-3 justify-center">
-          <a href="#brochure">
-            <Button size="lg" data-testid="button-explore-brochure">
-              Брошур үзэх
-              <ChevronRight className="ml-1 h-4 w-4" />
-            </Button>
-          </a>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 function BrochureSection() {
   return (
@@ -168,7 +128,6 @@ export default function HomePage() {
 
       <main className="pt-16">
         <BrochureSection />
-        <HeroSection />
         <StatsSection />
         <Footer />
       </main>
