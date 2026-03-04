@@ -21,11 +21,6 @@ function Navbar() {
           </div>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
-          <a href="#brochure" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors" data-testid="link-brochure">Аялалын брошур</a>
-          <a href="#contact" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors" data-testid="link-contact">Холбоо барих</a>
-        </div>
-
         <div className="flex items-center">
           <Link href={user ? "/admin" : "/admin/login"}>
             <button
