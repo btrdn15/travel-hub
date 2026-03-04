@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { MapPin, Phone, Mail, Instagram, Users, Star, Compass, LogIn, LayoutDashboard, ChevronDown, X } from "lucide-react";
+import { MapPin, Phone, Mail, Instagram, Users, Star, Compass, LogIn, Menu, ChevronDown, X } from "lucide-react";
 import brochureFront from "@assets/IMG_7059_1772631193955.jpeg";
 import brochureBack from "@assets/IMG_7060_1772631198093.jpeg";
 
@@ -28,22 +28,16 @@ function Navbar() {
           <a href="#contact" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors" data-testid="link-contact">Холбоо барих</a>
         </div>
 
-        <div className="flex items-center gap-2">
-          {user ? (
-            <Link href="/admin">
-              <Button size="sm" className="bg-amber-700 hover:bg-amber-800 text-white" data-testid="button-admin-dashboard">
-                <LayoutDashboard className="h-4 w-4 mr-1.5" />
-                Хяналтын самбар
-              </Button>
-            </Link>
-          ) : (
-            <Link href="/admin/login">
-              <Button size="sm" variant="outline" className="border-stone-300 text-stone-700 hover:bg-stone-50" data-testid="button-admin-login">
-                <LogIn className="h-4 w-4 mr-1.5" />
-                Админ нэвтрэх
-              </Button>
-            </Link>
-          )}
+        <div className="flex items-center">
+          <Link href={user ? "/admin" : "/admin/login"}>
+            <button
+              className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-stone-100 transition-colors"
+              aria-label="Админ цэс"
+              data-testid="button-admin-menu"
+            >
+              <Menu className="h-5 w-5 text-stone-700" />
+            </button>
+          </Link>
         </div>
       </div>
     </nav>
