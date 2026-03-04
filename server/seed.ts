@@ -12,10 +12,10 @@ async function hashPassword(password: string): Promise<string> {
 
 export async function seedDatabase() {
   const adminAccounts = [
-    { username: "admin2", password: "admin234" },
-    { username: "admin3", password: "admin345" },
-    { username: "admin4", password: "admin456" },
-    { username: "admin5", password: "admin567" },
+    { username: "admin2", password: "admin123" },
+    { username: "admin3", password: "admin123" },
+    { username: "admin4", password: "admin123" },
+    { username: "admin5", password: "admin123" },
   ];
 
   for (const account of adminAccounts) {
@@ -27,6 +27,9 @@ export async function seedDatabase() {
         password: hashedPassword,
         role: "admin",
       });
+    } else {
+      const hashedPassword = await hashPassword(account.password);
+      await storage.updateUserPassword(existing.id, hashedPassword);
     }
   }
 

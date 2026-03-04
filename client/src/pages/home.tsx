@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin, Clock, DollarSign, Plane, Globe, Mountain, Palmtree, ChevronRight, LogIn, LayoutDashboard } from "lucide-react";
 import type { Routine } from "@shared/schema";
+import brochureFront from "@assets/IMG_7059_1772631193955.jpeg";
+import brochureBack from "@assets/IMG_7060_1772631198093.jpeg";
 
 function HeroSection() {
   return (
@@ -60,90 +62,40 @@ function BrochureSection() {
         <div className="text-center mb-14">
           <Badge variant="secondary" className="mb-4">Аялалын брошур</Badge>
           <h2 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-brochure-title">
-            Онцлох газрууд
+            Olon Nuur Travel
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-            Дэлхийн өнцөг булан бүрээс сонгон цуглуулсан гайхалтай аялалын газруудтай танилцана уу.
+            Монгол аялалын бүрэн мэдээллийг доорх брошураас харна уу.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="group relative rounded-md overflow-hidden aspect-[4/3] hover-elevate">
-            <img
-              src="/images/beach-paradise.png"
-              alt="Далайн эрэг"
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              data-testid="img-brochure-beach"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-6">
-              <div className="flex items-center gap-2 mb-2">
-                <Palmtree className="h-4 w-4 text-white/80" />
-                <span className="text-white/80 text-sm">Халуун орон</span>
-              </div>
-              <h3 className="text-2xl font-bold text-white">Далайн диваажин</h3>
-              <p className="text-white/70 mt-1">Тунгалаг ус, цэвэрхэн элсэн эрэг</p>
+        <div className="space-y-8">
+          <div className="relative group">
+            <div className="overflow-hidden rounded-xl shadow-2xl border border-border/50 transition-shadow duration-500 group-hover:shadow-3xl">
+              <img
+                src={brochureFront}
+                alt="Olon Nuur Travel - Брошурын нүүр тал"
+                className="w-full h-auto object-contain"
+                data-testid="img-brochure-front"
+              />
             </div>
           </div>
 
-          <div className="group relative rounded-md overflow-hidden aspect-[4/3] hover-elevate">
-            <img
-              src="/images/temple-tour.png"
-              alt="Сүм хийд"
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              data-testid="img-brochure-temple"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-6">
-              <div className="flex items-center gap-2 mb-2">
-                <Globe className="h-4 w-4 text-white/80" />
-                <span className="text-white/80 text-sm">Соёл</span>
-              </div>
-              <h3 className="text-2xl font-bold text-white">Сүм хийдийн аялал</h3>
-              <p className="text-white/70 mt-1">Эртний сүм хийд, баялаг соёлын өв</p>
-            </div>
-          </div>
-
-          <div className="group relative rounded-md overflow-hidden aspect-[4/3] hover-elevate">
-            <img
-              src="/images/mountain-adventure.png"
-              alt="Уулын аялал"
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              data-testid="img-brochure-mountain"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-6">
-              <div className="flex items-center gap-2 mb-2">
-                <Mountain className="h-4 w-4 text-white/80" />
-                <span className="text-white/80 text-sm">Адал явдал</span>
-              </div>
-              <h3 className="text-2xl font-bold text-white">Уулын аялал</h3>
-              <p className="text-white/70 mt-1">Сүрлэг оргилууд, гайхамшигт уулсын үзэмж</p>
-            </div>
-          </div>
-
-          <div className="group relative rounded-md overflow-hidden aspect-[4/3] hover-elevate">
-            <img
-              src="/images/european-city.png"
-              alt="Европын хот"
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              data-testid="img-brochure-europe"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-6">
-              <div className="flex items-center gap-2 mb-2">
-                <MapPin className="h-4 w-4 text-white/80" />
-                <span className="text-white/80 text-sm">Хотын аялал</span>
-              </div>
-              <h3 className="text-2xl font-bold text-white">Европын сайхан</h3>
-              <p className="text-white/70 mt-1">Түүхэн гудамж, дэлхийн түвшний хоол</p>
+          <div className="relative group">
+            <div className="overflow-hidden rounded-xl shadow-2xl border border-border/50 transition-shadow duration-500 group-hover:shadow-3xl">
+              <img
+                src={brochureBack}
+                alt="Olon Nuur Travel - Брошурын ар тал"
+                className="w-full h-auto object-contain"
+                data-testid="img-brochure-back"
+              />
             </div>
           </div>
         </div>
 
         <div className="text-center mt-10">
-          <p className="text-sm text-muted-foreground italic">
-            Брошурын зургууд удахгүй нэмэгдэнэ. Хүлээгээрэй!
+          <p className="text-sm text-muted-foreground">
+            Дэлгэрэнгүй мэдээлэл авахыг хүсвэл бидэнтэй холбогдоорой.
           </p>
         </div>
       </div>

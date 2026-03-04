@@ -13,6 +13,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUserPassword(id: string, password: string): Promise<void>;
   getAllRoutines(): Promise<Routine[]>;
   getRoutine(id: string): Promise<Routine | undefined>;
   createRoutine(routine: InsertRoutine): Promise<Routine>;
@@ -37,6 +38,10 @@ export class DatabaseStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db.insert(users).values(insertUser).returning();
     return user;
+  }
+
+  async updateUserPassword(id: string, password: string): Promise<void> {
+    await db.update(users).set({ password }).where(eq(users.id, id));
   }
 
   async getAllRoutines(): Promise<Routine[]> {
