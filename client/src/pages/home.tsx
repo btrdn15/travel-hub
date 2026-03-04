@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { MapPin, Phone, Mail, Instagram, Users, Star, Compass, LogIn, Menu, ChevronDown, X } from "lucide-react";
+import { MapPin, Phone, Mail, Instagram, Compass, Menu, ChevronDown, X } from "lucide-react";
 import brochureFront from "@assets/IMG_7059_1772631193955.jpeg";
 import brochureBack from "@assets/IMG_7060_1772631198093.jpeg";
 
@@ -23,7 +23,6 @@ function Navbar() {
         </Link>
 
         <div className="hidden md:flex items-center gap-8">
-          <a href="#about" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors" data-testid="link-about">Бидний тухай</a>
           <a href="#brochure" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors" data-testid="link-brochure">Аялалын брошур</a>
           <a href="#contact" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors" data-testid="link-contact">Холбоо барих</a>
         </div>
@@ -93,37 +92,6 @@ function HeroSection() {
 
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
         <ChevronDown className="h-6 w-6 text-white/40" />
-      </div>
-    </section>
-  );
-}
-
-function StatsSection() {
-  const stats = [
-    { icon: Compass, value: "4+", label: "Жилийн туршлага" },
-    { icon: Users, value: "500+", label: "Аялагчид" },
-    { icon: Star, value: "100%", label: "Сэтгэл ханамж" },
-    { icon: MapPin, value: "20+", label: "Очих газрууд" },
-  ];
-
-  return (
-    <section id="about" className="py-20 px-6 bg-white border-b border-stone-100">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-          {stats.map((stat, i) => (
-            <div
-              key={i}
-              className="text-center p-6 rounded-2xl bg-stone-50 border border-stone-100"
-              data-testid={`stat-card-${i}`}
-            >
-              <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center mx-auto mb-4">
-                <stat.icon className="h-6 w-6 text-amber-700" />
-              </div>
-              <div className="text-3xl md:text-4xl font-bold text-stone-900 mb-1">{stat.value}</div>
-              <div className="text-sm font-medium text-stone-500">{stat.label}</div>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   );
@@ -333,7 +301,6 @@ export default function HomePage() {
       <Navbar />
       <main className="pt-16">
         <HeroSection />
-        <StatsSection />
         <BrochureSection />
         <ContactSection />
         <Footer />
