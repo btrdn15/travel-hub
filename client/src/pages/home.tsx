@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { MapPin, Phone, Mail, Instagram, Compass, Menu, ChevronDown, X } from "lucide-react";
+import { MapPin, Phone, Mail, Instagram, Compass, Menu, ChevronDown } from "lucide-react";
 import brochureFront from "@assets/IMG_7059_1772631193955.jpeg";
 import brochureBack from "@assets/IMG_7060_1772631198093.jpeg";
 
@@ -98,101 +97,66 @@ function HeroSection() {
 }
 
 function BrochureSection() {
-  const [lightbox, setLightbox] = useState<string | null>(null);
-
-  const handleEsc = useCallback((e: KeyboardEvent) => {
-    if (e.key === "Escape") setLightbox(null);
-  }, []);
-
-  useEffect(() => {
-    if (lightbox) {
-      document.addEventListener("keydown", handleEsc);
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.removeEventListener("keydown", handleEsc);
-        document.body.style.overflow = "";
-      };
-    }
-  }, [lightbox, handleEsc]);
-
   return (
-    <>
-      <section id="brochure" className="py-24 px-6 bg-gradient-to-b from-stone-50 to-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <span className="inline-block text-sm font-semibold text-amber-700 tracking-widest uppercase mb-3">
-              Olon Nuur Travel
-            </span>
-            <h2 className="text-3xl md:text-5xl font-bold text-stone-900 mb-5" data-testid="text-brochure-title">
-              Аялалын брошур
-            </h2>
-            <p className="text-stone-500 max-w-xl mx-auto text-lg leading-relaxed">
-              Монгол орны гайхамшигт аялалын бүрэн мэдээллийг доорх брошураас үзнэ үү. Зурган дээр дарж томруулна уу.
-            </p>
-          </div>
+    <section id="brochure" className="bg-stone-100">
+      <div className="max-w-7xl mx-auto px-6 py-24">
+        <div className="text-center mb-16">
+          <span className="inline-block text-sm font-semibold text-amber-700 tracking-widest uppercase mb-3">
+            Olon Nuur Travel
+          </span>
+          <h2 className="text-3xl md:text-5xl font-bold text-stone-900 mb-5" data-testid="text-brochure-title">
+            Аялалын брошур
+          </h2>
+          <p className="text-stone-500 max-w-xl mx-auto text-lg leading-relaxed">
+            Монгол орны гайхамшигт аялалын бүрэн мэдээллийг доорх брошураас үзнэ үү.
+          </p>
+        </div>
+      </div>
 
-          <div className="space-y-12">
-            <div
-              className="group cursor-pointer"
-              onClick={() => setLightbox(brochureFront)}
-              data-testid="brochure-front-wrapper"
-            >
-              <div className="relative overflow-hidden rounded-2xl shadow-xl ring-1 ring-stone-200/60 transition-all duration-500 group-hover:shadow-2xl group-hover:ring-amber-300/50 group-hover:-translate-y-1">
+      <div className="relative w-full">
+        <div className="absolute inset-0 bg-gradient-to-b from-stone-100 via-stone-200/50 to-stone-100 pointer-events-none" style={{ zIndex: 0 }} />
+
+        <div className="relative z-10 max-w-[1400px] mx-auto px-4 md:px-8">
+          <div className="bg-white rounded-3xl shadow-2xl ring-1 ring-stone-900/5 overflow-hidden">
+            <div className="p-3 md:p-6 bg-gradient-to-b from-stone-50 to-white">
+              <div className="relative rounded-2xl overflow-hidden">
                 <img
                   src={brochureFront}
                   alt="Olon Nuur Travel - Брошурын нүүр тал"
-                  className="w-full h-auto transition-transform duration-700 group-hover:scale-[1.02]"
+                  className="w-full h-auto"
                   data-testid="img-brochure-front"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>
-              <p className="text-center mt-4 text-sm font-medium text-stone-400">Нүүр тал — дарж томруулна уу</p>
             </div>
 
-            <div
-              className="group cursor-pointer"
-              onClick={() => setLightbox(brochureBack)}
-              data-testid="brochure-back-wrapper"
-            >
-              <div className="relative overflow-hidden rounded-2xl shadow-xl ring-1 ring-stone-200/60 transition-all duration-500 group-hover:shadow-2xl group-hover:ring-amber-300/50 group-hover:-translate-y-1">
+            <div className="flex items-center justify-center py-4 md:py-6">
+              <div className="flex items-center gap-3">
+                <div className="h-px w-16 bg-stone-200" />
+                <div className="flex items-center gap-2">
+                  <Compass className="h-4 w-4 text-amber-600" />
+                  <span className="text-xs font-semibold text-stone-400 tracking-widest uppercase">Нүүр тал · Ар тал</span>
+                  <Compass className="h-4 w-4 text-amber-600" />
+                </div>
+                <div className="h-px w-16 bg-stone-200" />
+              </div>
+            </div>
+
+            <div className="p-3 md:p-6 bg-gradient-to-t from-stone-50 to-white">
+              <div className="relative rounded-2xl overflow-hidden">
                 <img
                   src={brochureBack}
                   alt="Olon Nuur Travel - Брошурын ар тал"
-                  className="w-full h-auto transition-transform duration-700 group-hover:scale-[1.02]"
+                  className="w-full h-auto"
                   data-testid="img-brochure-back"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>
-              <p className="text-center mt-4 text-sm font-medium text-stone-400">Ар тал — дарж томруулна уу</p>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {lightbox && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 cursor-pointer"
-          onClick={() => setLightbox(null)}
-          data-testid="lightbox-overlay"
-        >
-          <button
-            className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-            onClick={() => setLightbox(null)}
-            aria-label="Хаах"
-            data-testid="button-close-lightbox"
-          >
-            <X className="h-5 w-5 text-white" />
-          </button>
-          <img
-            src={lightbox}
-            alt="Брошур томруулсан"
-            className="max-w-full max-h-[90vh] object-contain rounded-lg"
-            onClick={(e) => e.stopPropagation()}
-            data-testid="img-lightbox"
-          />
-        </div>
-      )}
-    </>
+      <div className="h-24" />
+    </section>
   );
 }
 
