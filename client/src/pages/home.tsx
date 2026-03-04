@@ -59,7 +59,7 @@ function HeroSection() {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-[1.1] tracking-tight" data-testid="text-hero-title">
-            <span className="bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">Olon Nuur Travel</span>
+            <span className="bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">Олон Нуур Травэл</span>
           </h1>
 
           <p className="text-lg md:text-xl text-stone-300 mb-10 leading-relaxed max-w-lg">
