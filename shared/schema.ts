@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { sql } from "drizzle-orm";
 import { pgTable, text, varchar, integer, timestamp, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
