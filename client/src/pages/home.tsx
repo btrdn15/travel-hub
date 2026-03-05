@@ -1,9 +1,75 @@
+import { createContext, useContext, useState } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { MapPin, Phone, Mail, Instagram, Compass, Menu, ChevronDown } from "lucide-react";
+import { MapPin, Phone, Mail, Instagram, Compass, Menu, ChevronDown, Globe } from "lucide-react";
 import brochureFront from "@assets/IMG_7059_1772631193955.jpeg";
 import brochureBack from "@assets/IMG_7060_1772631198093.jpeg";
+
+type Lang = "mn" | "ko";
+
+const translations = {
+  mn: {
+    heroTag: "Монгол аялалын мэргэжилтэн",
+    heroTitle: "Олон Нуур Травэл",
+    heroDesc: "Говийн элсэн дундуур тэмээгээр аялж, нүүдэлчдийн амьдралыг мэдэрч, одот тэнгэрийн доор мартагдашгүй дурсамж бүтээгээрэй.",
+    viewBrochure: "Брошур үзэх",
+    contactUs: "Холбоо барих",
+    brochureSubtitle: "Olon Nuur Travel",
+    brochureTitle: "Аялалын брошур",
+    brochureDesc: "Монгол орны гайхамшигт аялалын бүрэн мэдээллийг доорх брошураас үзнэ үү.",
+    brochureDivider: "Нүүр тал · Ар тал",
+    contactLabel: "Холбоо барих",
+    contactTitle: "Аялалаа төлөвлөхөд бэлэн үү?",
+    contactDesc: "Бидэнтэй холбогдож, танд тохирсон Монгол аялалыг хамтдаа төлөвлөцгөөе. Хөтөч, тээвэр, байр бүгдийг бид зохицуулна.",
+    emailLabel: "Имэйл",
+    phoneLabel: "Утас",
+    instaLabel: "Инстаграм",
+    copyright: "© 2025 Olon Nuur Travel LLC. Бүх эрх хуулиар хамгаалагдсан.",
+  },
+  ko: {
+    heroTag: "몽골 여행 전문가",
+    heroTitle: "올론 누르 트래블",
+    heroDesc: "고비 사막에서 낙타를 타고, 유목민의 삶을 체험하며, 별이 쏟아지는 하늘 아래 잊지 못할 추억을 만들어 보세요.",
+    viewBrochure: "브로슈어 보기",
+    contactUs: "문의하기",
+    brochureSubtitle: "Olon Nuur Travel",
+    brochureTitle: "여행 브로슈어",
+    brochureDesc: "아래 브로슈어에서 몽골 여행에 대한 자세한 정보를 확인하세요.",
+    brochureDivider: "앞면 · 뒷면",
+    contactLabel: "문의하기",
+    contactTitle: "여행을 계획할 준비가 되셨나요?",
+    contactDesc: "저희에게 연락하시면 맞춤형 몽골 여행을 함께 계획해 드립니다. 가이드, 교통, 숙소 모두 저희가 준비합니다.",
+    emailLabel: "이메일",
+    phoneLabel: "전화",
+    instaLabel: "인스타그램",
+    copyright: "© 2025 Olon Nuur Travel LLC. All rights reserved.",
+  },
+};
+
+const LangContext = createContext<{ lang: Lang; setLang: (l: Lang) => void }>({ lang: "mn", setLang: () => {} });
+
+function useLang() {
+  return useContext(LangContext);
+}
+
+function LangSwitcher() {
+  const { lang, setLang } = useLang();
+  const other: Lang = lang === "mn" ? "ko" : "mn";
+  const label = other === "ko" ? "한국어" : "Монгол";
+
+  return (
+    <button
+      onClick={() => setLang(other)}
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-stone-600 hover:bg-stone-100 transition-colors"
+      aria-label="Хэл солих"
+      data-testid="button-lang-switch"
+    >
+      <Globe className="h-4 w-4" />
+      <span>{label}</span>
+    </button>
+  );
+}
 
 function Navbar() {
   const { user } = useAuth();
@@ -21,7 +87,8 @@ function Navbar() {
           </div>
         </Link>
 
-        <div className="flex items-center">
+        <div className="flex items-center gap-1">
+          <LangSwitcher />
           <Link href={user ? "/admin" : "/admin/login"}>
             <button
               className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-stone-100 transition-colors"
@@ -38,6 +105,9 @@ function Navbar() {
 }
 
 function HeroSection() {
+  const { lang } = useLang();
+  const t = translations[lang];
+
   return (
     <section className="relative min-h-[92vh] flex items-center overflow-hidden bg-stone-950">
       <div className="absolute inset-0">
@@ -55,27 +125,27 @@ function HeroSection() {
         <div className="max-w-2xl">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-600/15 border border-amber-500/25 mb-8">
             <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            <span className="text-sm font-medium text-amber-300 tracking-wide">Монгол аялалын мэргэжилтэн</span>
+            <span className="text-sm font-medium text-amber-300 tracking-wide">{t.heroTag}</span>
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-[1.1] tracking-tight" data-testid="text-hero-title">
-            <span className="bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">Олон Нуур Травэл</span>
+            <span className="bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">{t.heroTitle}</span>
           </h1>
 
           <p className="text-lg md:text-xl text-stone-300 mb-10 leading-relaxed max-w-lg">
-            Говийн элсэн дундуур тэмээгээр аялж, нүүдэлчдийн амьдралыг мэдэрч, одот тэнгэрийн доор мартагдашгүй дурсамж бүтээгээрэй.
+            {t.heroDesc}
           </p>
 
           <div className="flex flex-wrap gap-4">
             <a href="#brochure">
               <Button size="lg" className="bg-amber-600 hover:bg-amber-700 text-white px-8 h-12 text-base font-semibold shadow-lg shadow-amber-900/30" data-testid="button-view-brochure">
-                Брошур үзэх
+                {t.viewBrochure}
                 <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </a>
             <a href="#contact">
               <Button size="lg" variant="outline" className="border-stone-500 text-stone-200 hover:bg-white/10 px-8 h-12 text-base" data-testid="button-contact">
-                Холбоо барих
+                {t.contactUs}
               </Button>
             </a>
           </div>
@@ -90,18 +160,21 @@ function HeroSection() {
 }
 
 function BrochureSection() {
+  const { lang } = useLang();
+  const t = translations[lang];
+
   return (
     <section id="brochure" className="bg-stone-100">
       <div className="max-w-7xl mx-auto px-6 py-24">
         <div className="text-center mb-16">
           <span className="inline-block text-sm font-semibold text-amber-700 tracking-widest uppercase mb-3">
-            Olon Nuur Travel
+            {t.brochureSubtitle}
           </span>
           <h2 className="text-3xl md:text-5xl font-bold text-stone-900 mb-5" data-testid="text-brochure-title">
-            Аялалын брошур
+            {t.brochureTitle}
           </h2>
           <p className="text-stone-500 max-w-xl mx-auto text-lg leading-relaxed">
-            Монгол орны гайхамшигт аялалын бүрэн мэдээллийг доорх брошураас үзнэ үү.
+            {t.brochureDesc}
           </p>
         </div>
       </div>
@@ -115,7 +188,7 @@ function BrochureSection() {
               <div className="relative rounded-2xl overflow-hidden">
                 <img
                   src={brochureFront}
-                  alt="Olon Nuur Travel - Брошурын нүүр тал"
+                  alt="Olon Nuur Travel - Front"
                   className="w-full h-auto"
                   data-testid="img-brochure-front"
                 />
@@ -127,7 +200,7 @@ function BrochureSection() {
                 <div className="h-px w-16 bg-stone-200" />
                 <div className="flex items-center gap-2">
                   <Compass className="h-4 w-4 text-amber-600" />
-                  <span className="text-xs font-semibold text-stone-400 tracking-widest uppercase">Нүүр тал · Ар тал</span>
+                  <span className="text-xs font-semibold text-stone-400 tracking-widest uppercase">{t.brochureDivider}</span>
                   <Compass className="h-4 w-4 text-amber-600" />
                 </div>
                 <div className="h-px w-16 bg-stone-200" />
@@ -138,7 +211,7 @@ function BrochureSection() {
               <div className="relative rounded-2xl overflow-hidden">
                 <img
                   src={brochureBack}
-                  alt="Olon Nuur Travel - Брошурын ар тал"
+                  alt="Olon Nuur Travel - Back"
                   className="w-full h-auto"
                   data-testid="img-brochure-back"
                 />
@@ -154,19 +227,22 @@ function BrochureSection() {
 }
 
 function ContactSection() {
+  const { lang } = useLang();
+  const t = translations[lang];
+
   return (
     <section id="contact" className="py-24 px-6 bg-stone-900">
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <div>
             <span className="inline-block text-sm font-semibold text-amber-500 tracking-widest uppercase mb-3">
-              Холбоо барих
+              {t.contactLabel}
             </span>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-              Аялалаа төлөвлөхөд бэлэн үү?
+              {t.contactTitle}
             </h2>
             <p className="text-stone-400 text-lg leading-relaxed mb-10">
-              Бидэнтэй холбогдож, танд тохирсон Монгол аялалыг хамтдаа төлөвлөцгөөе. Хөтөч, тээвэр, байр бүгдийг бид зохицуулна.
+              {t.contactDesc}
             </p>
 
             <div className="space-y-5">
@@ -179,7 +255,7 @@ function ContactSection() {
                   <Mail className="h-5 w-5 text-amber-500" />
                 </div>
                 <div>
-                  <p className="text-xs text-stone-500 font-medium uppercase tracking-wider">Имэйл</p>
+                  <p className="text-xs text-stone-500 font-medium uppercase tracking-wider">{t.emailLabel}</p>
                   <p className="text-white font-medium group-hover:text-amber-400 transition-colors">olonnuurtravel@gmail.com</p>
                 </div>
               </a>
@@ -193,7 +269,7 @@ function ContactSection() {
                   <Phone className="h-5 w-5 text-amber-500" />
                 </div>
                 <div>
-                  <p className="text-xs text-stone-500 font-medium uppercase tracking-wider">Утас</p>
+                  <p className="text-xs text-stone-500 font-medium uppercase tracking-wider">{t.phoneLabel}</p>
                   <p className="text-white font-medium group-hover:text-amber-400 transition-colors">010-9290-5686</p>
                 </div>
               </a>
@@ -209,7 +285,7 @@ function ContactSection() {
                   <Instagram className="h-5 w-5 text-amber-500" />
                 </div>
                 <div>
-                  <p className="text-xs text-stone-500 font-medium uppercase tracking-wider">Инстаграм</p>
+                  <p className="text-xs text-stone-500 font-medium uppercase tracking-wider">{t.instaLabel}</p>
                   <p className="text-white font-medium group-hover:text-amber-400 transition-colors">@olonnuurtravel</p>
                 </div>
               </a>
@@ -235,6 +311,9 @@ function ContactSection() {
 }
 
 function Footer() {
+  const { lang } = useLang();
+  const t = translations[lang];
+
   return (
     <footer className="py-8 px-6 bg-stone-950 border-t border-stone-800">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
@@ -245,7 +324,7 @@ function Footer() {
           <span className="text-sm font-bold text-stone-300 tracking-tight">OLON NUUR TRAVEL LLC</span>
         </div>
         <p className="text-xs text-stone-500">
-          © 2025 Olon Nuur Travel LLC. Бүх эрх хуулиар хамгаалагдсан.
+          {t.copyright}
         </p>
       </div>
     </footer>
@@ -253,15 +332,19 @@ function Footer() {
 }
 
 export default function HomePage() {
+  const [lang, setLang] = useState<Lang>("mn");
+
   return (
-    <div className="min-h-screen bg-white">
-      <Navbar />
-      <main className="pt-16">
-        <HeroSection />
-        <BrochureSection />
-        <ContactSection />
-        <Footer />
-      </main>
-    </div>
+    <LangContext.Provider value={{ lang, setLang }}>
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        <main className="pt-16">
+          <HeroSection />
+          <BrochureSection />
+          <ContactSection />
+          <Footer />
+        </main>
+      </div>
+    </LangContext.Provider>
   );
 }
