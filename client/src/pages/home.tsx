@@ -1,10 +1,10 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
-import { MapPin, Phone, Mail, Instagram, Compass, Menu, ChevronDown, Globe } from "lucide-react";
+import { MapPin, Phone, Mail, Instagram, Compass, Menu, ChevronDown, Globe, Lock } from "lucide-react";
 import brochureFront from "@assets/IMG_7059_1772631193955.jpeg";
 import brochureBack from "@assets/IMG_7060_1772631198093.jpeg";
+import olonNuurLogo from "@assets/olon_nuur_nobg.png";
 
 type Lang = "mn" | "ko";
 
@@ -26,6 +26,10 @@ const translations = {
     phoneLabel: "Утас",
     instaLabel: "Инстаграм",
     copyright: "© 2025 Olon Nuur Travel LLC. Бүх эрх хуулиар хамгаалагдсан.",
+    navHome: "НҮҮР",
+    navTours: "АЯЛАЛ",
+    navBrochure: "БРОШУР",
+    navContact: "ХОЛБОО БАРИХ",
   },
   ko: {
     heroTag: "몽골 여행 전문가",
@@ -44,6 +48,10 @@ const translations = {
     phoneLabel: "전화",
     instaLabel: "인스타그램",
     copyright: "© 2025 Olon Nuur Travel LLC. All rights reserved.",
+    navHome: "홈",
+    navTours: "투어",
+    navBrochure: "브로슈어",
+    navContact: "문의하기",
   },
 };
 
@@ -73,31 +81,105 @@ function LangSwitcher() {
 
 function Navbar() {
   const { user } = useAuth();
+  const { lang } = useLang();
+  const t = translations[lang];
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [navOpacity, setNavOpacity] = useState(1);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    // Fade the fixed navbar as the user scrolls down.
+    // Recomputes from scrollY so it fades back in when scrolling up.
+    let rafId = 0;
+    const fadeStart = 20; // px
+    const fadeDistance = 220; // px (distance to fully fade)
+
+    const onScroll = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const y = window.scrollY ?? document.documentElement.scrollTop ?? 0;
+        const t = Math.min(Math.max((y - fadeStart) / fadeDistance, 0), 1);
+        setNavOpacity(1 - t);
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    return () => {
+      window.removeEventListener("scroll", onScroll as EventListener);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, []);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-lg border-b border-stone-200/60">
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center">
-            <Compass className="h-4 w-4 text-white" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-base font-bold tracking-tight text-stone-900 leading-none">OLON NUUR</span>
-            <span className="text-[10px] font-medium text-amber-700 tracking-widest uppercase leading-none mt-0.5">Travel LLC</span>
-          </div>
-        </Link>
-
-        <div className="flex items-center gap-1">
-          <LangSwitcher />
-          <Link href={user ? "/admin" : "/admin/login"}>
-            <button
-              className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-stone-100 transition-colors"
-              aria-label="Админ цэс"
-              data-testid="button-admin-menu"
-            >
-              <Menu className="h-5 w-5 text-stone-700" />
-            </button>
+    <nav
+      className="fixed top-0 left-0 right-0 z-50 shadow-md"
+      style={{
+        opacity: navOpacity,
+        transition: "opacity 220ms linear",
+        pointerEvents: navOpacity <= 0.05 ? "none" : "auto",
+      }}
+    >
+      <div className="bg-white border-b border-stone-200">
+        <div className="max-w-7xl mx-auto px-6 h-44 flex items-center justify-between">
+          <Link href="/" className="flex items-center">
+            <img src={olonNuurLogo} alt="Olon Nuur Travel" className="h-44 w-auto" />
           </Link>
+
+          <div className="flex items-center gap-1">
+            <LangSwitcher />
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-stone-100 transition-colors"
+                aria-label="Цэс"
+                data-testid="button-admin-menu"
+              >
+                <Menu className="h-5 w-5 text-stone-700" />
+              </button>
+              {menuOpen && (
+                <div className="absolute right-0 top-12 w-52 bg-white rounded-xl shadow-lg border border-stone-200 py-1 z-50">
+                  <Link href={user ? "/admin" : "/admin/login"}>
+                    <button
+                      onClick={() => setMenuOpen(false)}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
+                      data-testid="button-admin-login"
+                    >
+                      <Lock className="h-4 w-4 text-amber-600" />
+                      <span>Админ нэвтрэх</span>
+                    </button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-stone-200 border-t border-stone-300">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center gap-1">
+            <a href="/" className="px-5 py-3 text-sm font-bold text-stone-700 tracking-wider hover:bg-stone-300 transition-colors">
+              {t.navHome}
+            </a>
+            <a href="#brochure" className="px-5 py-3 text-sm font-bold text-stone-700 tracking-wider hover:bg-stone-300 transition-colors">
+              {t.navBrochure}
+            </a>
+            <a href="#contact" className="px-5 py-3 text-sm font-bold text-stone-700 tracking-wider hover:bg-stone-300 transition-colors">
+              {t.navContact}
+            </a>
+          </div>
         </div>
       </div>
     </nav>
@@ -132,23 +214,9 @@ function HeroSection() {
             <span className="bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">{t.heroTitle}</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-stone-300 mb-10 leading-relaxed max-w-lg">
+          <p className="text-lg md:text-xl text-stone-300 leading-relaxed max-w-lg">
             {t.heroDesc}
           </p>
-
-          <div className="flex flex-wrap gap-4">
-            <a href="#brochure">
-              <Button size="lg" className="bg-amber-600 hover:bg-amber-700 text-white px-8 h-12 text-base font-semibold shadow-lg shadow-amber-900/30" data-testid="button-view-brochure">
-                {t.viewBrochure}
-                <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </a>
-            <a href="#contact">
-              <Button size="lg" variant="outline" className="border-stone-500 text-stone-200 hover:bg-white/10 px-8 h-12 text-base" data-testid="button-contact">
-                {t.contactUs}
-              </Button>
-            </a>
-          </div>
         </div>
       </div>
 
@@ -338,7 +406,7 @@ export default function HomePage() {
     <LangContext.Provider value={{ lang, setLang }}>
       <div className="min-h-screen bg-white">
         <Navbar />
-        <main className="pt-16">
+        <main className="pt-48">
           <HeroSection />
           <BrochureSection />
           <ContactSection />

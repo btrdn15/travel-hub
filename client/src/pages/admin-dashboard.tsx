@@ -155,14 +155,15 @@ export default function AdminDashboard() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingRoutine, setEditingRoutine] = useState<Routine | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const isSuperAdmin = user?.role === "super_admin";
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!authLoading && !user && !isLoggingOut) {
       setLocation("/admin/login");
     }
-  }, [user, authLoading, setLocation]);
+  }, [user, authLoading, setLocation, isLoggingOut]);
 
   const { data: routines, isLoading } = useQuery<Routine[]>({
     queryKey: ["/api/routines"],
@@ -245,8 +246,22 @@ export default function AdminDashboard() {
   });
 
   const handleLogout = async () => {
-    await logout();
-    setLocation("/");
+    setIsLoggingOut(true);
+    try {
+      await logout();
+    } catch (error: any) {
+      // Keep UI responsive even if the server logout fails.
+      // (Some edge cases can leave the cached user in place.)
+      queryClient.setQueryData(["/api/auth/me"], null);
+      toast({
+        title: "Алдаа",
+        description: error?.message || "Гарах үед алдаа гарлаа",
+        variant: "destructive",
+      });
+    } finally {
+      queryClient.setQueryData(["/api/auth/me"], null);
+      setLocation("/");
+    }
   };
 
   if (authLoading) {

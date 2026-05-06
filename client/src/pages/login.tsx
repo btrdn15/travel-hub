@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Globe, LogIn, ArrowLeft, Loader2 } from "lucide-react";
+import { LogIn, ArrowLeft, Loader2 } from "lucide-react";
 import { Link } from "wouter";
+import olonNuurLogo from "@assets/olon_nuur_nobg.png";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -56,14 +57,18 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <nav className="border-b bg-background/80 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between gap-3">
-          <Link href="/" className="flex items-center gap-2">
-            <Globe className="h-5 w-5 text-primary" />
-            <span className="text-lg font-bold">TravelWorld</span>
+      <nav className="border-b border-stone-200 bg-white shadow-md">
+        <div className="max-w-7xl mx-auto px-6 h-44 flex items-center justify-between gap-3">
+          <Link href="/" className="flex items-center">
+            <img src={olonNuurLogo} alt="Olon Nuur Travel" className="h-44 w-auto" />
           </Link>
           <Link href="/">
-            <Button size="sm" variant="ghost" data-testid="button-back-home">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-stone-700 hover:bg-stone-100"
+              data-testid="button-back-home"
+            >
               <ArrowLeft className="h-4 w-4 mr-1.5" />
               Нүүр хуудас руу
             </Button>
