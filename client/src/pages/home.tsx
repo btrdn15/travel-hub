@@ -5,6 +5,7 @@ import { MapPin, Phone, Mail, Instagram, Compass, Menu, ChevronDown, Globe, Lock
 import brochureFront from "@assets/IMG_7059_1772631193955.jpeg";
 import brochureBack from "@assets/IMG_7060_1772631198093.jpeg";
 import olonNuurLogo from "@assets/olon_nuur_nobg.png";
+import FloatingChat from "@/components/floating-chat";
 
 type Lang = "mn" | "ko";
 
@@ -412,6 +413,7 @@ export default function HomePage() {
           <ContactSection />
           <Footer />
         </main>
+        <FloatingChat lang={lang} />
       </div>
     </LangContext.Provider>
   );
