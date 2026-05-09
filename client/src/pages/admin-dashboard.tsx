@@ -249,18 +249,14 @@ export default function AdminDashboard() {
     setIsLoggingOut(true);
     try {
       await logout();
+      setLocation("/");
     } catch (error: any) {
-      // Keep UI responsive even if the server logout fails.
-      // (Some edge cases can leave the cached user in place.)
-      queryClient.setQueryData(["/api/auth/me"], null);
+      setIsLoggingOut(false);
       toast({
         title: "Алдаа",
         description: error?.message || "Гарах үед алдаа гарлаа",
         variant: "destructive",
       });
-    } finally {
-      queryClient.setQueryData(["/api/auth/me"], null);
-      setLocation("/");
     }
   };
 
