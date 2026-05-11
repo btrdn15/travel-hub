@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { LogIn, ArrowLeft, Loader2 } from "lucide-react";
 import { Link } from "wouter";
-import olonNuurLogo from "@assets/olon_nuur_nobg.png";
+import olonNuurLogo from "@assets/olon nuur.png";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
