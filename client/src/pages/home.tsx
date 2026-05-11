@@ -6,7 +6,7 @@ import { tours } from "@/data/tours";
 import { Phone, Mail, Instagram, Compass, Menu, ChevronDown, Globe, Lock, Clock, MapPin, ArrowRight, Sparkles } from "lucide-react";
 import brochureFront from "@assets/IMG_7059_1772631193955.jpeg";
 import brochureBack from "@assets/IMG_7060_1772631198093.jpeg";
-import olonNuurLogo from "@assets/olon_nuur_nobg.png";
+import olonNuurLogo from "@assets/olon nuur.png";
 
 const translations = {
   mn: {
