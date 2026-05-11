@@ -1,12 +1,12 @@
-import { createContext, useContext, useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/lib/auth";
-import { MapPin, Phone, Mail, Instagram, Compass, Menu, ChevronDown, Globe, Lock } from "lucide-react";
+import { useLang, type Lang } from "@/lib/lang";
+import { tours } from "@/data/tours";
+import { Phone, Mail, Instagram, Compass, Menu, ChevronDown, Globe, Lock, Clock, MapPin, ArrowRight, Sparkles } from "lucide-react";
 import brochureFront from "@assets/IMG_7059_1772631193955.jpeg";
 import brochureBack from "@assets/IMG_7060_1772631198093.jpeg";
 import olonNuurLogo from "@assets/olon_nuur_nobg.png";
-
-type Lang = "mn" | "ko";
 
 const translations = {
   mn: {
@@ -19,13 +19,18 @@ const translations = {
     brochureTitle: "Аялалын брошур",
     brochureDesc: "Монгол орны гайхамшигт аялалын бүрэн мэдээллийг доорх брошураас үзнэ үү.",
     brochureDivider: "Нүүр тал · Ар тал",
+    toursLabel: "Аяллын хөтөлбөр",
+    toursTitle: "Бэлэн боловсруулсан аяллын хөтөлбөрүүд",
+    toursDesc: "Манай мэргэжлийн багийн боловсруулсан аяллын хөтөлбөрүүдээс өөрт тохирохыг сонгоно уу. Дэлгэрэнгүй хуваарь, үнэ, тусгай саналыг доороос үзнэ үү.",
+    toursViewMore: "Дэлгэрэнгүй үзэх",
+    toursComingSoon: "Удахгүй",
     contactLabel: "Холбоо барих",
     contactTitle: "Аялалаа төлөвлөхөд бэлэн үү?",
     contactDesc: "Бидэнтэй холбогдож, танд тохирсон Монгол аялалыг хамтдаа төлөвлөцгөөе. Хөтөч, тээвэр, байр бүгдийг бид зохицуулна.",
     emailLabel: "Имэйл",
     phoneLabel: "Утас",
     instaLabel: "Инстаграм",
-    copyright: "© 2025 Olon Nuur Travel LLC. Бүх эрх хуулиар хамгаалагдсан.",
+    copyright: "© 2026 Olon Nuur Travel LLC. Бүх эрх хуулиар хамгаалагдсан.",
     navHome: "НҮҮР",
     navTours: "АЯЛАЛ",
     navBrochure: "БРОШУР",
@@ -41,25 +46,24 @@ const translations = {
     brochureTitle: "여행 브로슈어",
     brochureDesc: "아래 브로슈어에서 몽골 여행에 대한 자세한 정보를 확인하세요.",
     brochureDivider: "앞면 · 뒷면",
+    toursLabel: "투어 프로그램",
+    toursTitle: "전문가가 준비한 투어 일정",
+    toursDesc: "저희 전문 팀이 준비한 투어 프로그램 중에서 마음에 드는 일정을 선택하세요. 자세한 일정, 가격, 특별 출발일은 아래에서 확인하실 수 있습니다.",
+    toursViewMore: "자세히 보기",
+    toursComingSoon: "준비 중",
     contactLabel: "문의하기",
     contactTitle: "여행을 계획할 준비가 되셨나요?",
     contactDesc: "저희에게 연락하시면 맞춤형 몽골 여행을 함께 계획해 드립니다. 가이드, 교통, 숙소 모두 저희가 준비합니다.",
     emailLabel: "이메일",
     phoneLabel: "전화",
     instaLabel: "인스타그램",
-    copyright: "© 2025 Olon Nuur Travel LLC. All rights reserved.",
+    copyright: "© 2026 Olon Nuur Travel LLC. All rights reserved.",
     navHome: "홈",
     navTours: "투어",
     navBrochure: "브로슈어",
     navContact: "문의하기",
   },
 };
-
-const LangContext = createContext<{ lang: Lang; setLang: (l: Lang) => void }>({ lang: "mn", setLang: () => {} });
-
-function useLang() {
-  return useContext(LangContext);
-}
 
 function LangSwitcher() {
   const { lang, setLang } = useLang();
@@ -173,6 +177,9 @@ function Navbar() {
             <a href="/" className="px-5 py-3 text-sm font-bold text-stone-700 tracking-wider hover:bg-stone-300 transition-colors">
               {t.navHome}
             </a>
+            <a href="#tours" className="px-5 py-3 text-sm font-bold text-stone-700 tracking-wider hover:bg-stone-300 transition-colors">
+              {t.navTours}
+            </a>
             <a href="#brochure" className="px-5 py-3 text-sm font-bold text-stone-700 tracking-wider hover:bg-stone-300 transition-colors">
               {t.navBrochure}
             </a>
@@ -222,6 +229,99 @@ function HeroSection() {
 
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
         <ChevronDown className="h-6 w-6 text-white/40" />
+      </div>
+    </section>
+  );
+}
+
+function ToursSection() {
+  const { lang } = useLang();
+  const t = translations[lang];
+
+  return (
+    <section id="tours" className="bg-white py-24 px-6 border-t border-stone-200">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-14">
+          <span className="inline-flex items-center gap-2 text-sm font-semibold text-amber-700 tracking-widest uppercase mb-3">
+            <Sparkles className="h-3.5 w-3.5" />
+            {t.toursLabel}
+          </span>
+          <h2 className="text-3xl md:text-5xl font-bold text-stone-900 mb-5">
+            {t.toursTitle}
+          </h2>
+          <p className="text-stone-500 max-w-2xl mx-auto text-lg leading-relaxed">
+            {t.toursDesc}
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {tours.map((tour) => {
+            const isComingSoon = tour.status === "coming_soon" || tour.days.length === 0;
+            const Card = (
+              <article
+                className={`group relative h-full bg-white rounded-2xl overflow-hidden border border-stone-200 transition-all duration-300 ${
+                  isComingSoon
+                    ? "opacity-70"
+                    : "hover:-translate-y-1 hover:shadow-2xl hover:border-amber-300"
+                }`}
+              >
+                <div className="relative h-56 overflow-hidden">
+                  <img
+                    src={tour.hero.image}
+                    alt={tour.hero.title[lang]}
+                    className={`w-full h-full object-cover transition-transform duration-500 ${
+                      isComingSoon ? "" : "group-hover:scale-105"
+                    }`}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-stone-950/70 via-transparent to-transparent" />
+                  {isComingSoon && (
+                    <div className="absolute top-4 right-4 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-stone-900/80 text-white text-[11px] font-semibold uppercase tracking-wider">
+                      <Clock className="h-3 w-3" />
+                      {t.toursComingSoon}
+                    </div>
+                  )}
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <h3 className="text-lg md:text-xl font-bold text-white leading-tight line-clamp-2">
+                      {tour.hero.title[lang]}
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="p-5 space-y-4">
+                  <p className="text-sm text-stone-600 line-clamp-2 leading-relaxed">
+                    {tour.hero.subtitle[lang]}
+                  </p>
+
+                  {!isComingSoon && (
+                    <div className="flex flex-wrap gap-3 text-xs text-stone-500">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Clock className="h-3.5 w-3.5 text-amber-600" />
+                        {tour.overview.duration[lang]}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <MapPin className="h-3.5 w-3.5 text-amber-600" />
+                        {tour.overview.target[lang]}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="pt-2 flex items-center justify-between">
+                    <span className="text-sm font-semibold text-amber-700 inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+                      {t.toursViewMore}
+                      <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </div>
+                </div>
+              </article>
+            );
+
+            return (
+              <Link key={tour.slug} href={`/tours/${tour.slug}`} className="block h-full">
+                {Card}
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
@@ -400,19 +500,16 @@ function Footer() {
 }
 
 export default function HomePage() {
-  const [lang, setLang] = useState<Lang>("mn");
-
   return (
-    <LangContext.Provider value={{ lang, setLang }}>
-      <div className="min-h-screen bg-white">
-        <Navbar />
-        <main className="pt-48">
-          <HeroSection />
-          <BrochureSection />
-          <ContactSection />
-          <Footer />
-        </main>
-      </div>
-    </LangContext.Provider>
+    <div className="min-h-screen bg-white">
+      <Navbar />
+      <main className="pt-48">
+        <HeroSection />
+        <ToursSection />
+        <BrochureSection />
+        <ContactSection />
+        <Footer />
+      </main>
+    </div>
   );
 }

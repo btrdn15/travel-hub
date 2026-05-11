@@ -4,15 +4,18 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/lib/auth";
+import { LangProvider } from "@/lib/lang";
 import HomePage from "@/pages/home";
 import LoginPage from "@/pages/login";
 import AdminDashboard from "@/pages/admin-dashboard";
+import TourDetailPage from "@/pages/tour-detail";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
+      <Route path="/tours/:slug" component={TourDetailPage} />
       <Route path="/admin/login" component={LoginPage} />
       <Route path="/admin" component={AdminDashboard} />
       <Route component={NotFound} />
@@ -24,10 +27,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AuthProvider>
-          <Toaster />
-          <Router />
-        </AuthProvider>
+        <LangProvider>
+          <AuthProvider>
+            <Toaster />
+            <Router />
+          </AuthProvider>
+        </LangProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
