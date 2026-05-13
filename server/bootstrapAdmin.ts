@@ -8,9 +8,12 @@ export type BootstrapAdminConfig = {
   password: string;
 };
 
-export function getBootstrapAdminConfig(
-  env: Pick<NodeJS.ProcessEnv, "BOOTSTRAP_ADMIN_USERNAME" | "BOOTSTRAP_ADMIN_PASSWORD">,
-): BootstrapAdminConfig | null {
+type BootstrapAdminEnv = {
+  BOOTSTRAP_ADMIN_USERNAME?: string;
+  BOOTSTRAP_ADMIN_PASSWORD?: string;
+};
+
+export function getBootstrapAdminConfig(env: BootstrapAdminEnv): BootstrapAdminConfig | null {
   const username = env.BOOTSTRAP_ADMIN_USERNAME?.trim();
   const password = env.BOOTSTRAP_ADMIN_PASSWORD;
 
@@ -38,7 +41,7 @@ export async function ensureBootstrapSuperAdmin({
   env = process.env,
 }: {
   storage: IStorage;
-  env?: NodeJS.ProcessEnv;
+  env?: BootstrapAdminEnv;
 }) {
   const config = getBootstrapAdminConfig(env);
   if (!config) {
