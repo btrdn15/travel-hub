@@ -8,10 +8,7 @@ export type BootstrapAdminConfig = {
   password: string;
 };
 
-type BootstrapAdminEnv = {
-  BOOTSTRAP_ADMIN_USERNAME?: string;
-  BOOTSTRAP_ADMIN_PASSWORD?: string;
-};
+type BootstrapAdminEnv = Record<string, string | undefined>;
 
 export function getBootstrapAdminConfig(env: BootstrapAdminEnv): BootstrapAdminConfig | null {
   const username = env.BOOTSTRAP_ADMIN_USERNAME?.trim();
