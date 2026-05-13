@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { loginSchema, insertRoutineSchema } from "@shared/schema";
 import session from "express-session";
 import { comparePasswords, hashPassword } from "./auth";
+import { getSessionSecret } from "./sessionSecret";
 import connectPgSimple from "connect-pg-simple";
 
 declare module "express-session" {
@@ -42,7 +43,7 @@ export async function registerRoutes(
         conString: process.env.DATABASE_URL,
         createTableIfMissing: true,
       }),
-      secret: process.env.SESSION_SECRET || "travel-secret-key",
+      secret: getSessionSecret(),
       resave: false,
       saveUninitialized: false,
       cookie: {
