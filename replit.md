@@ -23,11 +23,13 @@ A Mongolian-language travel and tourism website for Olon Nuur Travel LLC. Featur
 - **admin_selections**: id, adminId, routineId
 
 ## Admin Accounts
-- `admin1` / `admin123` - Role: `super_admin` (full CRUD)
-- `admin2` / `admin123` - Role: `admin` (view & select only)
-- `admin3` / `admin123` - Role: `admin`
-- `admin4` / `admin123` - Role: `admin`
-- `admin5` / `admin123` - Role: `admin`
+- Admin accounts are not hardcoded or reset on startup.
+- To create the first super admin in an empty database, set both
+  `BOOTSTRAP_ADMIN_USERNAME` and `BOOTSTRAP_ADMIN_PASSWORD` before startup.
+- The bootstrap password must be at least 12 characters. If the username already
+  exists, startup leaves the existing password and role unchanged.
+- Additional admins are created by an authenticated super admin through
+  `POST /api/auth/register`.
 
 ## Important Implementation Details
 - **Login redirect**: Login page uses `useEffect` to watch for `user` state changes from `useAuth()` and redirects to `/admin`. Auth mutation uses `queryClient.setQueryData` to avoid race conditions.
@@ -49,7 +51,7 @@ server/
   index.ts                    - Express server setup
   routes.ts                   - API endpoints with auth middleware
   storage.ts                  - Database storage layer (PostgreSQL)
-  seed.ts                     - Seed data for admin accounts
+  seed.ts                     - Optional env-driven bootstrap admin creation
 shared/
   schema.ts                   - Drizzle schema + Zod validation
 attached_assets/              - Brochure images (IMG_7059, IMG_7060)

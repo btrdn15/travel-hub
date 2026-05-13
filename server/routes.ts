@@ -3,23 +3,9 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { loginSchema, insertRoutineSchema } from "@shared/schema";
 import session from "express-session";
-import { scrypt, randomBytes, timingSafeEqual } from "crypto";
-import { promisify } from "util";
+import { comparePasswords, hashPassword } from "./auth";
+import { getSessionSecret } from "./sessionSecret";
 import connectPgSimple from "connect-pg-simple";
-
-const scryptAsync = promisify(scrypt);
-
-async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16).toString("hex");
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${buf.toString("hex")}.${salt}`;
-}
-
-async function comparePasswords(supplied: string, stored: string): Promise<boolean> {
-  const [hashed, salt] = stored.split(".");
-  const buf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(Buffer.from(hashed, "hex"), buf);
-}
 
 declare module "express-session" {
   interface SessionData {
@@ -45,6 +31,11 @@ async function requireSuperAdmin(req: Request, res: Response, next: NextFunction
   next();
 }
 
+function getRouteParam(req: Request, name: string): string {
+  const value = req.params[name];
+  return Array.isArray(value) ? value[0] : value;
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -57,7 +48,7 @@ export async function registerRoutes(
         conString: process.env.DATABASE_URL,
         createTableIfMissing: true,
       }),
-      secret: process.env.SESSION_SECRET || "travel-secret-key",
+      secret: getSessionSecret(),
       resave: false,
       saveUninitialized: false,
       cookie: {
@@ -68,16 +59,6 @@ export async function registerRoutes(
       },
     })
   );
-
-  const existingAdmin = await storage.getUserByUsername("admin1");
-  if (!existingAdmin) {
-    const hashedPassword = await hashPassword("admin123");
-    await storage.createUser({
-      username: "admin1",
-      password: hashedPassword,
-      role: "super_admin",
-    });
-  }
 
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
@@ -150,7 +131,7 @@ export async function registerRoutes(
   });
 
   app.get("/api/routines/:id", async (req: Request, res: Response) => {
-    const routine = await storage.getRoutine(req.params.id);
+    const routine = await storage.getRoutine(getRouteParam(req, "id"));
     if (!routine) {
       return res.status(404).json({ message: "Routine not found" });
     }
@@ -173,7 +154,7 @@ export async function registerRoutes(
 
   app.patch("/api/routines/:id", requireSuperAdmin, async (req: Request, res: Response) => {
     try {
-      const routine = await storage.updateRoutine(req.params.id, req.body);
+      const routine = await storage.updateRoutine(getRouteParam(req, "id"), req.body);
       if (!routine) {
         return res.status(404).json({ message: "Routine not found" });
       }
@@ -185,7 +166,7 @@ export async function registerRoutes(
 
   app.delete("/api/routines/:id", requireSuperAdmin, async (req: Request, res: Response) => {
     try {
-      const deleted = await storage.deleteRoutine(req.params.id);
+      const deleted = await storage.deleteRoutine(getRouteParam(req, "id"));
       if (!deleted) {
         return res.status(404).json({ message: "Routine not found" });
       }
@@ -218,7 +199,10 @@ export async function registerRoutes(
 
   app.delete("/api/admin/selections/:routineId", requireAuth, async (req: Request, res: Response) => {
     try {
-      const removed = await storage.removeAdminSelection(req.session.userId!, req.params.routineId);
+      const removed = await storage.removeAdminSelection(
+        req.session.userId!,
+        getRouteParam(req, "routineId"),
+      );
       if (!removed) {
         return res.status(404).json({ message: "Selection not found" });
       }
