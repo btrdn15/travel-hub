@@ -3,6 +3,7 @@ import { scrypt, randomBytes } from "crypto";
 import { promisify } from "util";
 
 const scryptAsync = promisify(scrypt);
+const shouldSeedDevelopmentAdmins = process.env.NODE_ENV !== "production";
 
 async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16).toString("hex");
@@ -11,6 +12,10 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 export async function seedDatabase() {
+  if (!shouldSeedDevelopmentAdmins) {
+    return;
+  }
+
   const adminAccounts = [
     { username: "admin2", password: "admin123" },
     { username: "admin3", password: "admin123" },
@@ -27,9 +32,6 @@ export async function seedDatabase() {
         password: hashedPassword,
         role: "admin",
       });
-    } else {
-      const hashedPassword = await hashPassword(account.password);
-      await storage.updateUserPassword(existing.id, hashedPassword);
     }
   }
 

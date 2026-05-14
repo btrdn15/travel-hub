@@ -8,6 +8,40 @@ import { promisify } from "util";
 import connectPgSimple from "connect-pg-simple";
 
 const scryptAsync = promisify(scrypt);
+const isProduction = process.env.NODE_ENV === "production";
+const DEV_SESSION_SECRET = "dev-travel-secret-key";
+const DEV_SUPER_ADMIN_USERNAME = "admin1";
+const DEV_SUPER_ADMIN_PASSWORD = "admin123";
+
+function getSessionSecret(): string {
+  if (process.env.SESSION_SECRET) {
+    return process.env.SESSION_SECRET;
+  }
+
+  if (isProduction) {
+    throw new Error("SESSION_SECRET must be set in production");
+  }
+
+  return DEV_SESSION_SECRET;
+}
+
+function getBootstrapSuperAdmin(): { username: string; password: string } | null {
+  const username = process.env.ADMIN_USERNAME;
+  const password = process.env.ADMIN_PASSWORD;
+
+  if (username && password) {
+    return { username, password };
+  }
+
+  if (!isProduction) {
+    return {
+      username: username || DEV_SUPER_ADMIN_USERNAME,
+      password: password || DEV_SUPER_ADMIN_PASSWORD,
+    };
+  }
+
+  return null;
+}
 
 async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16).toString("hex");
@@ -57,7 +91,7 @@ export async function registerRoutes(
         conString: process.env.DATABASE_URL,
         createTableIfMissing: true,
       }),
-      secret: process.env.SESSION_SECRET || "travel-secret-key",
+      secret: getSessionSecret(),
       resave: false,
       saveUninitialized: false,
       cookie: {
@@ -69,14 +103,21 @@ export async function registerRoutes(
     })
   );
 
-  const existingAdmin = await storage.getUserByUsername("admin1");
-  if (!existingAdmin) {
-    const hashedPassword = await hashPassword("admin123");
-    await storage.createUser({
-      username: "admin1",
-      password: hashedPassword,
-      role: "super_admin",
-    });
+  const bootstrapSuperAdmin = getBootstrapSuperAdmin();
+  if (bootstrapSuperAdmin) {
+    const existingAdmin = await storage.getUserByUsername(bootstrapSuperAdmin.username);
+    if (!existingAdmin) {
+      const hashedPassword = await hashPassword(bootstrapSuperAdmin.password);
+      await storage.createUser({
+        username: bootstrapSuperAdmin.username,
+        password: hashedPassword,
+        role: "super_admin",
+      });
+    }
+  } else {
+    console.warn(
+      "Skipping super admin bootstrap because ADMIN_USERNAME and ADMIN_PASSWORD are not set.",
+    );
   }
 
   app.post("/api/auth/login", async (req: Request, res: Response) => {
