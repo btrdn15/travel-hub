@@ -8,7 +8,7 @@ import { promisify } from "util";
 import connectPgSimple from "connect-pg-simple";
 
 const scryptAsync = promisify(scrypt);
-const isProduction = process.env.NODE_ENV === "production";
+const isDevelopment = process.env.NODE_ENV === "development";
 const DEV_SESSION_SECRET = "dev-travel-secret-key";
 const DEV_SUPER_ADMIN_USERNAME = "admin1";
 const DEV_SUPER_ADMIN_PASSWORD = "admin123";
@@ -18,7 +18,7 @@ function getSessionSecret(): string {
     return process.env.SESSION_SECRET;
   }
 
-  if (isProduction) {
+  if (!isDevelopment) {
     throw new Error("SESSION_SECRET must be set in production");
   }
 
@@ -33,7 +33,7 @@ function getBootstrapSuperAdmin(): { username: string; password: string } | null
     return { username, password };
   }
 
-  if (!isProduction) {
+  if (isDevelopment) {
     return {
       username: username || DEV_SUPER_ADMIN_USERNAME,
       password: password || DEV_SUPER_ADMIN_PASSWORD,

@@ -3,7 +3,7 @@ import { scrypt, randomBytes } from "crypto";
 import { promisify } from "util";
 
 const scryptAsync = promisify(scrypt);
-const shouldSeedDevelopmentAdmins = process.env.NODE_ENV !== "production";
+const shouldSeedDevelopmentAdmins = process.env.NODE_ENV === "development";
 
 async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16).toString("hex");
