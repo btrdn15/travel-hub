@@ -23,11 +23,9 @@ A Mongolian-language travel and tourism website for Olon Nuur Travel LLC. Featur
 - **admin_selections**: id, adminId, routineId
 
 ## Admin Accounts
-- `admin1` / `admin123` - Role: `super_admin` (full CRUD)
-- `admin2` / `admin123` - Role: `admin` (view & select only)
-- `admin3` / `admin123` - Role: `admin`
-- `admin4` / `admin123` - Role: `admin`
-- `admin5` / `admin123` - Role: `admin`
+- Production admin credentials must be supplied with `ADMIN_USERNAME` and `ADMIN_PASSWORD`.
+- `SESSION_SECRET` must be set to a long random value in production.
+- Development mode still creates local-only sample admin accounts for convenience.
 
 ## Important Implementation Details
 - **Login redirect**: Login page uses `useEffect` to watch for `user` state changes from `useAuth()` and redirects to `/admin`. Auth mutation uses `queryClient.setQueryData` to avoid race conditions.
@@ -35,6 +33,7 @@ A Mongolian-language travel and tourism website for Olon Nuur Travel LLC. Featur
 - **Brochure images**: Imported from `@assets/` (IMG_7059, IMG_7060) - Olon Nuur Travel brochure front/back
 - **Contact info**: olonnuurtravel@gmail.com, 010-9290-5686, @olonnuurtravel (Instagram)
 - **createdBy** is set server-side from `req.session.userId`
+- **Admin bootstrap**: production never creates hard-coded admin passwords; the first super admin is created only from explicit environment variables.
 
 ## Project Structure
 ```

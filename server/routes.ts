@@ -8,6 +8,44 @@ import { promisify } from "util";
 import connectPgSimple from "connect-pg-simple";
 
 const scryptAsync = promisify(scrypt);
+const isDevelopment = process.env.NODE_ENV === "development";
+const DEV_SESSION_SECRET = "dev-travel-secret-key";
+const DEV_SUPER_ADMIN_USERNAME = "admin1";
+const DEV_SUPER_ADMIN_PASSWORD = "admin123";
+
+function getSessionSecret(): string {
+  if (process.env.SESSION_SECRET) {
+    return process.env.SESSION_SECRET;
+  }
+
+  if (!isDevelopment) {
+    throw new Error("SESSION_SECRET must be set in production");
+  }
+
+  return DEV_SESSION_SECRET;
+}
+
+function getBootstrapSuperAdmin(): { username: string; password: string } | null {
+  const username = process.env.ADMIN_USERNAME;
+  const password = process.env.ADMIN_PASSWORD;
+
+  if (username && password) {
+    return { username, password };
+  }
+
+  if (isDevelopment) {
+    return {
+      username: username || DEV_SUPER_ADMIN_USERNAME,
+      password: password || DEV_SUPER_ADMIN_PASSWORD,
+    };
+  }
+
+  return null;
+}
+
+function routeParam(value: string | string[]): string {
+  return Array.isArray(value) ? value[0] : value;
+}
 
 async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16).toString("hex");
@@ -57,7 +95,7 @@ export async function registerRoutes(
         conString: process.env.DATABASE_URL,
         createTableIfMissing: true,
       }),
-      secret: process.env.SESSION_SECRET || "travel-secret-key",
+      secret: getSessionSecret(),
       resave: false,
       saveUninitialized: false,
       cookie: {
@@ -69,14 +107,21 @@ export async function registerRoutes(
     })
   );
 
-  const existingAdmin = await storage.getUserByUsername("admin1");
-  if (!existingAdmin) {
-    const hashedPassword = await hashPassword("admin123");
-    await storage.createUser({
-      username: "admin1",
-      password: hashedPassword,
-      role: "super_admin",
-    });
+  const bootstrapSuperAdmin = getBootstrapSuperAdmin();
+  if (bootstrapSuperAdmin) {
+    const existingAdmin = await storage.getUserByUsername(bootstrapSuperAdmin.username);
+    if (!existingAdmin) {
+      const hashedPassword = await hashPassword(bootstrapSuperAdmin.password);
+      await storage.createUser({
+        username: bootstrapSuperAdmin.username,
+        password: hashedPassword,
+        role: "super_admin",
+      });
+    }
+  } else {
+    console.warn(
+      "Skipping super admin bootstrap because ADMIN_USERNAME and ADMIN_PASSWORD are not set.",
+    );
   }
 
   app.post("/api/auth/login", async (req: Request, res: Response) => {
@@ -150,7 +195,7 @@ export async function registerRoutes(
   });
 
   app.get("/api/routines/:id", async (req: Request, res: Response) => {
-    const routine = await storage.getRoutine(req.params.id);
+    const routine = await storage.getRoutine(routeParam(req.params.id));
     if (!routine) {
       return res.status(404).json({ message: "Routine not found" });
     }
@@ -173,7 +218,7 @@ export async function registerRoutes(
 
   app.patch("/api/routines/:id", requireSuperAdmin, async (req: Request, res: Response) => {
     try {
-      const routine = await storage.updateRoutine(req.params.id, req.body);
+      const routine = await storage.updateRoutine(routeParam(req.params.id), req.body);
       if (!routine) {
         return res.status(404).json({ message: "Routine not found" });
       }
@@ -185,7 +230,7 @@ export async function registerRoutes(
 
   app.delete("/api/routines/:id", requireSuperAdmin, async (req: Request, res: Response) => {
     try {
-      const deleted = await storage.deleteRoutine(req.params.id);
+      const deleted = await storage.deleteRoutine(routeParam(req.params.id));
       if (!deleted) {
         return res.status(404).json({ message: "Routine not found" });
       }
@@ -218,7 +263,7 @@ export async function registerRoutes(
 
   app.delete("/api/admin/selections/:routineId", requireAuth, async (req: Request, res: Response) => {
     try {
-      const removed = await storage.removeAdminSelection(req.session.userId!, req.params.routineId);
+      const removed = await storage.removeAdminSelection(req.session.userId!, routeParam(req.params.routineId));
       if (!removed) {
         return res.status(404).json({ message: "Selection not found" });
       }
