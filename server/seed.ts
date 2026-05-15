@@ -27,9 +27,6 @@ export async function seedDatabase() {
         password: hashedPassword,
         role: "admin",
       });
-    } else {
-      const hashedPassword = await hashPassword(account.password);
-      await storage.updateUserPassword(existing.id, hashedPassword);
     }
   }
 
