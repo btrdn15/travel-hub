@@ -13,8 +13,8 @@ A Mongolian-language travel and tourism website for Olon Nuur Travel LLC. Featur
 ## Key Features
 - Modern public homepage: hero with brochure background, stats, brochure gallery with lightbox zoom, contact section
 - Admin login system with role-based permissions
-- Super Admin (admin1): Full CRUD control over travel routines
-- Regular Admins (admin2-5): Can view and select routines for customer services
+- Super Admin role: Full CRUD control over travel routines
+- Regular Admin role: Can view and select routines for customer services
 - Admin routine selection tracking in database
 
 ## Data Model
@@ -22,12 +22,10 @@ A Mongolian-language travel and tourism website for Olon Nuur Travel LLC. Featur
 - **routines**: id, title, destination, description, duration, price, image, highlights[], createdBy
 - **admin_selections**: id, adminId, routineId
 
-## Admin Accounts
-- `admin1` / `admin123` - Role: `super_admin` (full CRUD)
-- `admin2` / `admin123` - Role: `admin` (view & select only)
-- `admin3` / `admin123` - Role: `admin`
-- `admin4` / `admin123` - Role: `admin`
-- `admin5` / `admin123` - Role: `admin`
+## Admin Bootstrap
+- Development (`NODE_ENV=development`) seeds local-only default accounts for testing.
+- Non-development environments must set `ADMIN_USERNAME` and `ADMIN_PASSWORD` to create the initial `super_admin`; the development default password is rejected.
+- Existing seeded accounts with the old development default password are rotated in non-development environments before they can be used.
 
 ## Important Implementation Details
 - **Login redirect**: Login page uses `useEffect` to watch for `user` state changes from `useAuth()` and redirects to `/admin`. Auth mutation uses `queryClient.setQueryData` to avoid race conditions.
