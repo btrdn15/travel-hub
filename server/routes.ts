@@ -3,23 +3,9 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { loginSchema, insertRoutineSchema } from "@shared/schema";
 import session from "express-session";
-import { scrypt, randomBytes, timingSafeEqual } from "crypto";
-import { promisify } from "util";
 import connectPgSimple from "connect-pg-simple";
-
-const scryptAsync = promisify(scrypt);
-
-async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16).toString("hex");
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${buf.toString("hex")}.${salt}`;
-}
-
-async function comparePasswords(supplied: string, stored: string): Promise<boolean> {
-  const [hashed, salt] = stored.split(".");
-  const buf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(Buffer.from(hashed, "hex"), buf);
-}
+import { ensureBootstrapSuperAdmin } from "./adminBootstrap";
+import { comparePasswords, hashPassword } from "./password";
 
 declare module "express-session" {
   interface SessionData {
@@ -69,15 +55,7 @@ export async function registerRoutes(
     })
   );
 
-  const existingAdmin = await storage.getUserByUsername("admin1");
-  if (!existingAdmin) {
-    const hashedPassword = await hashPassword("admin123");
-    await storage.createUser({
-      username: "admin1",
-      password: hashedPassword,
-      role: "super_admin",
-    });
-  }
+  await ensureBootstrapSuperAdmin(storage);
 
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
