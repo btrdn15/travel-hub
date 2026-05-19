@@ -23,11 +23,11 @@ A Mongolian-language travel and tourism website for Olon Nuur Travel LLC. Featur
 - **admin_selections**: id, adminId, routineId
 
 ## Admin Accounts
-- `admin1` / `admin123` - Role: `super_admin` (full CRUD)
-- `admin2` / `admin123` - Role: `admin` (view & select only)
-- `admin3` / `admin123` - Role: `admin`
-- `admin4` / `admin123` - Role: `admin`
-- `admin5` / `admin123` - Role: `admin`
+- Set `SUPER_ADMIN_PASSWORD` before first startup to create or rotate the `admin1` super-admin account.
+- Optional: set `SUPER_ADMIN_USERNAME` to use a different bootstrap super-admin username.
+- Optional: set `STAFF_ADMIN_PASSWORD` to create or rotate staff admin accounts `admin2` through `admin5`.
+- Do not publish or rely on default admin passwords; startup code invalidates the former public `admin123` password when detected.
+- Set `SESSION_SECRET` in production so login sessions remain valid across restarts.
 
 ## Important Implementation Details
 - **Login redirect**: Login page uses `useEffect` to watch for `user` state changes from `useAuth()` and redirects to `/admin`. Auth mutation uses `queryClient.setQueryData` to avoid race conditions.
