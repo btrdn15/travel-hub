@@ -80,6 +80,11 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+function routeParam(req: Request, name: string): string {
+  const value = req.params[name];
+  return Array.isArray(value) ? value[0] : value;
+}
+
 async function requireSuperAdmin(req: Request, res: Response, next: NextFunction) {
   if (!req.session.userId) {
     return res.status(401).json({ message: "Not authenticated" });
@@ -193,7 +198,7 @@ export async function registerRoutes(
   });
 
   app.get("/api/routines/:id", async (req: Request, res: Response) => {
-    const routine = await storage.getRoutine(req.params.id);
+    const routine = await storage.getRoutine(routeParam(req, "id"));
     if (!routine) {
       return res.status(404).json({ message: "Routine not found" });
     }
@@ -216,7 +221,7 @@ export async function registerRoutes(
 
   app.patch("/api/routines/:id", requireSuperAdmin, async (req: Request, res: Response) => {
     try {
-      const routine = await storage.updateRoutine(req.params.id, req.body);
+      const routine = await storage.updateRoutine(routeParam(req, "id"), req.body);
       if (!routine) {
         return res.status(404).json({ message: "Routine not found" });
       }
@@ -228,7 +233,7 @@ export async function registerRoutes(
 
   app.delete("/api/routines/:id", requireSuperAdmin, async (req: Request, res: Response) => {
     try {
-      const deleted = await storage.deleteRoutine(req.params.id);
+      const deleted = await storage.deleteRoutine(routeParam(req, "id"));
       if (!deleted) {
         return res.status(404).json({ message: "Routine not found" });
       }
@@ -261,7 +266,7 @@ export async function registerRoutes(
 
   app.delete("/api/admin/selections/:routineId", requireAuth, async (req: Request, res: Response) => {
     try {
-      const removed = await storage.removeAdminSelection(req.session.userId!, req.params.routineId);
+      const removed = await storage.removeAdminSelection(req.session.userId!, routeParam(req, "routineId"));
       if (!removed) {
         return res.status(404).json({ message: "Selection not found" });
       }
