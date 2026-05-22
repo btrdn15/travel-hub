@@ -1,8 +1,9 @@
-import { storage } from "./storage";
+import { storage, type IStorage } from "./storage";
 import { scrypt, randomBytes } from "crypto";
 import { promisify } from "util";
 
 const scryptAsync = promisify(scrypt);
+type SeedStorage = Pick<IStorage, "getUserByUsername" | "createUser">;
 
 async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16).toString("hex");
@@ -10,7 +11,7 @@ async function hashPassword(password: string): Promise<string> {
   return `${buf.toString("hex")}.${salt}`;
 }
 
-export async function seedDatabase() {
+export async function seedDatabase(store: SeedStorage = storage) {
   const adminAccounts = [
     { username: "admin2", password: "admin123" },
     { username: "admin3", password: "admin123" },
@@ -19,17 +20,14 @@ export async function seedDatabase() {
   ];
 
   for (const account of adminAccounts) {
-    const existing = await storage.getUserByUsername(account.username);
+    const existing = await store.getUserByUsername(account.username);
     if (!existing) {
       const hashedPassword = await hashPassword(account.password);
-      await storage.createUser({
+      await store.createUser({
         username: account.username,
         password: hashedPassword,
         role: "admin",
       });
-    } else {
-      const hashedPassword = await hashPassword(account.password);
-      await storage.updateUserPassword(existing.id, hashedPassword);
     }
   }
 
