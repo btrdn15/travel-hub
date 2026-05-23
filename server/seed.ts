@@ -1,36 +1,92 @@
-import { storage } from "./storage";
-import { scrypt, randomBytes } from "crypto";
-import { promisify } from "util";
+import { randomBytes } from "crypto";
+import { storage, type IStorage } from "./storage";
+import { comparePasswords, hashPassword } from "./password";
 
-const scryptAsync = promisify(scrypt);
+type AdminStore = Pick<
+  IStorage,
+  "getUserByUsername" | "createUser" | "updateUserPassword"
+>;
 
-async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16).toString("hex");
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${buf.toString("hex")}.${salt}`;
+type BootstrapAdmin = {
+  username: string;
+  password: string;
+};
+
+const DEFAULT_ADMIN_PASSWORD = "admin123";
+const DEFAULT_ADMIN_USERNAMES = ["admin1", "admin2", "admin3", "admin4", "admin5"];
+
+function getBootstrapAdmin(env: NodeJS.ProcessEnv): BootstrapAdmin | null {
+  const username = env.BOOTSTRAP_ADMIN_USERNAME?.trim();
+  const password = env.BOOTSTRAP_ADMIN_PASSWORD;
+
+  if (!username && !password) {
+    return null;
+  }
+
+  if (!username || !password) {
+    throw new Error(
+      "Both BOOTSTRAP_ADMIN_USERNAME and BOOTSTRAP_ADMIN_PASSWORD must be set to bootstrap an admin account.",
+    );
+  }
+
+  if (password === DEFAULT_ADMIN_PASSWORD || password.length < 12) {
+    throw new Error(
+      "BOOTSTRAP_ADMIN_PASSWORD must be at least 12 characters and cannot be the previous default password.",
+    );
+  }
+
+  return { username, password };
 }
 
-export async function seedDatabase() {
-  const adminAccounts = [
-    { username: "admin2", password: "admin123" },
-    { username: "admin3", password: "admin123" },
-    { username: "admin4", password: "admin123" },
-    { username: "admin5", password: "admin123" },
-  ];
+export async function secureAdminAccounts(
+  store: AdminStore = storage,
+  env: NodeJS.ProcessEnv = process.env,
+) {
+  const bootstrapAdmin = getBootstrapAdmin(env);
 
-  for (const account of adminAccounts) {
-    const existing = await storage.getUserByUsername(account.username);
+  if (bootstrapAdmin) {
+    const existing = await store.getUserByUsername(bootstrapAdmin.username);
     if (!existing) {
-      const hashedPassword = await hashPassword(account.password);
-      await storage.createUser({
-        username: account.username,
-        password: hashedPassword,
-        role: "admin",
+      await store.createUser({
+        username: bootstrapAdmin.username,
+        password: await hashPassword(bootstrapAdmin.password),
+        role: "super_admin",
       });
-    } else {
-      const hashedPassword = await hashPassword(account.password);
-      await storage.updateUserPassword(existing.id, hashedPassword);
+    } else if (await comparePasswords(DEFAULT_ADMIN_PASSWORD, existing.password)) {
+      await store.updateUserPassword(
+        existing.id,
+        await hashPassword(bootstrapAdmin.password),
+      );
+      console.warn(
+        `[seed] Replaced default password for bootstrap admin "${bootstrapAdmin.username}".`,
+      );
+    } else if (existing.role !== "super_admin") {
+      console.warn(
+        `[seed] BOOTSTRAP_ADMIN_USERNAME "${bootstrapAdmin.username}" already exists but is not a super_admin.`,
+      );
     }
   }
 
+  for (const username of DEFAULT_ADMIN_USERNAMES) {
+    if (username === bootstrapAdmin?.username) {
+      continue;
+    }
+
+    const existing = await store.getUserByUsername(username);
+    if (!existing) {
+      continue;
+    }
+
+    if (await comparePasswords(DEFAULT_ADMIN_PASSWORD, existing.password)) {
+      const lockedPassword = randomBytes(32).toString("base64url");
+      await store.updateUserPassword(existing.id, await hashPassword(lockedPassword));
+      console.warn(
+        `[seed] Disabled default password for "${username}". Reset it through a trusted admin workflow if the account is still needed.`,
+      );
+    }
+  }
+}
+
+export async function seedDatabase() {
+  await secureAdminAccounts();
 }
