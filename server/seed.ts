@@ -1,36 +1,54 @@
 import { storage } from "./storage";
-import { scrypt, randomBytes } from "crypto";
-import { promisify } from "util";
+import type { IStorage } from "./storage";
+import { randomBytes } from "crypto";
+import { comparePasswords, hashPassword } from "./password";
 
-const scryptAsync = promisify(scrypt);
+type SeedStorage = Pick<IStorage, "getUserByUsername" | "createUser" | "updateUserPassword">;
 
-async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16).toString("hex");
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${buf.toString("hex")}.${salt}`;
-}
+const legacyDefaultPassword = "admin123";
+const legacyDefaultAdminUsernames = ["admin1", "admin2", "admin3", "admin4", "admin5"];
 
-export async function seedDatabase() {
-  const adminAccounts = [
-    { username: "admin2", password: "admin123" },
-    { username: "admin3", password: "admin123" },
-    { username: "admin4", password: "admin123" },
-    { username: "admin5", password: "admin123" },
-  ];
-
-  for (const account of adminAccounts) {
-    const existing = await storage.getUserByUsername(account.username);
+async function lockDefaultPasswordAccounts(seedStorage: SeedStorage) {
+  for (const username of legacyDefaultAdminUsernames) {
+    const existing = await seedStorage.getUserByUsername(username);
     if (!existing) {
-      const hashedPassword = await hashPassword(account.password);
-      await storage.createUser({
-        username: account.username,
-        password: hashedPassword,
-        role: "admin",
-      });
-    } else {
-      const hashedPassword = await hashPassword(account.password);
-      await storage.updateUserPassword(existing.id, hashedPassword);
+      continue;
+    }
+
+    if (await comparePasswords(legacyDefaultPassword, existing.password)) {
+      const randomPassword = randomBytes(32).toString("hex");
+      const hashedPassword = await hashPassword(randomPassword);
+      await seedStorage.updateUserPassword(existing.id, hashedPassword);
     }
   }
+}
 
+async function bootstrapAdminFromEnvironment(seedStorage: SeedStorage) {
+  const username = process.env.BOOTSTRAP_ADMIN_USERNAME;
+  const password = process.env.BOOTSTRAP_ADMIN_PASSWORD;
+
+  if (!username && !password) {
+    return;
+  }
+
+  if (!username || !password) {
+    throw new Error("BOOTSTRAP_ADMIN_USERNAME and BOOTSTRAP_ADMIN_PASSWORD must be set together");
+  }
+
+  const existing = await seedStorage.getUserByUsername(username);
+  if (existing) {
+    return;
+  }
+
+  const hashedPassword = await hashPassword(password);
+  await seedStorage.createUser({
+    username,
+    password: hashedPassword,
+    role: "super_admin",
+  });
+}
+
+export async function seedDatabase(seedStorage: SeedStorage = storage) {
+  await lockDefaultPasswordAccounts(seedStorage);
+  await bootstrapAdminFromEnvironment(seedStorage);
 }
