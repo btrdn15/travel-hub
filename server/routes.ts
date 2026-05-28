@@ -69,16 +69,6 @@ export async function registerRoutes(
     })
   );
 
-  const existingAdmin = await storage.getUserByUsername("admin1");
-  if (!existingAdmin) {
-    const hashedPassword = await hashPassword("admin123");
-    await storage.createUser({
-      username: "admin1",
-      password: hashedPassword,
-      role: "super_admin",
-    });
-  }
-
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
       const parsed = loginSchema.safeParse(req.body);
