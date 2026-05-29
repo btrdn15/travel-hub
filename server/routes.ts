@@ -69,16 +69,6 @@ export async function registerRoutes(
     })
   );
 
-  const existingAdmin = await storage.getUserByUsername("admin1");
-  if (!existingAdmin) {
-    const hashedPassword = await hashPassword("admin123");
-    await storage.createUser({
-      username: "admin1",
-      password: hashedPassword,
-      role: "super_admin",
-    });
-  }
-
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
       const parsed = loginSchema.safeParse(req.body);
@@ -150,7 +140,8 @@ export async function registerRoutes(
   });
 
   app.get("/api/routines/:id", async (req: Request, res: Response) => {
-    const routine = await storage.getRoutine(req.params.id);
+    const { id } = req.params as { id: string };
+    const routine = await storage.getRoutine(id);
     if (!routine) {
       return res.status(404).json({ message: "Routine not found" });
     }
@@ -173,7 +164,8 @@ export async function registerRoutes(
 
   app.patch("/api/routines/:id", requireSuperAdmin, async (req: Request, res: Response) => {
     try {
-      const routine = await storage.updateRoutine(req.params.id, req.body);
+      const { id } = req.params as { id: string };
+      const routine = await storage.updateRoutine(id, req.body);
       if (!routine) {
         return res.status(404).json({ message: "Routine not found" });
       }
@@ -185,7 +177,8 @@ export async function registerRoutes(
 
   app.delete("/api/routines/:id", requireSuperAdmin, async (req: Request, res: Response) => {
     try {
-      const deleted = await storage.deleteRoutine(req.params.id);
+      const { id } = req.params as { id: string };
+      const deleted = await storage.deleteRoutine(id);
       if (!deleted) {
         return res.status(404).json({ message: "Routine not found" });
       }
@@ -218,7 +211,8 @@ export async function registerRoutes(
 
   app.delete("/api/admin/selections/:routineId", requireAuth, async (req: Request, res: Response) => {
     try {
-      const removed = await storage.removeAdminSelection(req.session.userId!, req.params.routineId);
+      const { routineId } = req.params as { routineId: string };
+      const removed = await storage.removeAdminSelection(req.session.userId!, routineId);
       if (!removed) {
         return res.status(404).json({ message: "Selection not found" });
       }
