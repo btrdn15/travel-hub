@@ -69,16 +69,6 @@ export async function registerRoutes(
     })
   );
 
-  const existingAdmin = await storage.getUserByUsername("admin1");
-  if (!existingAdmin) {
-    const hashedPassword = await hashPassword("admin123");
-    await storage.createUser({
-      username: "admin1",
-      password: hashedPassword,
-      role: "super_admin",
-    });
-  }
-
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
       const parsed = loginSchema.safeParse(req.body);
@@ -149,7 +139,7 @@ export async function registerRoutes(
     return res.json(allRoutines);
   });
 
-  app.get("/api/routines/:id", async (req: Request, res: Response) => {
+  app.get("/api/routines/:id", async (req: Request<{ id: string }>, res: Response) => {
     const routine = await storage.getRoutine(req.params.id);
     if (!routine) {
       return res.status(404).json({ message: "Routine not found" });
@@ -171,7 +161,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/routines/:id", requireSuperAdmin, async (req: Request, res: Response) => {
+  app.patch("/api/routines/:id", requireSuperAdmin, async (req: Request<{ id: string }>, res: Response) => {
     try {
       const routine = await storage.updateRoutine(req.params.id, req.body);
       if (!routine) {
@@ -183,7 +173,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/routines/:id", requireSuperAdmin, async (req: Request, res: Response) => {
+  app.delete("/api/routines/:id", requireSuperAdmin, async (req: Request<{ id: string }>, res: Response) => {
     try {
       const deleted = await storage.deleteRoutine(req.params.id);
       if (!deleted) {
@@ -216,7 +206,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/admin/selections/:routineId", requireAuth, async (req: Request, res: Response) => {
+  app.delete("/api/admin/selections/:routineId", requireAuth, async (req: Request<{ routineId: string }>, res: Response) => {
     try {
       const removed = await storage.removeAdminSelection(req.session.userId!, req.params.routineId);
       if (!removed) {
