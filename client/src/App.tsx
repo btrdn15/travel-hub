@@ -3,21 +3,20 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/lib/auth";
 import { LangProvider } from "@/lib/lang";
 import HomePage from "@/pages/home";
-import LoginPage from "@/pages/login";
-import AdminDashboard from "@/pages/admin-dashboard";
 import TourDetailPage from "@/pages/tour-detail";
+import BookingPage from "@/pages/booking";
 import NotFound from "@/pages/not-found";
+import { FloatingSocialLinks } from "@/components/floating-chat";
+import { GoogleAnalytics } from "@/components/google-analytics";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/tours/:slug" component={TourDetailPage} />
-      <Route path="/admin/login" component={LoginPage} />
-      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/book" component={BookingPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -28,10 +27,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <LangProvider>
-          <AuthProvider>
-            <Toaster />
-            <Router />
-          </AuthProvider>
+          <GoogleAnalytics />
+          <Toaster />
+          <Router />
+          <FloatingSocialLinks />
         </LangProvider>
       </TooltipProvider>
     </QueryClientProvider>

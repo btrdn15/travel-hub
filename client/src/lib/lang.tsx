@@ -1,6 +1,19 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 
-export type Lang = "mn" | "ko";
+export type Lang = "mn" | "ko" | "en";
+
+export const LANG_ORDER: Lang[] = ["mn", "ko", "en"];
+
+export const LANG_LABELS: Record<Lang, string> = {
+  mn: "Монгол",
+  ko: "한국어",
+  en: "English",
+};
+
+export function nextLang(current: Lang): Lang {
+  const i = LANG_ORDER.indexOf(current);
+  return LANG_ORDER[(i + 1) % LANG_ORDER.length];
+}
 
 type LangContextValue = {
   lang: Lang;
@@ -20,7 +33,7 @@ export function LangProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY) as Lang | null;
-      if (saved === "mn" || saved === "ko") {
+      if (saved === "mn" || saved === "ko" || saved === "en") {
         setLangState(saved);
       }
     } catch {

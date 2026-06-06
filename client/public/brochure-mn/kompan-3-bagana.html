@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Olon Nuur Travel — Танилцуулга (монгол)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0d0d0d;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px;
+      font-family: "Noto Sans", system-ui, sans-serif;
+      color: #f5f2eb;
+    }
+    .hint {
+      max-width: 720px;
+      text-align: center;
+      font-size: 13px;
+      opacity: 0.88;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    .triptych {
+      width: 1200px;
+      height: 720px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      box-shadow: 0 12px 48px rgba(0,0,0,.5);
+      border: 1px solid #2a2a2a;
+    }
+    .col {
+      position: relative;
+      padding: 28px 22px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .col::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+    .col::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,.55) 100%);
+    }
+    .col > * { position: relative; z-index: 2; }
+    .c1::before {
+      background: linear-gradient(145deg, #3d3028 0%, #5c4a3a 40%, #2a221c 100%);
+    }
+    .c2::before {
+      background: linear-gradient(200deg, #c45c2a 0%, #8b3d1a 25%, #4a2a18 50%, #1a1512 100%);
+    }
+    .c3::before {
+      background: linear-gradient(180deg, #5a4a38 0%, #8b7355 35%, #3d3428 100%);
+    }
+    .serif { font-family: "Noto Serif", Georgia, serif; }
+    h1 {
+      font-family: "Noto Serif", Georgia, serif;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 18px;
+      text-shadow: 0 2px 16px rgba(0,0,0,.45);
+    }
+    .lead {
+      font-size: 13px;
+      line-height: 1.55;
+      margin-bottom: 12px;
+      opacity: .96;
+    }
+    .checks {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(212, 175, 55, .45);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+    .checks li {
+      list-style: none;
+      padding-left: 22px;
+      position: relative;
+      margin-bottom: 8px;
+    }
+    .checks li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #d4af37;
+      font-weight: 700;
+    }
+    .poetic {
+      font-family: "Noto Serif", Georgia, serif;
+      font-size: 17px;
+      font-style: italic;
+      margin-bottom: 16px;
+      opacity: .95;
+    }
+    .c2 h2 {
+      font-family: "Noto Serif", Georgia, serif;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.25;
+    }
+    .c2 .body { font-size: 13px; line-height: 1.55; margin-bottom: auto; }
+    .contact {
+      margin-top: auto;
+      padding-top: 16px;
+      text-align: center;
+    }
+    .contact h3 {
+      font-size: 12px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      opacity: .85;
+    }
+    .contact .line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #d4af37, transparent);
+      margin-bottom: 12px;
+    }
+    .contact p { font-size: 13px; margin: 6px 0; }
+    .brand-block { text-align: center; margin-bottom: 20px; }
+    .brand-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 10px;
+      border-radius: 8px;
+      background: linear-gradient(145deg, #2d6a4f 0%, #95d5b2 50%, #1b4332 100%);
+      border: 2px solid rgba(255,255,255,.25);
+      box-shadow: 0 4px 16px rgba(0,0,0,.35);
+    }
+    .brand-name {
+      font-family: "Noto Serif", Georgia, serif;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+    .brand-sub { font-size: 14px; margin-top: 4px; opacity: .9; }
+    .c3 .poetic-big {
+      font-family: "Noto Serif", Georgia, serif;
+      font-size: 22px;
+      line-height: 1.35;
+      margin: 24px 0 12px;
+    }
+    .c3 .tag { font-size: 14px; line-height: 1.5; opacity: .95; }
+    .llc {
+      margin-top: auto;
+      font-size: 11px;
+      opacity: .7;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <p class="hint">
+    Энэ хуудсыг <strong>1200×720</strong> гэж тохируулан дэлгэцийн зураг эсвэл PDF болгон хадгална уу. Анхны гэрэл зурагтай яг ижил болгохын тулд гурван баганыг өөрийн PNG дээр давхаргын зэрэгцээ HTML-ийг ашиглах эсвэл Photoshop-д энэхүү текстийг хуулна.
+  </p>
+  <div class="triptych">
+    <section class="col c1">
+      <h1>Бид &ldquo;онцгой зочдод&rdquo; зориулсан сэтгэл хөдөлгөм аяллыг бүтээдэг.</h1>
+      <p class="lead">
+        <strong>OLON NUUR</strong> гэдэг нь монголоор &ldquo;олон нуур&rdquo; гэсэн утгатай. Монголын өргөн байгальд зөвхөн өргөн тал биш, тэнгэрийг тольдсон цэнгэг нуурнууд ч нуугдан байдаг.
+      </p>
+      <p class="lead">
+        Бид нуур шиг нам гүм, гэхдээ гүн аяллыг удирдана — жуулчлал биш, жинхэнэ Монгол, байгаль ба хүнийг хамтад нь уулзуулах аялал.
+      </p>
+      <p class="lead"><strong>OLON NUUR</strong>-тай хамт өөрийн Монголоо нээгээрэй.</p>
+      <ul class="checks">
+        <li>Солонгос зочдод тохируулсан хөтөлбөр</li>
+        <li>Орон нутгийн нүүдэлчидтэй уулзалт, солилцоо</li>
+        <li>Сэтгэл хөдөлгөм байрлал ба байгальд суурилсан туршлага</li>
+      </ul>
+    </section>
+    <section class="col c2">
+      <p class="poetic">Монгол зөвхөн пейзаж биш,<br />дурсамж болон үлддэг.</p>
+      <h2>Аялал жуулчлалын захирал өөрөө,<br />таныг угтана.</h2>
+      <p class="body">
+        Солонгос хэлээр ойлголцох боломжтой захирал онгоцны буудлаас эхлээд буцаах хүртэл, орон нутгийн гүн түүх, олон төрлийн хөтөлбөрөөр аюулгүй, тухтай Монголын аяллыг өгнө.
+      </p>
+      <div class="contact">
+        <h3>Захиалга, лавлагаа</h3>
+        <div class="line"></div>
+        <p>✉ olonnuurtravel@gmail.com</p>
+        <p>◎ @olonnurtravel</p>
+        <p>☎ 010.9290.5686</p>
+      </div>
+    </section>
+    <section class="col c3">
+      <div class="brand-block">
+        <div class="brand-icon" aria-hidden="true"></div>
+        <div class="brand-name">OLON NUUR</div>
+        <div class="brand-sub">Монголын аялал</div>
+      </div>
+      <p class="poetic-big serif">Талын цаана,<br />нуур хүлээж буй аялал</p>
+      <p class="tag">Монголд тэнгэр илүү ойрхон газар бий.</p>
+      <p class="llc">Olon Nuur Travel LLC</p>
+    </section>
+  </div>
+</body>
+</html>

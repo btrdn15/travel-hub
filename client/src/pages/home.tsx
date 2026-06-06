@@ -1,234 +1,170 @@
-import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
-import { useAuth } from "@/lib/auth";
 import { useLang, type Lang } from "@/lib/lang";
-import { tours } from "@/data/tours";
-import { Phone, Mail, Instagram, Compass, Menu, ChevronDown, Globe, Lock, Clock, MapPin, ArrowRight, Sparkles } from "lucide-react";
-import brochureFront from "@assets/IMG_7059_1772631193955.jpeg";
-import brochureBack from "@assets/IMG_7060_1772631198093.jpeg";
-import olonNuurLogo from "@assets/olon_nuur_nobg.png";
+import { localize } from "@/lib/localize";
+import { brand } from "@/lib/brand";
+import { SiteNavbar, SITE_NAVBAR_OFFSET } from "@/components/site-navbar";
+import { tours, type Tour } from "@/data/tours";
+import {
+  CONTACT,
+  JOURNEY_SLUG_ORDER,
+  getTourMarketingTitle,
+  getWebsiteCopy,
+} from "@/data/website-content";
+import {
+  Phone,
+  Mail,
+  Instagram,
+  Globe2,
+  ArrowRight,
+  Camera,
+  Fish,
+  Mountain,
+  Shield,
+  Users,
+  UserCheck,
+  Leaf,
+  Car,
+  Tent,
+  Crosshair,
+} from "lucide-react";
+import brochureMn from "@assets/brochure-mn.png";
+import brochureKo from "@assets/brochure-ko.png";
+import brochureEn from "@assets/brochure-en.png";
+import olonNuurLogo from "@assets/olon_nuur_travel_logo.png";
+import heroCover from "@assets/hero-cover.png";
+import nomadicCultureHero from "@assets/nomadic-culture-hero-1920.jpg";
+import freshwaterFishingHero from "@assets/freshwater-fishing-hero-1920.jpg";
+import birdPhotographyHero from "@assets/bird-photography-hero-1920.jpg";
 
-const translations = {
-  mn: {
-    heroTag: "Монгол аялалын мэргэжилтэн",
-    heroTitle: "Олон Нуур Травэл",
-    heroDesc: "Говийн элсэн дундуур тэмээгээр аялж, нүүдэлчдийн амьдралыг мэдэрч, одот тэнгэрийн доор мартагдашгүй дурсамж бүтээгээрэй.",
-    viewBrochure: "Брошур үзэх",
-    contactUs: "Холбоо барих",
-    brochureSubtitle: "Olon Nuur Travel",
-    brochureTitle: "Аялалын брошур",
-    brochureDesc: "Монгол орны гайхамшигт аялалын бүрэн мэдээллийг доорх брошураас үзнэ үү.",
-    brochureDivider: "Нүүр тал · Ар тал",
-    toursLabel: "Аяллын хөтөлбөр",
-    toursTitle: "Бэлэн боловсруулсан аяллын хөтөлбөрүүд",
-    toursDesc: "Манай мэргэжлийн багийн боловсруулсан аяллын хөтөлбөрүүдээс өөрт тохирохыг сонгоно уу. Дэлгэрэнгүй хуваарь, үнэ, тусгай саналыг доороос үзнэ үү.",
-    toursViewMore: "Дэлгэрэнгүй үзэх",
-    toursComingSoon: "Удахгүй",
-    contactLabel: "Холбоо барих",
-    contactTitle: "Аялалаа төлөвлөхөд бэлэн үү?",
-    contactDesc: "Бидэнтэй холбогдож, танд тохирсон Монгол аялалыг хамтдаа төлөвлөцгөөе. Хөтөч, тээвэр, байр бүгдийг бид зохицуулна.",
-    emailLabel: "Имэйл",
-    phoneLabel: "Утас",
-    instaLabel: "Инстаграм",
-    copyright: "© 2026 Olon Nuur Travel LLC. Бүх эрх хуулиар хамгаалагдсан.",
-    navHome: "НҮҮР",
-    navTours: "АЯЛАЛ",
-    navBrochure: "БРОШУР",
-    navContact: "ХОЛБОО БАРИХ",
-  },
-  ko: {
-    heroTag: "몽골 여행 전문가",
-    heroTitle: "올론 누르 트래블",
-    heroDesc: "고비 사막에서 낙타를 타고, 유목민의 삶을 체험하며, 별이 쏟아지는 하늘 아래 잊지 못할 추억을 만들어 보세요.",
-    viewBrochure: "브로슈어 보기",
-    contactUs: "문의하기",
-    brochureSubtitle: "Olon Nuur Travel",
-    brochureTitle: "여행 브로슈어",
-    brochureDesc: "아래 브로슈어에서 몽골 여행에 대한 자세한 정보를 확인하세요.",
-    brochureDivider: "앞면 · 뒷면",
-    toursLabel: "투어 프로그램",
-    toursTitle: "전문가가 준비한 투어 일정",
-    toursDesc: "저희 전문 팀이 준비한 투어 프로그램 중에서 마음에 드는 일정을 선택하세요. 자세한 일정, 가격, 특별 출발일은 아래에서 확인하실 수 있습니다.",
-    toursViewMore: "자세히 보기",
-    toursComingSoon: "준비 중",
-    contactLabel: "문의하기",
-    contactTitle: "여행을 계획할 준비가 되셨나요?",
-    contactDesc: "저희에게 연락하시면 맞춤형 몽골 여행을 함께 계획해 드립니다. 가이드, 교통, 숙소 모두 저희가 준비합니다.",
-    emailLabel: "이메일",
-    phoneLabel: "전화",
-    instaLabel: "인스타그램",
-    copyright: "© 2026 Olon Nuur Travel LLC. All rights reserved.",
-    navHome: "홈",
-    navTours: "투어",
-    navBrochure: "브로슈어",
-    navContact: "문의하기",
-  },
-};
+const TOUR_ICONS = {
+  "bird-photography": Camera,
+  "arburd-gobi": Tent,
+  "kherlen-fishing": Fish,
+  "winter-hunting": Crosshair,
+} as const;
 
-function LangSwitcher() {
-  const { lang, setLang } = useLang();
-  const other: Lang = lang === "mn" ? "ko" : "mn";
-  const label = other === "ko" ? "한국어" : "Монгол";
+const WHY_ICONS = {
+  experts: UserCheck,
+  groups: Users,
+  safety: Shield,
+  comfort: Car,
+  responsible: Leaf,
+  memories: Camera,
+} as const;
 
+function brochureImage(lang: Lang) {
+  if (lang === "mn") return brochureMn;
+  if (lang === "ko") return brochureKo;
+  return brochureEn;
+}
+
+function getOrderedTours(): Tour[] {
+  const bySlug = Object.fromEntries(tours.map((tour) => [tour.slug, tour]));
+  return JOURNEY_SLUG_ORDER.map((slug) => bySlug[slug]).filter((t): t is Tour => Boolean(t));
+}
+
+function tourCardImage(tour: Tour): string {
+  return tour.hero.imageHd ?? tour.hero.image;
+}
+
+function SectionOrnament() {
   return (
-    <button
-      onClick={() => setLang(other)}
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-stone-600 hover:bg-stone-100 transition-colors"
-      aria-label="Хэл солих"
-      data-testid="button-lang-switch"
-    >
-      <Globe className="h-4 w-4" />
-      <span>{label}</span>
-    </button>
+    <div className="mb-4 flex items-center justify-center gap-3">
+      <span className="h-px w-12 sm:w-16" style={{ backgroundColor: brand.gold }} />
+      <span
+        className="inline-block h-2 w-2 rotate-45 border"
+        style={{ borderColor: brand.gold }}
+        aria-hidden
+      />
+      <span className="h-px w-12 sm:w-16" style={{ backgroundColor: brand.gold }} />
+    </div>
   );
 }
 
-function Navbar() {
-  const { user } = useAuth();
-  const { lang } = useLang();
-  const t = translations[lang];
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [navOpacity, setNavOpacity] = useState(1);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    // Fade the fixed navbar as the user scrolls down.
-    // Recomputes from scrollY so it fades back in when scrolling up.
-    let rafId = 0;
-    const fadeStart = 20; // px
-    const fadeDistance = 220; // px (distance to fully fade)
-
-    const onScroll = () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        const y = window.scrollY ?? document.documentElement.scrollTop ?? 0;
-        const t = Math.min(Math.max((y - fadeStart) / fadeDistance, 0), 1);
-        setNavOpacity(1 - t);
-      });
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-
-    return () => {
-      window.removeEventListener("scroll", onScroll as EventListener);
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-  }, []);
-
+function SectionHeading({
+  title,
+  subtitle,
+  light,
+}: {
+  title: string;
+  subtitle?: string;
+  light?: boolean;
+}) {
   return (
-    <nav
-      className="fixed top-0 left-0 right-0 z-50 shadow-md"
-      style={{
-        opacity: navOpacity,
-        transition: "opacity 220ms linear",
-        pointerEvents: navOpacity <= 0.05 ? "none" : "auto",
-      }}
-    >
-      <div className="bg-white border-b border-stone-200">
-        <div className="max-w-7xl mx-auto px-6 h-44 flex items-center justify-between">
-          <Link href="/" className="flex items-center">
-            <img src={olonNuurLogo} alt="Olon Nuur Travel" className="h-44 w-auto" />
-          </Link>
-
-          <div className="flex items-center gap-1">
-            <LangSwitcher />
-            <div className="relative" ref={menuRef}>
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-stone-100 transition-colors"
-                aria-label="Цэс"
-                data-testid="button-admin-menu"
-              >
-                <Menu className="h-5 w-5 text-stone-700" />
-              </button>
-              {menuOpen && (
-                <div className="absolute right-0 top-12 w-52 bg-white rounded-xl shadow-lg border border-stone-200 py-1 z-50">
-                  <Link href={user ? "/admin" : "/admin/login"}>
-                    <button
-                      onClick={() => setMenuOpen(false)}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
-                      data-testid="button-admin-login"
-                    >
-                      <Lock className="h-4 w-4 text-amber-600" />
-                      <span>Админ нэвтрэх</span>
-                    </button>
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-stone-200 border-t border-stone-300">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center gap-1">
-            <a href="/" className="px-5 py-3 text-sm font-bold text-stone-700 tracking-wider hover:bg-stone-300 transition-colors">
-              {t.navHome}
-            </a>
-            <a href="#tours" className="px-5 py-3 text-sm font-bold text-stone-700 tracking-wider hover:bg-stone-300 transition-colors">
-              {t.navTours}
-            </a>
-            <a href="#brochure" className="px-5 py-3 text-sm font-bold text-stone-700 tracking-wider hover:bg-stone-300 transition-colors">
-              {t.navBrochure}
-            </a>
-            <a href="#contact" className="px-5 py-3 text-sm font-bold text-stone-700 tracking-wider hover:bg-stone-300 transition-colors">
-              {t.navContact}
-            </a>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <div className="mx-auto mb-12 max-w-3xl text-center sm:mb-16">
+      <SectionOrnament />
+      <h2
+        className="font-serif text-2xl uppercase tracking-[0.12em] sm:text-3xl md:text-4xl"
+        style={{ color: light ? brand.white : brand.forest }}
+      >
+        {title}
+      </h2>
+      {subtitle && (
+        <p
+          className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed sm:text-base"
+          style={{ color: light ? "rgba(255,255,255,0.75)" : brand.textMuted }}
+        >
+          {subtitle}
+        </p>
+      )}
+    </div>
   );
 }
 
 function HeroSection() {
   const { lang } = useLang();
-  const t = translations[lang];
+  const tr = getWebsiteCopy(lang);
 
   return (
-    <section className="relative min-h-[92vh] flex items-center overflow-hidden bg-stone-950">
-      <div className="absolute inset-0">
-        <img
-          src={brochureFront}
-          alt="Монгол аялал"
-          className="w-full h-full object-cover opacity-30 scale-110 blur-sm"
-          data-testid="img-hero-bg"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-stone-950/95 via-stone-950/70 to-stone-950/50" />
-        <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-stone-950/40" />
-      </div>
+    <section className={`relative flex min-h-[100dvh] items-center overflow-hidden ${SITE_NAVBAR_OFFSET}`}>
+      <img
+        src={heroCover}
+        alt=""
+        fetchPriority="high"
+        decoding="async"
+        className="absolute inset-0 h-full w-full object-cover object-[72%_42%] sm:object-[68%_40%] md:object-[65%_38%]"
+        data-testid="img-hero-bg"
+      />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(26,46,36,0.9) 0%, rgba(26,46,36,0.5) 38%, rgba(26,46,36,0.08) 72%, transparent 100%)",
+        }}
+      />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 w-full">
-        <div className="max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-600/15 border border-amber-500/25 mb-8">
-            <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            <span className="text-sm font-medium text-amber-300 tracking-wide">{t.heroTag}</span>
-          </div>
-
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-[1.1] tracking-tight" data-testid="text-hero-title">
-            <span className="bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">{t.heroTitle}</span>
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 sm:py-28 md:py-32">
+        <div className="max-w-xl text-white">
+          {tr.heroTag ? (
+            <p className="mb-4 text-xs uppercase tracking-[0.25em] sm:text-sm" style={{ color: brand.gold }}>
+              {tr.heroTag}
+            </p>
+          ) : null}
+          <h1
+            className="font-serif text-4xl leading-[1.08] sm:text-5xl md:text-6xl lg:text-[4.25rem]"
+            data-testid="text-hero-title"
+          >
+            {tr.heroTitle}
+            {tr.heroTitleLine2 ? (
+              <>
+                <br />
+                {tr.heroTitleLine2}
+              </>
+            ) : null}
           </h1>
-
-          <p className="text-lg md:text-xl text-stone-300 leading-relaxed max-w-lg">
-            {t.heroDesc}
-          </p>
+          {tr.heroDesc ? (
+            <p className="mt-5 max-w-md text-sm leading-7 text-white/85 sm:mt-6 sm:text-base sm:leading-8">
+              {tr.heroDesc}
+            </p>
+          ) : null}
+          <a
+            href="#tours"
+            className="mt-8 inline-flex items-center gap-2 border px-7 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-white/10 sm:mt-10 sm:text-sm"
+            style={{ borderColor: "rgba(255,255,255,0.65)" }}
+          >
+            {tr.exploreJourneys}
+          </a>
         </div>
-      </div>
-
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <ChevronDown className="h-6 w-6 text-white/40" />
       </div>
     </section>
   );
@@ -236,89 +172,89 @@ function HeroSection() {
 
 function ToursSection() {
   const { lang } = useLang();
-  const t = translations[lang];
+  const tr = getWebsiteCopy(lang);
 
   return (
-    <section id="tours" className="bg-white py-24 px-6 border-t border-stone-200">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-14">
-          <span className="inline-flex items-center gap-2 text-sm font-semibold text-amber-700 tracking-widest uppercase mb-3">
-            <Sparkles className="h-3.5 w-3.5" />
-            {t.toursLabel}
-          </span>
-          <h2 className="text-3xl md:text-5xl font-bold text-stone-900 mb-5">
-            {t.toursTitle}
-          </h2>
-          <p className="text-stone-500 max-w-2xl mx-auto text-lg leading-relaxed">
-            {t.toursDesc}
-          </p>
-        </div>
+    <section
+      id="tours"
+      className="scroll-mt-20 px-4 py-16 sm:scroll-mt-24 sm:px-6 sm:py-20 md:py-28"
+      style={{ backgroundColor: brand.cream }}
+    >
+      <div className="mx-auto max-w-7xl">
+        <SectionHeading title={tr.journeysTitle} subtitle={tr.journeysSubtitle} />
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tours.map((tour) => {
+        <div className="grid gap-10 sm:grid-cols-2 sm:gap-8 lg:grid-cols-4 lg:gap-6">
+          {getOrderedTours().map((tour) => {
+            const Icon = TOUR_ICONS[tour.slug as keyof typeof TOUR_ICONS] ?? Mountain;
             const isComingSoon = tour.status === "coming_soon" || tour.days.length === 0;
-            const Card = (
-              <article
-                className={`group relative h-full bg-white rounded-2xl overflow-hidden border border-stone-200 transition-all duration-300 ${
-                  isComingSoon
-                    ? "opacity-70"
-                    : "hover:-translate-y-1 hover:shadow-2xl hover:border-amber-300"
-                }`}
-              >
-                <div className="relative h-56 overflow-hidden">
-                  <img
-                    src={tour.hero.image}
-                    alt={tour.hero.title[lang]}
-                    className={`w-full h-full object-cover transition-transform duration-500 ${
-                      isComingSoon ? "" : "group-hover:scale-105"
-                    }`}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-stone-950/70 via-transparent to-transparent" />
-                  {isComingSoon && (
-                    <div className="absolute top-4 right-4 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-stone-900/80 text-white text-[11px] font-semibold uppercase tracking-wider">
-                      <Clock className="h-3 w-3" />
-                      {t.toursComingSoon}
-                    </div>
-                  )}
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <h3 className="text-lg md:text-xl font-bold text-white leading-tight line-clamp-2">
-                      {tour.hero.title[lang]}
-                    </h3>
+            const displayTitle = (
+              getTourMarketingTitle(tour.slug, lang) ?? localize(tour.hero.title, lang)
+            ).toUpperCase();
+            const imgSrc = tourCardImage(tour);
+
+            const card = (
+              <article className="group flex h-full flex-col text-center">
+                <div className="relative mx-auto mb-10 w-full max-w-[280px] sm:max-w-none">
+                  <div className="overflow-hidden shadow-md">
+                    <img
+                      src={imgSrc}
+                      alt=""
+                      className="aspect-[4/5] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    />
+                  </div>
+                  <div
+                    className="absolute -bottom-6 left-1/2 flex h-[3.25rem] w-[3.25rem] -translate-x-1/2 items-center justify-center rounded-full border-4 shadow-md"
+                    style={{
+                      backgroundColor: brand.forest,
+                      borderColor: brand.cream,
+                      color: brand.gold,
+                    }}
+                  >
+                    <Icon className="h-6 w-6" strokeWidth={1.5} />
                   </div>
                 </div>
-
-                <div className="p-5 space-y-4">
-                  <p className="text-sm text-stone-600 line-clamp-2 leading-relaxed">
-                    {tour.hero.subtitle[lang]}
-                  </p>
-
-                  {!isComingSoon && (
-                    <div className="flex flex-wrap gap-3 text-xs text-stone-500">
-                      <span className="inline-flex items-center gap-1.5">
-                        <Clock className="h-3.5 w-3.5 text-amber-600" />
-                        {tour.overview.duration[lang]}
-                      </span>
-                      <span className="inline-flex items-center gap-1.5">
-                        <MapPin className="h-3.5 w-3.5 text-amber-600" />
-                        {tour.overview.target[lang]}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="pt-2 flex items-center justify-between">
-                    <span className="text-sm font-semibold text-amber-700 inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                      {t.toursViewMore}
-                      <ArrowRight className="h-4 w-4" />
-                    </span>
-                  </div>
-                </div>
+                <h3
+                  className="font-serif text-base leading-snug tracking-[0.06em] sm:text-lg"
+                  style={{ color: brand.forest }}
+                >
+                  {displayTitle}
+                </h3>
+                <p
+                  className="mx-auto mt-3 max-w-[16rem] flex-1 text-xs leading-6 sm:text-sm"
+                  style={{ color: brand.textMuted }}
+                >
+                  {localize(tour.description, lang)}
+                </p>
+                {!isComingSoon && (
+                  <span
+                    className="mt-5 inline-flex items-center justify-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition-all group-hover:gap-2.5"
+                    style={{ color: brand.gold }}
+                  >
+                    {tr.learnMore}
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                )}
+                {isComingSoon && (
+                  <span
+                    className="mt-5 inline-flex items-center justify-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition-all group-hover:gap-2.5"
+                    style={{ color: brand.gold }}
+                  >
+                    {tour.comingSoon ? tr.learnMore : tr.comingSoon}
+                    {tour.comingSoon ? <ArrowRight className="h-3.5 w-3.5" /> : null}
+                  </span>
+                )}
               </article>
             );
 
-            return (
-              <Link key={tour.slug} href={`/tours/${tour.slug}`} className="block h-full">
-                {Card}
+            const tourHref =
+              !isComingSoon || tour.comingSoon ? `/tours/${tour.slug}` : null;
+
+            return tourHref ? (
+              <Link key={tour.slug} href={tourHref} className="block h-full">
+                {card}
               </Link>
+            ) : (
+              <div key={tour.slug}>{card}</div>
             );
           })}
         </div>
@@ -327,173 +263,263 @@ function ToursSection() {
   );
 }
 
+function WhySection() {
+  const { lang } = useLang();
+  const tr = getWebsiteCopy(lang);
+
+  return (
+    <section
+      id="why"
+      className="scroll-mt-20 px-4 py-16 sm:scroll-mt-24 sm:px-6 sm:py-20 md:py-28"
+      style={{ backgroundColor: brand.forest }}
+    >
+      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(0,1fr)_1.4fr] lg:gap-16 lg:items-start">
+        <div className="text-white lg:sticky lg:top-28">
+          <h2 className="font-serif text-3xl leading-tight sm:text-4xl md:text-[2.5rem] md:leading-[1.15]">
+            {tr.whyTravelTitle}
+          </h2>
+          <p className="mt-6 max-w-md text-sm leading-7 text-white/75 sm:text-base">
+            {tr.whyTravelDesc}
+          </p>
+          <a
+            href="#brochure"
+            className="mt-8 inline-flex border px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] transition-colors hover:bg-white/5"
+            style={{ borderColor: brand.gold, color: brand.gold }}
+          >
+            {tr.aboutUsBtn}
+          </a>
+        </div>
+
+        <div className="grid gap-8 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10 lg:grid-cols-3">
+          {tr.whyItems.map(([key, title, text]) => {
+            const Icon = WHY_ICONS[key as keyof typeof WHY_ICONS] ?? Shield;
+            return (
+              <div key={key}>
+                <Icon className="h-6 w-6" style={{ color: brand.gold }} strokeWidth={1.5} />
+                <h3 className="mt-4 font-serif text-lg uppercase tracking-[0.08em] text-white sm:text-xl">
+                  {title}
+                </h3>
+                <p className="mt-2 text-xs leading-6 text-white/70 sm:text-sm">{text}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function GallerySection() {
+  const { lang } = useLang();
+  const tr = getWebsiteCopy(lang);
+  const ordered = getOrderedTours();
+  const galleryImages = [
+    heroCover,
+    ordered[0]?.hero.imageHd ?? ordered[0]?.hero.image,
+    nomadicCultureHero,
+    ordered[1]?.hero.imageHd ?? ordered[1]?.hero.image,
+    birdPhotographyHero,
+    freshwaterFishingHero,
+  ];
+
+  return (
+    <section
+      id="gallery"
+      className="scroll-mt-20 px-4 py-16 sm:scroll-mt-24 sm:px-6 sm:py-20 md:py-28"
+      style={{ backgroundColor: brand.cream }}
+    >
+      <div className="mx-auto max-w-7xl">
+        <SectionHeading title={tr.galleryTitle} />
+
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-6">
+          {galleryImages.map((src, i) => (
+            <div
+              key={i}
+              className="group relative aspect-square overflow-hidden sm:aspect-[4/5]"
+            >
+              <img
+                src={src}
+                alt={tr.galleryItems[i] ?? ""}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function BrochureSection() {
   const { lang } = useLang();
-  const t = translations[lang];
+  const tr = getWebsiteCopy(lang);
+  const src = brochureImage(lang);
 
   return (
-    <section id="brochure" className="bg-stone-100">
-      <div className="max-w-7xl mx-auto px-6 py-24">
-        <div className="text-center mb-16">
-          <span className="inline-block text-sm font-semibold text-amber-700 tracking-widest uppercase mb-3">
-            {t.brochureSubtitle}
-          </span>
-          <h2 className="text-3xl md:text-5xl font-bold text-stone-900 mb-5" data-testid="text-brochure-title">
-            {t.brochureTitle}
+    <section
+      id="brochure"
+      className="scroll-mt-20 border-t px-4 py-14 sm:px-6 sm:py-20"
+      style={{ backgroundColor: brand.cream, borderColor: `${brand.forest}10` }}
+    >
+      <div className="mx-auto max-w-4xl">
+        <SectionHeading title={tr.brochureTitle} subtitle={tr.brochureDesc} />
+        <div className="overflow-hidden bg-white shadow-md ring-1 ring-black/5">
+          <div className="p-3 sm:p-6 md:p-8" style={{ backgroundColor: brand.cream }}>
+            <img
+              key={lang}
+              src={src}
+              alt={tr.brochureTitle}
+              className="mx-auto h-auto w-full max-w-3xl"
+              data-testid="img-brochure"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FooterCtaSection() {
+  const { lang } = useLang();
+  const tr = getWebsiteCopy(lang);
+
+  return (
+    <section id="contact" className="relative scroll-mt-20 overflow-hidden sm:scroll-mt-24">
+      <img
+        src={nomadicCultureHero}
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover"
+        aria-hidden
+      />
+      <div className="absolute inset-0" style={{ backgroundColor: "rgba(18,28,24,0.82)" }} />
+
+      <div className="relative mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 sm:py-20 md:grid-cols-2 md:py-24 lg:gap-20">
+        <div className="text-white">
+          <h2 className="font-serif text-3xl leading-tight sm:text-4xl md:text-[2.35rem]">
+            {tr.footerReady}
           </h2>
-          <p className="text-stone-500 max-w-xl mx-auto text-lg leading-relaxed">
-            {t.brochureDesc}
+          <p className="mt-4 max-w-md text-sm leading-7 text-white/75 sm:text-base">
+            {tr.footerContactIntro}
           </p>
+          <Link
+            href="/book"
+            className="mt-8 inline-flex border px-7 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-white/10 sm:text-sm"
+            style={{ borderColor: "rgba(255,255,255,0.55)" }}
+          >
+            {tr.contactUsBtn}
+          </Link>
         </div>
-      </div>
 
-      <div className="relative w-full">
-        <div className="absolute inset-0 bg-gradient-to-b from-stone-100 via-stone-200/50 to-stone-100 pointer-events-none" style={{ zIndex: 0 }} />
-
-        <div className="relative z-10 max-w-[1400px] mx-auto px-4 md:px-8">
-          <div className="bg-white rounded-3xl shadow-2xl ring-1 ring-stone-900/5 overflow-hidden">
-            <div className="p-3 md:p-6 bg-gradient-to-b from-stone-50 to-white">
-              <div className="relative rounded-2xl overflow-hidden">
-                <img
-                  src={brochureFront}
-                  alt="Olon Nuur Travel - Front"
-                  className="w-full h-auto"
-                  data-testid="img-brochure-front"
-                />
+        <div className="space-y-5 text-sm text-white/90">
+          <div className="flex items-start gap-4" data-testid="link-phone">
+            <Phone className="mt-0.5 h-5 w-5 shrink-0" style={{ color: brand.gold }} />
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">
+                {tr.phoneLabel}
               </div>
-            </div>
-
-            <div className="flex items-center justify-center py-4 md:py-6">
-              <div className="flex items-center gap-3">
-                <div className="h-px w-16 bg-stone-200" />
-                <div className="flex items-center gap-2">
-                  <Compass className="h-4 w-4 text-amber-600" />
-                  <span className="text-xs font-semibold text-stone-400 tracking-widest uppercase">{t.brochureDivider}</span>
-                  <Compass className="h-4 w-4 text-amber-600" />
-                </div>
-                <div className="h-px w-16 bg-stone-200" />
-              </div>
-            </div>
-
-            <div className="p-3 md:p-6 bg-gradient-to-t from-stone-50 to-white">
-              <div className="relative rounded-2xl overflow-hidden">
-                <img
-                  src={brochureBack}
-                  alt="Olon Nuur Travel - Back"
-                  className="w-full h-auto"
-                  data-testid="img-brochure-back"
-                />
-              </div>
+              {CONTACT.phones.map((phone, idx) => (
+                <a
+                  key={phone}
+                  href={CONTACT.phoneHref[idx]}
+                  className="mt-1 block hover:opacity-80"
+                  style={{ color: brand.goldLight }}
+                >
+                  {phone}
+                </a>
+              ))}
             </div>
           </div>
-        </div>
-      </div>
-
-      <div className="h-24" />
-    </section>
-  );
-}
-
-function ContactSection() {
-  const { lang } = useLang();
-  const t = translations[lang];
-
-  return (
-    <section id="contact" className="py-24 px-6 bg-stone-900">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-16 items-center">
-          <div>
-            <span className="inline-block text-sm font-semibold text-amber-500 tracking-widest uppercase mb-3">
-              {t.contactLabel}
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-              {t.contactTitle}
-            </h2>
-            <p className="text-stone-400 text-lg leading-relaxed mb-10">
-              {t.contactDesc}
-            </p>
-
-            <div className="space-y-5">
-              <a
-                href="mailto:olonnuurtravel@gmail.com"
-                className="flex items-center gap-4 p-4 rounded-xl bg-stone-800/50 border border-stone-700/50 hover:border-amber-600/40 hover:bg-stone-800 transition-all group"
-                data-testid="link-email"
-              >
-                <div className="w-11 h-11 rounded-lg bg-amber-600/15 flex items-center justify-center shrink-0">
-                  <Mail className="h-5 w-5 text-amber-500" />
-                </div>
-                <div>
-                  <p className="text-xs text-stone-500 font-medium uppercase tracking-wider">{t.emailLabel}</p>
-                  <p className="text-white font-medium group-hover:text-amber-400 transition-colors">olonnuurtravel@gmail.com</p>
-                </div>
-              </a>
-
-              <a
-                href="tel:01092905686"
-                className="flex items-center gap-4 p-4 rounded-xl bg-stone-800/50 border border-stone-700/50 hover:border-amber-600/40 hover:bg-stone-800 transition-all group"
-                data-testid="link-phone"
-              >
-                <div className="w-11 h-11 rounded-lg bg-amber-600/15 flex items-center justify-center shrink-0">
-                  <Phone className="h-5 w-5 text-amber-500" />
-                </div>
-                <div>
-                  <p className="text-xs text-stone-500 font-medium uppercase tracking-wider">{t.phoneLabel}</p>
-                  <p className="text-white font-medium group-hover:text-amber-400 transition-colors">010-9290-5686</p>
-                </div>
-              </a>
-
-              <a
-                href="https://instagram.com/olonnuurtravel"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-4 p-4 rounded-xl bg-stone-800/50 border border-stone-700/50 hover:border-amber-600/40 hover:bg-stone-800 transition-all group"
-                data-testid="link-instagram"
-              >
-                <div className="w-11 h-11 rounded-lg bg-amber-600/15 flex items-center justify-center shrink-0">
-                  <Instagram className="h-5 w-5 text-amber-500" />
-                </div>
-                <div>
-                  <p className="text-xs text-stone-500 font-medium uppercase tracking-wider">{t.instaLabel}</p>
-                  <p className="text-white font-medium group-hover:text-amber-400 transition-colors">@olonnuurtravel</p>
-                </div>
-              </a>
+          <a
+            href={`mailto:${CONTACT.email}`}
+            className="flex items-start gap-4 hover:opacity-90"
+            data-testid="link-email"
+          >
+            <Mail className="mt-0.5 h-5 w-5 shrink-0" style={{ color: brand.gold }} />
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">
+                {tr.emailLabel}
+              </div>
+              <span className="mt-1 block" style={{ color: brand.goldLight }}>
+                {CONTACT.email}
+              </span>
             </div>
-          </div>
-
-          <div className="relative hidden md:block">
-            <div className="absolute -inset-4 bg-gradient-to-br from-amber-600/20 to-transparent rounded-3xl blur-2xl" />
-            <div className="relative overflow-hidden rounded-2xl ring-1 ring-stone-700/50">
-              <img
-                src={brochureFront}
-                alt="Olon Nuur Travel"
-                className="w-full h-[500px] object-cover object-right"
-                data-testid="img-contact-visual"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-stone-900/60 via-transparent to-transparent" />
+          </a>
+          <a
+            href={CONTACT.websiteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-start gap-4 hover:opacity-90"
+          >
+            <Globe2 className="mt-0.5 h-5 w-5 shrink-0" style={{ color: brand.gold }} />
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">
+                {tr.websiteLabel}
+              </div>
+              <span className="mt-1 block" style={{ color: brand.goldLight }}>
+                {CONTACT.website}
+              </span>
             </div>
-          </div>
+          </a>
+          <a
+            href={CONTACT.instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-start gap-4 hover:opacity-90"
+            data-testid="link-instagram"
+          >
+            <Instagram className="mt-0.5 h-5 w-5 shrink-0" style={{ color: brand.gold }} />
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">
+                {tr.instaLabel}
+              </div>
+              <span className="mt-1 block" style={{ color: brand.goldLight }}>
+                {CONTACT.instagram}
+              </span>
+            </div>
+          </a>
         </div>
       </div>
     </section>
   );
 }
 
-function Footer() {
+function SiteFooter() {
   const { lang } = useLang();
-  const t = translations[lang];
+  const tr = getWebsiteCopy(lang);
+  const footerLinks = [
+    { href: "/", label: tr.navHome },
+    { href: "#tours", label: tr.navJourneys },
+    { href: "#why", label: tr.navAbout },
+    { href: "#gallery", label: tr.navGallery },
+    { href: "#contact", label: tr.navContact },
+  ];
 
   return (
-    <footer className="py-8 px-6 bg-stone-950 border-t border-stone-800">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-md bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center">
-            <Compass className="h-3.5 w-3.5 text-white" />
-          </div>
-          <span className="text-sm font-bold text-stone-300 tracking-tight">OLON NUUR TRAVEL LLC</span>
-        </div>
-        <p className="text-xs text-stone-500">
-          {t.copyright}
-        </p>
+    <footer style={{ backgroundColor: brand.forestDark }}>
+      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-7 sm:px-6 md:flex-row">
+        <Link href="/" className="flex shrink-0 items-center gap-2.5">
+          <img
+            src={olonNuurLogo}
+            alt=""
+            className="h-9 w-9 rounded-full object-cover object-top"
+            aria-hidden
+          />
+          <span className="font-serif text-xs uppercase tracking-[0.12em] text-white/80">
+            Olon Nuur Travel
+          </span>
+        </Link>
+        <nav className="flex flex-wrap justify-center gap-4 md:gap-6">
+          {footerLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/45 transition-colors hover:text-white/80"
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
+        <p className="text-center text-[10px] text-white/40 md:text-right">{tr.copyright}</p>
       </div>
     </footer>
   );
@@ -501,14 +527,16 @@ function Footer() {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white">
-      <Navbar />
-      <main className="pt-48">
+    <div className="min-h-screen" style={{ backgroundColor: brand.cream, color: brand.forest }}>
+      <SiteNavbar />
+      <main>
         <HeroSection />
         <ToursSection />
+        <WhySection />
+        <GallerySection />
         <BrochureSection />
-        <ContactSection />
-        <Footer />
+        <FooterCtaSection />
+        <SiteFooter />
       </main>
     </div>
   );

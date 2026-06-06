@@ -1,230 +1,118 @@
-import type { Express, Request, Response, NextFunction } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { loginSchema, insertRoutineSchema } from "@shared/schema";
-import session from "express-session";
-import { scrypt, randomBytes, timingSafeEqual } from "crypto";
-import { promisify } from "util";
-import connectPgSimple from "connect-pg-simple";
-
-const scryptAsync = promisify(scrypt);
-
-async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16).toString("hex");
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${buf.toString("hex")}.${salt}`;
-}
-
-async function comparePasswords(supplied: string, stored: string): Promise<boolean> {
-  const [hashed, salt] = stored.split(".");
-  const buf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(Buffer.from(hashed, "hex"), buf);
-}
-
-declare module "express-session" {
-  interface SessionData {
-    userId: string;
-  }
-}
-
-function requireAuth(req: Request, res: Response, next: NextFunction) {
-  if (!req.session.userId) {
-    return res.status(401).json({ message: "Not authenticated" });
-  }
-  next();
-}
-
-async function requireSuperAdmin(req: Request, res: Response, next: NextFunction) {
-  if (!req.session.userId) {
-    return res.status(401).json({ message: "Not authenticated" });
-  }
-  const user = await storage.getUser(req.session.userId);
-  if (!user || user.role !== "super_admin") {
-    return res.status(403).json({ message: "Only the primary admin can perform this action" });
-  }
-  next();
-}
+import { bookingSubmitSchema } from "@shared/schema";
+import { BOOKING_TOUR_OPTIONS, DEPOSIT_RATE, getBankTransferInfo, getMaxPeopleForTour } from "@shared/booking-config";
+import { resolveNationalityId } from "@shared/nationalities";
+import {
+  calculateBookingAmounts,
+  generateBookingNumber,
+  getBookingTour,
+  notifyBookingChannels,
+  resolveTourTitle,
+} from "./booking";
 
 export async function registerRoutes(
   httpServer: Server,
-  app: Express
+  app: Express,
 ): Promise<Server> {
-  const PgSession = connectPgSimple(session);
-
-  app.use(
-    session({
-      store: new PgSession({
-        conString: process.env.DATABASE_URL,
-        createTableIfMissing: true,
-      }),
-      secret: process.env.SESSION_SECRET || "travel-secret-key",
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        maxAge: 24 * 60 * 60 * 1000,
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax",
-      },
-    })
-  );
-
-  const existingAdmin = await storage.getUserByUsername("admin1");
-  if (!existingAdmin) {
-    const hashedPassword = await hashPassword("admin123");
-    await storage.createUser({
-      username: "admin1",
-      password: hashedPassword,
-      role: "super_admin",
-    });
-  }
-
-  app.post("/api/auth/login", async (req: Request, res: Response) => {
-    try {
-      const parsed = loginSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid credentials" });
-      }
-      const { username, password } = parsed.data;
-      const user = await storage.getUserByUsername(username);
-      if (!user) {
-        return res.status(401).json({ message: "Invalid username or password" });
-      }
-      const valid = await comparePasswords(password, user.password);
-      if (!valid) {
-        return res.status(401).json({ message: "Invalid username or password" });
-      }
-      req.session.userId = user.id;
-      return res.json({ id: user.id, username: user.username, role: user.role });
-    } catch (error) {
-      return res.status(500).json({ message: "Login failed" });
-    }
-  });
-
-  app.post("/api/auth/logout", (req: Request, res: Response) => {
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).json({ message: "Logout failed" });
-      }
-      res.clearCookie("connect.sid");
-      return res.json({ message: "Logged out" });
+  app.get("/api/bookings/config", (_req: Request, res: Response) => {
+    const bank = getBankTransferInfo();
+    return res.json({
+      tours: BOOKING_TOUR_OPTIONS.map((t) => ({
+        slug: t.slug,
+        titleMn: t.titleMn,
+        titleKo: t.titleKo,
+        titleEn: t.titleEn,
+        bookable: t.bookable,
+        hasPricing: Boolean(t.priceTiers?.length),
+        maxPeople: getMaxPeopleForTour(t.slug),
+      })),
+      depositRate: DEPOSIT_RATE,
+      bank,
     });
   });
 
-  app.get("/api/auth/me", async (req: Request, res: Response) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    const user = await storage.getUser(req.session.userId);
-    if (!user) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    return res.json({ id: user.id, username: user.username, role: user.role });
-  });
-
-  app.post("/api/auth/register", requireSuperAdmin, async (req: Request, res: Response) => {
+  app.post("/api/bookings", async (req: Request, res: Response) => {
     try {
-      const { username, password } = req.body;
-      if (!username || !password) {
-        return res.status(400).json({ message: "Username and password required" });
-      }
-      const existing = await storage.getUserByUsername(username);
-      if (existing) {
-        return res.status(409).json({ message: "Username already exists" });
-      }
-      const hashedPassword = await hashPassword(password);
-      const user = await storage.createUser({
-        username,
-        password: hashedPassword,
-        role: "admin",
-      });
-      return res.json({ id: user.id, username: user.username, role: user.role });
-    } catch (error) {
-      return res.status(500).json({ message: "Registration failed" });
-    }
-  });
-
-  app.get("/api/routines", async (_req: Request, res: Response) => {
-    const allRoutines = await storage.getAllRoutines();
-    return res.json(allRoutines);
-  });
-
-  app.get("/api/routines/:id", async (req: Request, res: Response) => {
-    const routine = await storage.getRoutine(req.params.id);
-    if (!routine) {
-      return res.status(404).json({ message: "Routine not found" });
-    }
-    return res.json(routine);
-  });
-
-  app.post("/api/routines", requireSuperAdmin, async (req: Request, res: Response) => {
-    try {
-      const data = { ...req.body, createdBy: req.session.userId };
-      const parsed = insertRoutineSchema.safeParse(data);
+      const parsed = bookingSubmitSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid routine data", errors: parsed.error.errors });
+        return res.status(400).json({
+          message: "Invalid booking data",
+          errors: parsed.error.flatten().fieldErrors,
+        });
       }
-      const routine = await storage.createRoutine(parsed.data);
-      return res.json(routine);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to create routine" });
-    }
-  });
 
-  app.patch("/api/routines/:id", requireSuperAdmin, async (req: Request, res: Response) => {
-    try {
-      const routine = await storage.updateRoutine(req.params.id, req.body);
-      if (!routine) {
-        return res.status(404).json({ message: "Routine not found" });
+      const data = parsed.data;
+      const tour = getBookingTour(data.tourSlug);
+      if (!tour || !tour.bookable) {
+        return res.status(400).json({ message: "Invalid or unavailable tour" });
       }
-      return res.json(routine);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to update routine" });
-    }
-  });
 
-  app.delete("/api/routines/:id", requireSuperAdmin, async (req: Request, res: Response) => {
-    try {
-      const deleted = await storage.deleteRoutine(req.params.id);
-      if (!deleted) {
-        return res.status(404).json({ message: "Routine not found" });
+      const maxPeople = getMaxPeopleForTour(data.tourSlug);
+      if (data.numberOfPeople > maxPeople) {
+        return res.status(400).json({
+          message:
+            data.lang === "ko"
+              ? `최대 ${maxPeople}명까지 예약 가능합니다.`
+              : data.lang === "en"
+                ? `Maximum ${maxPeople} guest(s) for this tour.`
+                : `Энэ аялалд хамгийн ихдээ ${maxPeople} хүн захиална.`,
+        });
       }
-      return res.json({ message: "Routine deleted" });
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to delete routine" });
-    }
-  });
 
-  app.get("/api/admin/selections", requireAuth, async (req: Request, res: Response) => {
-    const selections = await storage.getAdminSelections(req.session.userId!);
-    return res.json(selections);
-  });
-
-  app.post("/api/admin/selections", requireAuth, async (req: Request, res: Response) => {
-    try {
-      const { routineId } = req.body;
-      if (!routineId) {
-        return res.status(400).json({ message: "routineId is required" });
+      const nationalityId = resolveNationalityId(data.nationality);
+      if (!nationalityId) {
+        return res.status(400).json({
+          message:
+            data.lang === "ko"
+              ? "국적을 선택해 주세요."
+              : data.lang === "en"
+                ? "Please select a valid nationality."
+                : "Иргэншлээ сонгоно уу.",
+        });
       }
-      const selection = await storage.addAdminSelection({
-        adminId: req.session.userId!,
-        routineId,
+
+      const amounts = calculateBookingAmounts(data.tourSlug, data.numberOfPeople);
+      const tourTitle = resolveTourTitle(data.tourSlug, data.lang);
+
+      const booking = await storage.createBooking({
+        bookingNumber: generateBookingNumber(),
+        fullName: data.fullName,
+        nationality: nationalityId,
+        phone: data.phone,
+        kakaoId: data.kakaoId || null,
+        email: data.email,
+        tourSlug: data.tourSlug,
+        tourTitle,
+        numberOfPeople: data.numberOfPeople,
+        travelDate: data.travelDate,
+        specialRequests: data.specialRequests || null,
+        airportPickup: data.airportPickup,
+        lang: data.lang,
+        pricePerPersonKrw: amounts.pricePerPersonKrw,
+        totalAmountKrw: amounts.totalKrw,
+        depositAmountKrw: amounts.depositKrw,
+        status: "deposit_pending",
       });
-      return res.json(selection);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to select routine" });
-    }
-  });
 
-  app.delete("/api/admin/selections/:routineId", requireAuth, async (req: Request, res: Response) => {
-    try {
-      const removed = await storage.removeAdminSelection(req.session.userId!, req.params.routineId);
-      if (!removed) {
-        return res.status(404).json({ message: "Selection not found" });
-      }
-      return res.json({ message: "Selection removed" });
+      const { emailSent } = await notifyBookingChannels(booking);
+
+      return res.status(201).json({
+        bookingNumber: booking.bookingNumber,
+        tourSlug: booking.tourSlug,
+        tourTitle: booking.tourTitle,
+        travelDate: booking.travelDate,
+        numberOfPeople: booking.numberOfPeople,
+        totalAmountKrw: booking.totalAmountKrw,
+        depositAmountKrw: booking.depositAmountKrw,
+        status: booking.status,
+        emailSent,
+        bank: getBankTransferInfo(),
+      });
     } catch (error) {
-      return res.status(500).json({ message: "Failed to remove selection" });
+      console.error("Booking failed:", error);
+      return res.status(500).json({ message: "Failed to submit booking" });
     }
   });
 

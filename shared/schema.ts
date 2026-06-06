@@ -1,57 +1,44 @@
-import 'dotenv/config';
+import "dotenv/config";
 import { sql } from "drizzle-orm";
 import { pgTable, text, varchar, integer, timestamp, boolean } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { NATIONALITY_IDS } from "./nationalities";
 
-export const users = pgTable("users", {
+export const bookings = pgTable("bookings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-  role: text("role").notNull().default("admin"),
+  bookingNumber: text("booking_number").notNull().unique(),
+  fullName: text("full_name").notNull(),
+  nationality: text("nationality").notNull(),
+  phone: text("phone").notNull(),
+  kakaoId: text("kakao_id"),
+  email: text("email").notNull(),
+  tourSlug: text("tour_slug").notNull(),
+  tourTitle: text("tour_title").notNull(),
+  numberOfPeople: integer("number_of_people").notNull(),
+  travelDate: text("travel_date").notNull(),
+  specialRequests: text("special_requests"),
+  airportPickup: boolean("airport_pickup").notNull().default(false),
+  lang: text("lang").notNull().default("mn"),
+  pricePerPersonKrw: integer("price_per_person_krw"),
+  totalAmountKrw: integer("total_amount_krw"),
+  depositAmountKrw: integer("deposit_amount_krw"),
+  status: text("status").notNull().default("deposit_pending"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const routines = pgTable("routines", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  title: text("title").notNull(),
-  destination: text("destination").notNull(),
-  description: text("description").notNull(),
-  duration: text("duration").notNull(),
-  price: integer("price").notNull(),
-  image: text("image"),
-  highlights: text("highlights").array(),
-  createdBy: varchar("created_by").notNull(),
+export const bookingSubmitSchema = z.object({
+  fullName: z.string().min(2, "Name is required"),
+  nationality: z.enum(NATIONALITY_IDS),
+  phone: z.string().min(5, "Phone is required"),
+  kakaoId: z.string().optional(),
+  email: z.string().email("Valid email required"),
+  tourSlug: z.string().min(1, "Tour is required"),
+  numberOfPeople: z.number().int().min(1).max(20),
+  travelDate: z.string().min(1, "Travel date is required"),
+  specialRequests: z.string().optional(),
+  airportPickup: z.boolean(),
+  lang: z.enum(["mn", "ko", "en"]),
 });
 
-export const adminSelections = pgTable("admin_selections", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  adminId: varchar("admin_id").notNull(),
-  routineId: varchar("routine_id").notNull(),
-});
-
-export const insertAdminSelectionSchema = createInsertSchema(adminSelections).omit({
-  id: true,
-});
-
-export type InsertAdminSelection = z.infer<typeof insertAdminSelectionSchema>;
-export type AdminSelection = typeof adminSelections.$inferSelect;
-
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-  role: true,
-});
-
-export const insertRoutineSchema = createInsertSchema(routines).omit({
-  id: true,
-});
-
-export const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(1, "Password is required"),
-});
-
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
-export type InsertRoutine = z.infer<typeof insertRoutineSchema>;
-export type Routine = typeof routines.$inferSelect;
+export type BookingSubmit = z.infer<typeof bookingSubmitSchema>;
+export type Booking = typeof bookings.$inferSelect;

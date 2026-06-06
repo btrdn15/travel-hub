@@ -1,88 +1,93 @@
-import { type User, type InsertUser, type Routine, type InsertRoutine, type AdminSelection, type InsertAdminSelection, users, routines, adminSelections } from "@shared/schema";
-import { eq, and } from "drizzle-orm";
+import { type Booking, bookings } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
-const db = drizzle(pool);
-
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
-  updateUserPassword(id: string, password: string): Promise<void>;
-  getAllRoutines(): Promise<Routine[]>;
-  getRoutine(id: string): Promise<Routine | undefined>;
-  createRoutine(routine: InsertRoutine): Promise<Routine>;
-  updateRoutine(id: string, routine: Partial<InsertRoutine>): Promise<Routine | undefined>;
-  deleteRoutine(id: string): Promise<boolean>;
-  getAdminSelections(adminId: string): Promise<AdminSelection[]>;
-  addAdminSelection(selection: InsertAdminSelection): Promise<AdminSelection>;
-  removeAdminSelection(adminId: string, routineId: string): Promise<boolean>;
+  createBooking(data: typeof bookings.$inferInsert): Promise<Booking>;
+}
+
+export class MemoryStorage implements IStorage {
+  private items: Booking[] = [];
+
+  async createBooking(data: typeof bookings.$inferInsert): Promise<Booking> {
+    const created: Booking = {
+      ...data,
+      id: crypto.randomUUID(),
+      createdAt: new Date(),
+      kakaoId: data.kakaoId ?? null,
+      specialRequests: data.specialRequests ?? null,
+      pricePerPersonKrw: data.pricePerPersonKrw ?? null,
+      totalAmountKrw: data.totalAmountKrw ?? null,
+      depositAmountKrw: data.depositAmountKrw ?? null,
+      status: data.status ?? "deposit_pending",
+      lang: data.lang ?? "ko",
+      airportPickup: data.airportPickup ?? false,
+    };
+    this.items.push(created);
+    return created;
+  }
 }
 
 export class DatabaseStorage implements IStorage {
-  async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+  private db;
+
+  constructor(pool: pg.Pool) {
+    this.db = drizzle(pool);
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
-    return user;
-  }
-
-  async updateUserPassword(id: string, password: string): Promise<void> {
-    await db.update(users).set({ password }).where(eq(users.id, id));
-  }
-
-  async getAllRoutines(): Promise<Routine[]> {
-    return db.select().from(routines);
-  }
-
-  async getRoutine(id: string): Promise<Routine | undefined> {
-    const [routine] = await db.select().from(routines).where(eq(routines.id, id));
-    return routine;
-  }
-
-  async createRoutine(routine: InsertRoutine): Promise<Routine> {
-    const [created] = await db.insert(routines).values(routine).returning();
+  async createBooking(data: typeof bookings.$inferInsert): Promise<Booking> {
+    const [created] = await this.db.insert(bookings).values(data).returning();
     return created;
-  }
-
-  async updateRoutine(id: string, updates: Partial<InsertRoutine>): Promise<Routine | undefined> {
-    const [updated] = await db.update(routines).set(updates).where(eq(routines.id, id)).returning();
-    return updated;
-  }
-
-  async deleteRoutine(id: string): Promise<boolean> {
-    const result = await db.delete(routines).where(eq(routines.id, id)).returning();
-    return result.length > 0;
-  }
-
-  async getAdminSelections(adminId: string): Promise<AdminSelection[]> {
-    return db.select().from(adminSelections).where(eq(adminSelections.adminId, adminId));
-  }
-
-  async addAdminSelection(selection: InsertAdminSelection): Promise<AdminSelection> {
-    const [created] = await db.insert(adminSelections).values(selection).returning();
-    return created;
-  }
-
-  async removeAdminSelection(adminId: string, routineId: string): Promise<boolean> {
-    const result = await db.delete(adminSelections)
-      .where(and(eq(adminSelections.adminId, adminId), eq(adminSelections.routineId, routineId)))
-      .returning();
-    return result.length > 0;
   }
 }
 
-export const storage = new DatabaseStorage();
+function isMissingTableError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: string }).code === "42P01"
+  );
+}
+
+/** DB алдаа гарвал memory руу fallback — dev-д bookings хүснэгт байхгүй үед */
+class ResilientStorage implements IStorage {
+  private memory = new MemoryStorage();
+  private db: DatabaseStorage | null = null;
+
+  constructor(pool: pg.Pool | null) {
+    if (pool) this.db = new DatabaseStorage(pool);
+  }
+
+  async createBooking(data: typeof bookings.$inferInsert): Promise<Booking> {
+    if (!this.db || process.env.BOOKING_STORAGE === "memory") {
+      return this.memory.createBooking(data);
+    }
+
+    try {
+      return await this.db.createBooking(data);
+    } catch (error) {
+      if (isMissingTableError(error)) {
+        console.warn(
+          "[storage] bookings table missing — saved in memory. Production: run `npm run db:push`",
+        );
+        return this.memory.createBooking(data);
+      }
+      throw error;
+    }
+  }
+}
+
+function createStorage(): IStorage {
+  if (process.env.BOOKING_STORAGE === "memory" || !process.env.DATABASE_URL) {
+    if (!process.env.DATABASE_URL) {
+      console.warn("[storage] DATABASE_URL not set — using in-memory bookings.");
+    }
+    return new MemoryStorage();
+  }
+
+  const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+  return new ResilientStorage(pool);
+}
+
+export const storage = createStorage();

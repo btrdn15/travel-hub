@@ -1,8 +1,38 @@
+import "dotenv/config";
+import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
-import { seedDatabase } from "./seed";
+import net from "node:net";
+/** When PORT is unset in development, pick first free port from startPort (avoids macOS AirPlay on 5000 and busy 5001). */
+function findFirstAvailablePort(startPort: number, host: string, maxAttempts = 50): Promise<number> {
+  return new Promise((resolve, reject) => {
+    let offset = 0;
+    const attempt = () => {
+      if (offset >= maxAttempts) {
+        reject(new Error(`No free TCP port from ${startPort} to ${startPort + maxAttempts - 1}`));
+        return;
+      }
+      const candidate = startPort + offset;
+      const probe = net.createServer();
+      probe.once("error", (err: NodeJS.ErrnoException) => {
+        probe.removeAllListeners("listening");
+        if (err.code === "EADDRINUSE") {
+          offset++;
+          attempt();
+        } else {
+          reject(err);
+        }
+      });
+      probe.once("listening", () => {
+        probe.close(() => resolve(candidate));
+      });
+      probe.listen(candidate, host);
+    };
+    attempt();
+  });
+}
 
 const app = express();
 const httpServer = createServer(app);
@@ -62,7 +92,6 @@ app.use((req, res, next) => {
 
 (async () => {
   await registerRoutes(httpServer, app);
-  await seedDatabase();
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -87,19 +116,21 @@ app.use((req, res, next) => {
     await setupVite(httpServer, app);
   }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || "5000", 10);
   const host = process.env.HOST || "0.0.0.0";
-  httpServer.listen(
-    {
-      port,
-      host,
-    },
-    () => {
-      console.log(`Server running on http://${host}:${port}`);
-    },
-  );
+  const port =
+    process.env.PORT && process.env.PORT !== ""
+      ? parseInt(process.env.PORT, 10)
+      : process.env.NODE_ENV === "development"
+        ? await findFirstAvailablePort(5001, host)
+        : 5000;
+
+  httpServer.once("error", (err: NodeJS.ErrnoException) => {
+    if (err.code === "EADDRINUSE") {
+      console.error(`Port ${port} is already in use. Stop the other process or set PORT to a free port.`);
+    }
+  });
+
+  httpServer.listen({ port, host }, () => {
+    console.log(`Server running on http://${host}:${port}`);
+  });
 })();
