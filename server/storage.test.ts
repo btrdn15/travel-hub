@@ -140,7 +140,8 @@ test("development still falls back to memory when the bookings table is missing"
     },
   };
 
-  const booking = await storage.createBooking(bookingInsert());
+  const submitted = bookingInsert();
+  const booking = await storage.createBooking(submitted);
 
-  assert.equal(booking.bookingNumber, `ON-TEST-${importCounter - 1}`);
+  assert.equal(booking.bookingNumber, submitted.bookingNumber);
 });
