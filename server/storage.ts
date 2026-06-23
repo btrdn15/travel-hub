@@ -6,9 +6,12 @@ export interface IStorage {
   createBooking(data: typeof bookings.$inferInsert): Promise<Booking>;
 }
 
-type StorageEnvironment = Partial<
-  Record<"BOOKING_STORAGE" | "DATABASE_URL" | "NODE_ENV", string>
->;
+type StorageEnvironment = {
+  [key: string]: string | undefined;
+  BOOKING_STORAGE?: string;
+  DATABASE_URL?: string;
+  NODE_ENV?: string;
+};
 
 function isProduction(env: StorageEnvironment): boolean {
   return env.NODE_ENV === "production";
