@@ -54,20 +54,22 @@ function isMissingTableError(error: unknown): boolean {
 class ResilientStorage implements IStorage {
   private memory = new MemoryStorage();
   private db: DatabaseStorage | null = null;
+  private allowMissingTableFallback: boolean;
 
-  constructor(pool: pg.Pool | null) {
+  constructor(pool: pg.Pool | null, allowMissingTableFallback: boolean) {
     if (pool) this.db = new DatabaseStorage(pool);
+    this.allowMissingTableFallback = allowMissingTableFallback;
   }
 
   async createBooking(data: typeof bookings.$inferInsert): Promise<Booking> {
-    if (!this.db || process.env.BOOKING_STORAGE === "memory") {
+    if (!this.db) {
       return this.memory.createBooking(data);
     }
 
     try {
       return await this.db.createBooking(data);
     } catch (error) {
-      if (isMissingTableError(error)) {
+      if (isMissingTableError(error) && this.allowMissingTableFallback) {
         console.warn(
           "[storage] bookings table missing — saved in memory. Production: run `npm run db:push`",
         );
@@ -78,8 +80,20 @@ class ResilientStorage implements IStorage {
   }
 }
 
-function createStorage(): IStorage {
+function isProduction(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
+export function createStorage(): IStorage {
   if (process.env.BOOKING_STORAGE === "memory" || !process.env.DATABASE_URL) {
+    if (isProduction()) {
+      throw new Error(
+        process.env.BOOKING_STORAGE === "memory"
+          ? "[storage] BOOKING_STORAGE=memory is not allowed in production."
+          : "[storage] DATABASE_URL must be set in production.",
+      );
+    }
+
     if (!process.env.DATABASE_URL) {
       console.warn("[storage] DATABASE_URL not set — using in-memory bookings.");
     }
@@ -87,7 +101,7 @@ function createStorage(): IStorage {
   }
 
   const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
-  return new ResilientStorage(pool);
+  return new ResilientStorage(pool, !isProduction());
 }
 
 export const storage = createStorage();
