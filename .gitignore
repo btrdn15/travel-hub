@@ -3,8 +3,11 @@ dist
 .DS_Store
 server/public
 vite.config.ts.*
-*.tar.gznode_modules
+*.tar.gz
+.venv
 .env
+.env.*
+!.env.example
 .dist
 build
 .DS_Store
