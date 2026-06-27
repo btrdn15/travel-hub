@@ -7,6 +7,7 @@ export interface IStorage {
 }
 
 type StorageEnv = {
+  [key: string]: string | undefined;
   BOOKING_STORAGE?: string;
   DATABASE_URL?: string;
   NODE_ENV?: string;
