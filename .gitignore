@@ -5,6 +5,10 @@ server/public
 vite.config.ts.*
 *.tar.gznode_modules
 .env
+.env.*
+!.env.example
+.venv
+.venv/
 .dist
 build
 .DS_Store
