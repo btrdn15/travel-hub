@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { StorageUnavailableError, storage } from "./storage";
 import { bookingSubmitSchema } from "@shared/schema";
 import { BOOKING_TOUR_OPTIONS, DEPOSIT_RATE, getBankTransferInfo, getMaxPeopleForTour } from "@shared/booking-config";
 import { resolveNationalityId } from "@shared/nationalities";
@@ -112,6 +112,10 @@ export async function registerRoutes(
       });
     } catch (error) {
       console.error("Booking failed:", error);
+      if (error instanceof StorageUnavailableError) {
+        return res.status(503).json({ message: "Booking storage is unavailable" });
+      }
+
       return res.status(500).json({ message: "Failed to submit booking" });
     }
   });
