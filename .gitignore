@@ -1,10 +1,14 @@
 node_modules
 dist
-.DS_Store
-server/public
-vite.config.ts.*
-*.tar.gznode_modules
-.env
 .dist
 build
+server/public
+
+.env
+vite.config.ts.*
+*.tar.gz
 .DS_Store
+
+# Node төсөлд хамаагүй орчны файлууд
+homebrew/
+.venv/
