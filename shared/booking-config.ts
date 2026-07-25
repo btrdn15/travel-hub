@@ -1,5 +1,5 @@
-/** Урьдчилгаа — нийт үнийн хувь */
-export const DEPOSIT_RATE = 0.1;
+/** Урьдчилгаа — бүх захиалгад тогтмол дүн (KRW) */
+export const DEPOSIT_AMOUNT_KRW = 50_000;
 
 export type PriceTier = {
   minPeople: number;
@@ -12,6 +12,7 @@ export type BookingTourOption = {
   titleMn: string;
   titleKo: string;
   titleEn: string;
+  titleJa: string;
   bookable: boolean;
   /** Захиалгын хамгийн их хүний тоо (байхгүй бол 20) */
   maxPeople?: number;
@@ -24,12 +25,13 @@ export const BOOKING_TOUR_OPTIONS: BookingTourOption[] = [
     titleMn: "Шувуудын гэрэл зургийн аялал",
     titleKo: "조류 사진 탐험",
     titleEn: "Bird Photography Expedition",
+    titleJa: "野鳥写真エクスペディション",
     bookable: true,
-    maxPeople: 3,
+    maxPeople: 5,
     priceTiers: [
-      { minPeople: 1, maxPeople: 1, pricePerPersonKrw: 2_600_000 },
-      { minPeople: 2, maxPeople: 2, pricePerPersonKrw: 2_200_000 },
-      { minPeople: 3, maxPeople: 3, pricePerPersonKrw: 2_000_000 },
+      { minPeople: 1, maxPeople: 3, pricePerPersonKrw: 2_600_000 },
+      { minPeople: 4, maxPeople: 4, pricePerPersonKrw: 2_200_000 },
+      { minPeople: 5, maxPeople: 5, pricePerPersonKrw: 2_000_000 },
     ],
   },
   {
@@ -37,14 +39,32 @@ export const BOOKING_TOUR_OPTIONS: BookingTourOption[] = [
     titleMn: "Цэнгэг усны загасчлалын аялал",
     titleKo: "민물 낚시 탐험",
     titleEn: "Freshwater Fishing Expedition",
+    titleJa: "淡水釣りエクスペディション",
     bookable: true,
+    maxPeople: 5,
+    priceTiers: [
+      { minPeople: 1, maxPeople: 1, pricePerPersonKrw: 1_490_000 },
+      { minPeople: 2, maxPeople: 2, pricePerPersonKrw: 1_390_000 },
+      { minPeople: 3, maxPeople: 3, pricePerPersonKrw: 1_190_000 },
+      { minPeople: 4, maxPeople: 4, pricePerPersonKrw: 990_000 },
+      { minPeople: 5, maxPeople: 5, pricePerPersonKrw: 890_000 },
+    ],
   },
   {
     slug: "arburd-gobi",
     titleMn: "Нүүдэлчдийн соёлын аялал",
-    titleKo: "유목 문화 체험",
-    titleEn: "Nomadic Culture Experience",
+    titleKo: "아르부르드 고비 3박4일 투어",
+    titleEn: "Arburd Gobi · 3 Nights 4 Days",
+    titleJa: "アルブルド・ゴビ 3泊4日",
     bookable: true,
+    maxPeople: 5,
+    priceTiers: [
+      { minPeople: 1, maxPeople: 1, pricePerPersonKrw: 1_500_000 },
+      { minPeople: 2, maxPeople: 2, pricePerPersonKrw: 1_300_000 },
+      { minPeople: 3, maxPeople: 3, pricePerPersonKrw: 1_090_000 },
+      { minPeople: 4, maxPeople: 4, pricePerPersonKrw: 990_000 },
+      { minPeople: 5, maxPeople: 5, pricePerPersonKrw: 890_000 },
+    ],
   },
 ];
 
@@ -68,11 +88,11 @@ export function getPricePerPersonKrw(slug: string, people: number): number | nul
 
 export function calculateBookingAmounts(slug: string, people: number) {
   const pricePerPerson = getPricePerPersonKrw(slug, people);
+  const depositKrw = DEPOSIT_AMOUNT_KRW;
   if (pricePerPerson === null) {
-    return { pricePerPersonKrw: null, totalKrw: null, depositKrw: null };
+    return { pricePerPersonKrw: null, totalKrw: null, depositKrw };
   }
   const totalKrw = pricePerPerson * people;
-  const depositKrw = Math.round(totalKrw * DEPOSIT_RATE);
   return { pricePerPersonKrw: pricePerPerson, totalKrw, depositKrw };
 }
 
@@ -85,7 +105,7 @@ export type BankTransferInfo = {
 
 export function getBankTransferInfo(): BankTransferInfo {
   return {
-    bankName: process.env.BANK_NAME || "Хаан банк",
+    bankName: process.env.BANK_NAME || "Худалдаа хөгжил банк",
     accountNumber: process.env.BANK_ACCOUNT_NUMBER || "MN35 0004 000 433070088",
     accountHolder: process.env.BANK_ACCOUNT_HOLDER || "Олон Нуур Трэвел",
     transferDeadlineHours: Number(process.env.BANK_TRANSFER_DEADLINE_HOURS || "48"),

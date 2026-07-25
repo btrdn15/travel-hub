@@ -1,19 +1,19 @@
-export type Lang = "mn" | "ko" | "en";
+export type Lang = "mn" | "ko" | "en" | "ja";
 
 export const NATIONALITY_OPTIONS = [
-  { id: "kr", mn: "БНСУ", ko: "대한민국", en: "South Korea" },
-  { id: "mn", mn: "Монгол", ko: "몽골", en: "Mongolia" },
-  { id: "jp", mn: "Япон", ko: "일본", en: "Japan" },
-  { id: "cn", mn: "Хятад", ko: "중국", en: "China" },
-  { id: "us", mn: "АНУ", ko: "미국", en: "United States" },
-  { id: "uk", mn: "Их Британи", ko: "영국", en: "United Kingdom" },
-  { id: "de", mn: "Герман", ko: "독일", en: "Germany" },
-  { id: "fr", mn: "Франц", ko: "프랑스", en: "France" },
-  { id: "au", mn: "Австрали", ko: "호주", en: "Australia" },
-  { id: "ca", mn: "Канад", ko: "캐나다", en: "Canada" },
-  { id: "tw", mn: "Тайвань", ko: "대만", en: "Taiwan" },
-  { id: "sg", mn: "Сингапур", ko: "싱가포르", en: "Singapore" },
-  { id: "other", mn: "Бусад", ko: "기타", en: "Other" },
+  { id: "kr", mn: "БНСУ", ko: "대한민국", en: "South Korea", ja: "韓国" },
+  { id: "mn", mn: "Монгол", ko: "몽골", en: "Mongolia", ja: "モンゴル" },
+  { id: "jp", mn: "Япон", ko: "일본", en: "Japan", ja: "日本" },
+  { id: "cn", mn: "Хятад", ko: "중국", en: "China", ja: "中国" },
+  { id: "us", mn: "АНУ", ko: "미국", en: "United States", ja: "アメリカ" },
+  { id: "uk", mn: "Их Британи", ko: "영국", en: "United Kingdom", ja: "イギリス" },
+  { id: "de", mn: "Герман", ko: "독일", en: "Germany", ja: "ドイツ" },
+  { id: "fr", mn: "Франц", ko: "프랑스", en: "France", ja: "フランス" },
+  { id: "au", mn: "Австрали", ko: "호주", en: "Australia", ja: "オーストラリア" },
+  { id: "ca", mn: "Канад", ko: "캐나다", en: "Canada", ja: "カナダ" },
+  { id: "tw", mn: "Тайвань", ko: "대만", en: "Taiwan", ja: "台湾" },
+  { id: "sg", mn: "Сингапур", ko: "싱가포르", en: "Singapore", ja: "シンガポール" },
+  { id: "other", mn: "Бусад", ko: "기타", en: "Other", ja: "その他" },
 ] as const;
 
 export type NationalityId = (typeof NATIONALITY_OPTIONS)[number]["id"];
@@ -27,7 +27,7 @@ export const NATIONALITY_IDS = NATIONALITY_OPTIONS.map((o) => o.id) as [
 const NATIONALITY_EMAIL_LANG: Record<NationalityId, Lang> = {
   kr: "ko",
   mn: "mn",
-  jp: "ko",
+  jp: "ja",
   cn: "ko",
   tw: "ko",
   sg: "ko",
@@ -51,7 +51,7 @@ export function resolveNationalityId(nationality: string): NationalityId | null 
     return nationality as NationalityId;
   }
   const opt = NATIONALITY_OPTIONS.find(
-    (o) => o.mn === nationality || o.ko === nationality || o.en === nationality,
+    (o) => o.mn === nationality || o.ko === nationality || o.en === nationality || o.ja === nationality,
   );
   return opt?.id ?? null;
 }

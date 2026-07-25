@@ -14,11 +14,12 @@ export function generateBookingNumber(): string {
   return `ON-${year}-${suffix}`;
 }
 
-export function resolveTourTitle(slug: string, lang: "mn" | "ko" | "en"): string {
+export function resolveTourTitle(slug: string, lang: "mn" | "ko" | "en" | "ja"): string {
   const tour = getBookingTour(slug);
   if (!tour) return slug;
   if (lang === "ko") return tour.titleKo;
   if (lang === "en") return tour.titleEn;
+  if (lang === "ja") return tour.titleJa;
   return tour.titleMn;
 }
 

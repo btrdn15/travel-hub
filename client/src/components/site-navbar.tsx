@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useLang, LANG_ORDER, LANG_LABELS, type Lang } from "@/lib/lang";
+import { useLang, LANG_LABELS, type Lang } from "@/lib/lang";
 import { getWebsiteCopy } from "@/data/website-content";
 import { brand } from "@/lib/brand";
 import { tours } from "@/data/tours";
@@ -21,7 +21,7 @@ function LangSwitcher({
   className?: string;
   onSelect?: () => void;
 }) {
-  const { lang, setLang } = useLang();
+  const { lang, setLang, availableLangs } = useLang();
 
   const pick = (code: Lang) => {
     setLang(code);
@@ -44,7 +44,7 @@ function LangSwitcher({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[10rem]">
-        {LANG_ORDER.map((code) => (
+        {availableLangs.map((code) => (
           <DropdownMenuItem
             key={code}
             onClick={() => pick(code)}
@@ -72,21 +72,30 @@ export function SiteNavbar({ backLink }: SiteNavbarProps) {
   const onHome = location === "/";
   const anchor = (hash: string) => (onHome ? hash : `/${hash}`);
 
+  const isPageRoute = (href: string) => href.startsWith("/") && href.length > 1;
+
   const navLinks = [
     { href: "/", label: t.navHome, isHome: true },
     { href: anchor("#tours"), label: t.navJourneys, hasExpeditions: true },
     { href: anchor("#why"), label: t.navAbout },
-    { href: anchor("#gallery"), label: t.navGallery },
-    { href: anchor("#brochure"), label: t.navBlog },
+    { href: "/gallery", label: t.navGallery },
+    { href: "/comic", label: t.navBlog },
     { href: anchor("#contact"), label: t.navContact },
   ];
 
   const closeMobile = () => setMobileNav(false);
 
-  const navLinkClass = (active: boolean) =>
-    `relative text-[11px] font-semibold uppercase tracking-[0.2em] transition-colors hover:opacity-80 ${
-      active ? "" : ""
-    }`;
+  const usesLatinNavStyle = lang === "en" || lang === "ja";
+  const navLinkClass = (_active: boolean) =>
+    usesLatinNavStyle
+      ? "relative text-[11px] font-semibold uppercase tracking-[0.2em] transition-colors hover:opacity-80"
+      : "relative text-[13px] font-semibold tracking-normal transition-colors hover:opacity-80 sm:text-sm";
+  const mobileNavLinkClass = usesLatinNavStyle
+    ? "rounded px-2 py-3 text-xs font-semibold uppercase tracking-[0.15em] hover:opacity-70"
+    : "rounded px-2 py-3 text-sm font-semibold tracking-normal hover:opacity-70";
+  const bookBtnClass = usesLatinNavStyle
+    ? "hidden rounded px-4 py-2 text-[11px] font-bold uppercase tracking-[0.15em] text-white transition-opacity hover:opacity-90 sm:inline-flex sm:px-5 sm:py-2.5 sm:text-xs"
+    : "hidden rounded px-4 py-2 text-[13px] font-bold tracking-normal text-white transition-opacity hover:opacity-90 sm:inline-flex sm:px-5 sm:py-2.5 sm:text-sm";
 
   return (
     <header
@@ -149,13 +158,31 @@ export function SiteNavbar({ backLink }: SiteNavbarProps) {
                 </DropdownMenu>
               );
             }
+            const routeActive = isPageRoute(link.href) && location === link.href;
+            const linkClass = navLinkClass(!!active || routeActive);
+            const linkStyle = { color: active || routeActive ? brand.gold : brand.forest };
+
+            if (isPageRoute(link.href)) {
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={linkClass}
+                  style={linkStyle}
+                >
+                  {link.label}
+                  {routeActive && (
+                    <span
+                      className="absolute -bottom-1 left-0 right-0 mx-auto h-px w-full max-w-[2rem]"
+                      style={{ backgroundColor: brand.gold }}
+                    />
+                  )}
+                </Link>
+              );
+            }
+
             return (
-              <a
-                key={link.href}
-                href={link.href}
-                className={navLinkClass(!!active)}
-                style={{ color: active ? brand.gold : brand.forest }}
-              >
+              <a key={link.href} href={link.href} className={linkClass} style={linkStyle}>
                 {link.label}
                 {active && (
                   <span
@@ -182,7 +209,7 @@ export function SiteNavbar({ backLink }: SiteNavbarProps) {
           )}
           <Link
             href="/book"
-            className="hidden rounded px-4 py-2 text-[11px] font-bold uppercase tracking-[0.15em] text-white transition-opacity hover:opacity-90 sm:inline-flex sm:px-5 sm:py-2.5 sm:text-xs"
+            className={bookBtnClass}
             style={{ backgroundColor: brand.forest }}
           >
             {t.bookNow}
@@ -221,19 +248,30 @@ export function SiteNavbar({ backLink }: SiteNavbarProps) {
                 </span>
               </Link>
             )}
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="rounded px-2 py-3 text-xs font-semibold uppercase tracking-[0.15em] hover:opacity-70"
-                onClick={closeMobile}
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map((link) =>
+              isPageRoute(link.href) ? (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={mobileNavLinkClass}
+                  onClick={closeMobile}
+                >
+                  {link.label}
+                </Link>
+              ) : (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className={mobileNavLinkClass}
+                  onClick={closeMobile}
+                >
+                  {link.label}
+                </a>
+              ),
+            )}
             <Link
               href="/book"
-              className="mt-2 rounded px-2 py-3 text-center text-xs font-bold uppercase tracking-[0.15em] text-white"
+              className={`mt-2 text-center text-white ${mobileNavLinkClass} font-bold`}
               style={{ backgroundColor: brand.forest }}
               onClick={closeMobile}
             >

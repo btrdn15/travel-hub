@@ -1,13 +1,14 @@
 import type { Booking } from "@shared/schema";
-import { DEPOSIT_RATE, formatKrw, getBankTransferInfo, getBookingTour } from "@shared/booking-config";
+import { DEPOSIT_AMOUNT_KRW, formatKrw, getBankTransferInfo, getBookingTour } from "@shared/booking-config";
 import { emailLangFromNationality } from "@shared/nationalities";
 
-type Lang = "mn" | "ko" | "en";
+type Lang = "mn" | "ko" | "en" | "ja";
 
-const COMPANY = {
+const COMPANY: Record<Lang, string> = {
   mn: "Olon Nuur Travel LLC",
   ko: "Olon Nuur Travel LLC",
   en: "Olon Nuur Travel LLC",
+  ja: "Olon Nuur Travel LLC",
 };
 
 type TourCopy = {
@@ -24,6 +25,7 @@ const TOUR_COPY: Record<string, TourCopy> = {
       mn: "5 өдөр / 4 шөнө",
       ko: "5일 / 4박",
       en: "5 days / 4 nights",
+      ja: "5日間 / 4泊",
     },
     guideline: {
       mn: [
@@ -43,6 +45,12 @@ const TOUR_COPY: Record<string, TourCopy> = {
         "Route: Ulaanbaatar → Khokh Burd → Erdene Santi → Jargalant → Bayan Nuur → Ulaanbaatar.",
         "Be ready at the meeting point at 08:00 on the first tour day.",
         "After the tour you will return to Ulaanbaatar.",
+      ],
+      ja: [
+        "到着の1〜2日前までに、フライトと空港送迎の時間をご確認ください。",
+        "ルート：ウランバートル → ホフブルド → エルデネサント → ジャルガラン → バヤンヌール → ウランバートル。",
+        "ツアー初日の08:00までに集合場所へお越しください。",
+        "ツアー終了後、ウランバートルへ戻ります。",
       ],
     },
     packing: {
@@ -64,6 +72,12 @@ const TOUR_COPY: Record<string, TourCopy> = {
         "Sunglasses, hat, sturdy footwear",
         "Personal medication, travel insurance documents",
       ],
+      ja: [
+        "暖かい服装（季節に応じて）",
+        "カメラ、望遠レンズ、予備バッテリー",
+        "サングラス、帽子、頑丈な靴",
+        "常備薬、旅行保険の書類",
+      ],
     },
     included: {
       mn: [
@@ -80,6 +94,11 @@ const TOUR_COPY: Record<string, TourCopy> = {
         "Airport pickup and drop-off",
         "Domestic transport, lodging, meals (B/L/D)",
         "Professional bird guide, driver, chef",
+      ],
+      ja: [
+        "空港送迎",
+        "国内交通、宿泊、食事（朝・昼・夕）",
+        "専門バードガイド、ドライバー、シェフ",
       ],
     },
     excluded: {
@@ -101,31 +120,41 @@ const TOUR_COPY: Record<string, TourCopy> = {
         "Personal expenses, alcohol",
         "Travel insurance (required)",
       ],
+      ja: [
+        "国際航空券",
+        "ツアー前後の都市ホテル",
+        "個人的な費用、酒類",
+        "旅行保険（必須）",
+      ],
     },
   },
 };
 
 const DEFAULT_COPY: TourCopy = {
-  duration: { mn: "—", ko: "—", en: "—" },
+  duration: { mn: "—", ko: "—", en: "—", ja: "—" },
   guideline: {
     mn: ["Бид таны ирсний дараа дэлгэрэнгүй хуваарийг имэйлээр илгээнэ."],
     ko: ["도착 후 상세 일정을 이메일로 안내해 드립니다."],
     en: ["We will email you a detailed itinerary after arrival."],
+    ja: ["到着後、詳細な日程をメールでご案内いたします。"],
   },
   packing: {
     mn: ["Дулаан хувцас, хувийн эм, аяллын даатгалын баримт."],
     ko: ["따뜻한 옷, 개인 의약품, 여행자 보험."],
     en: ["Warm clothes, personal medication, travel insurance."],
+    ja: ["暖かい服装、常備薬、旅行保険。"],
   },
   included: {
     mn: ["Дотоодын тээвэр, байр, хоол (турын төрлөөс хамаарна)."],
     ko: ["국내 교통, 숙박, 식사(투어에 따라)."],
     en: ["Domestic transport, lodging, meals (varies by tour)."],
+    ja: ["国内交通、宿泊、食事（ツアーにより異なります）。"],
   },
   excluded: {
     mn: ["Олон улсын нислэг, хувийн зардал, даатгал."],
     ko: ["국제 항공, 개인 비용, 보험."],
     en: ["International flights, personal expenses, insurance."],
+    ja: ["国際航空券、個人的な費用、保険。"],
   },
 };
 
@@ -136,7 +165,8 @@ function bullets(items: string[]): string {
 function formatDate(travelDate: string, lang: Lang): string {
   try {
     const d = new Date(travelDate.includes("T") ? travelDate : `${travelDate}T12:00:00`);
-    const locale = lang === "ko" ? "ko-KR" : lang === "en" ? "en-US" : "mn-MN";
+    const locale =
+      lang === "ko" ? "ko-KR" : lang === "en" ? "en-US" : lang === "ja" ? "ja-JP" : "mn-MN";
     return d.toLocaleDateString(locale, {
       year: "numeric",
       month: "long",
@@ -152,6 +182,7 @@ function tourTitleForLang(tourSlug: string, lang: Lang): string {
   if (!tour) return tourSlug;
   if (lang === "ko") return tour.titleKo;
   if (lang === "en") return tour.titleEn;
+  if (lang === "ja") return tour.titleJa;
   return tour.titleMn;
 }
 
@@ -163,7 +194,7 @@ export function buildBookingConfirmation(
   const copy = TOUR_COPY[booking.tourSlug] ?? DEFAULT_COPY;
   const bank = getBankTransferInfo();
   const dateStr = formatDate(booking.travelDate, L);
-  const depositPercent = Math.round(DEPOSIT_RATE * 100);
+  const depositLabel = formatKrw(DEPOSIT_AMOUNT_KRW);
 
   const totalStr = booking.totalAmountKrw
     ? formatKrw(booking.totalAmountKrw)
@@ -171,21 +202,27 @@ export function buildBookingConfirmation(
       ? "별도 안내"
       : L === "en"
         ? "On request"
-        : "Тусгайлан мэдэгдэнэ";
+        : L === "ja"
+          ? "別途ご案内"
+          : "Тусгайлан мэдэгдэнэ";
   const depositStr = booking.depositAmountKrw
     ? formatKrw(booking.depositAmountKrw)
     : L === "ko"
       ? "별도 안내"
       : L === "en"
         ? "On request"
-        : "Тусгайлан мэдэгдэнэ";
+        : L === "ja"
+          ? "別途ご案内"
+          : "Тусгайлан мэдэгдэнэ";
 
   const greeting =
     L === "ko"
       ? `안녕하세요, ${booking.fullName}님! (${booking.email})\n\n올론 누르 트래블(Olon Nuur Travel LLC)입니다. 몽골의 희귀한 자연과 진정한 유목 문화를 경험하는 프리미엄 여행사입니다.`
       : L === "en"
         ? `Hello ${booking.fullName} (${booking.email}),\n\nThank you for contacting Olon Nuur Travel LLC — a premium expedition company sharing rare Mongolia and authentic nomadic experiences.`
-        : `Сайн байна уу, ${booking.fullName}? (${booking.email})\n\nБид Olon Nuur Travel LLC — Монголын ховор аяллын туршлагыг санал болгодог компани.`;
+        : L === "ja"
+          ? `${booking.fullName} 様 (${booking.email})\n\nOlon Nuur Travel LLC（オロン・ヌール・トラベル）へのお問い合わせありがとうございます。希少なモンゴルと本物の遊牧文化を体験できるプレミアム・エクスペディション会社です。`
+          : `Сайн байна уу, ${booking.fullName}? (${booking.email})\n\nБид Olon Nuur Travel LLC — Монголын ховор аяллын туршлагыг санал болгодог компани.`;
 
   const sections =
     L === "ko"
@@ -196,7 +233,7 @@ export function buildBookingConfirmation(
           people: "인원",
           price: "요금 안내",
           total: "총 금액",
-          deposit: `예약금 (${depositPercent}%, ${bank.transferDeadlineHours}시간 이내 입금)`,
+          deposit: `예약금 (${depositLabel}, ${bank.transferDeadlineHours}시간 이내 입금)`,
           included: "포함 사항",
           excluded: "불포함 사항",
           guide: "일정 안내",
@@ -220,7 +257,7 @@ export function buildBookingConfirmation(
             people: "Guests",
             price: "Pricing",
             total: "Total",
-            deposit: `Deposit (${depositPercent}%, within ${bank.transferDeadlineHours} hours)`,
+            deposit: `Deposit (${depositLabel}, within ${bank.transferDeadlineHours} hours)`,
             included: "Included",
             excluded: "Not included",
             guide: "Itinerary guide",
@@ -236,16 +273,40 @@ export function buildBookingConfirmation(
             phone: "Phone",
             email: "Email",
           }
-        : {
+        : L === "ja"
+          ? {
+              tour: "選択されたツアー",
+              when: "旅行日",
+              duration: "期間",
+              people: "人数",
+              price: "料金のご案内",
+              total: "合計金額",
+              deposit: `予約金（${depositLabel}、${bank.transferDeadlineHours}時間以内にお振込み）`,
+              included: "含まれるもの",
+              excluded: "含まれないもの",
+              guide: "日程のご案内",
+              pack: "持ち物",
+              bank: "振込先口座",
+              thanks:
+                "ご予約ありがとうございます。モンゴルでお会いできることを楽しみにしております！",
+              requests: booking.specialRequests
+                ? `特別なご要望：${booking.specialRequests}`
+                : null,
+              bookingNo: "予約番号",
+              contact: "連絡先",
+              phone: "電話番号",
+              email: "メール",
+            }
+          : {
             tour: "Сонгосон аялал",
             when: "Аялах огноо",
             duration: "Хугацаа",
             people: "Хүний тоо",
             price: "Үнийн мэдээлэл",
             total: "Нийт үнэ",
-            deposit: `Урьдчилгаа (${depositPercent}%, ${bank.transferDeadlineHours} цагийн дотор шилжүүлнэ)`,
-            included: "Үнэнд багтсан",
-            excluded: "Үнэнд багтаагүй",
+            deposit: `Урьдчилгаа (${depositLabel}, ${bank.transferDeadlineHours} цагийн дотор шилжүүлнэ)`,
+            included: "Үнэд багтсан",
+            excluded: "Үнэд багтаагүй",
             guide: "Товч хөтөлбөр",
             pack: "Авч явах зүйлс",
             bank: "Дансны мэдээлэл",
@@ -276,7 +337,7 @@ export function buildBookingConfirmation(
     dateStr,
     `${sections.duration}: ${copy.duration[L]}`,
     `${sections.people}: ${booking.numberOfPeople}${
-      L === "ko" ? "명" : L === "en" ? " guest(s)" : " хүн"
+      L === "ko" ? "명" : L === "en" ? " guest(s)" : L === "ja" ? "名" : " хүн"
     }`,
     sections.requests ?? "",
     "",
@@ -316,7 +377,9 @@ export function buildBookingConfirmation(
       ? `[Olon Nuur Travel] 예약 접수 — ${booking.bookingNumber}`
       : L === "en"
         ? `[Olon Nuur Travel] Booking received — ${booking.bookingNumber}`
-        : `[Olon Nuur Travel] Захиалга хүлээн авлаа — ${booking.bookingNumber}`;
+        : L === "ja"
+          ? `[Olon Nuur Travel] ご予約受付 — ${booking.bookingNumber}`
+          : `[Olon Nuur Travel] Захиалга хүлээн авлаа — ${booking.bookingNumber}`;
 
   return { subject, text };
 }

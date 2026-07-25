@@ -14,7 +14,7 @@ const emailHref = (() => {
 const SOCIAL = {
   kakao:
     import.meta.env.VITE_KAKAO_URL?.toString().trim() ||
-    "http://pf.kakao.com/_cSlsX/chat",
+    "https://open.kakao.com/o/sdqKo4Bi",
   instagram:
     import.meta.env.VITE_INSTAGRAM_URL?.toString().trim() ||
     "https://www.instagram.com/olonnurtravel/",

@@ -32,17 +32,32 @@ function TourHeroPicture({
   srcHd,
   srcWebp,
   alt,
+  objectPosition = "center 40%",
+  objectScale,
 }: {
   src: string;
   srcHd?: string;
   srcWebp?: string;
   alt: string;
+  objectPosition?: string;
+  objectScale?: number;
 }) {
   const hd = srcHd ?? src;
+  const imgClassName =
+    "h-full w-full object-cover brightness-[1.04] saturate-[1.06]";
+  const imgStyle: React.CSSProperties = {
+    objectPosition,
+    ...(objectScale
+      ? {
+          transform: `scale(${objectScale}) translateY(4%)`,
+          transformOrigin: "center top",
+        }
+      : {}),
+  };
 
   if (srcWebp) {
     return (
-      <picture className="absolute inset-0 block h-full w-full">
+      <picture className="absolute inset-0 block h-full w-full overflow-hidden">
         <source type="image/webp" srcSet={`${srcWebp} 1920w`} sizes="100vw" />
         <source type="image/jpeg" srcSet={`${hd} 1920w`} sizes="100vw" />
         <img
@@ -50,7 +65,8 @@ function TourHeroPicture({
           alt={alt}
           decoding="async"
           fetchPriority="high"
-          className="h-full w-full object-cover object-[center_40%] brightness-[1.04] saturate-[1.06] sm:object-[center_45%]"
+          className={imgClassName}
+          style={imgStyle}
         />
       </picture>
     );
@@ -62,7 +78,8 @@ function TourHeroPicture({
       alt={alt}
       decoding="async"
       fetchPriority="high"
-      className="h-full w-full object-cover object-[center_40%] brightness-[1.04] saturate-[1.06] sm:object-[center_45%]"
+      className={imgClassName}
+      style={imgStyle}
     />
   );
 }
@@ -83,9 +100,8 @@ const labels = {
     special: "Тусгай хоол",
     logistics: "Аяллын зохион байгуулалт",
     pricing: "Үнэ ба нөхцөл",
-    perPerson: "/ хүн",
-    included: "Үнэнд багтсан",
-    excluded: "Үнэнд багтаагүй",
+    included: "Үнэд багтсан",
+    excluded: "Үнэд багтаагүй",
     overnight: "Хонох газар",
     departures: "Тусгай хуваарьт аялалууд",
     bookCta: "Захиалга өгөх",
@@ -109,7 +125,6 @@ const labels = {
     special: "특별 식사",
     logistics: "투어 운영",
     pricing: "가격 및 조건",
-    perPerson: "/ 인",
     included: "포함 사항",
     excluded: "불포함 사항",
     overnight: "숙박",
@@ -135,7 +150,6 @@ const labels = {
     special: "Special meal",
     logistics: "Logistics",
     pricing: "Pricing & terms",
-    perPerson: "/ person",
     included: "Included",
     excluded: "Not included",
     overnight: "Overnight",
@@ -146,6 +160,32 @@ const labels = {
     notReady: "Coming soon",
     notReadyDesc:
       "A detailed itinerary for this tour will be added soon. Contact us directly and we will be happy to help.",
+  },
+  ja: {
+    back: "すべてのツアーに戻る",
+    duration: "期間",
+    target: "対象",
+    crew: "スタッフ",
+    route: "ルート",
+    overview: "ツアー概要",
+    schedule: "日程表",
+    meals: "食事",
+    breakfast: "朝食",
+    lunch: "昼食",
+    dinner: "夕食",
+    special: "特別食",
+    logistics: "運営体制",
+    pricing: "料金と条件",
+    included: "含まれるもの",
+    excluded: "含まれないもの",
+    overnight: "宿泊",
+    departures: "特別出発日程",
+    bookCta: "予約する",
+    bookHint: "下のボタンからオンライン予約フォームに進んでください。",
+    bookForm: "予約フォーム",
+    notReady: "近日公開",
+    notReadyDesc:
+      "このツアーの詳細日程は近日公開予定です。直接お問い合わせいただければ、喜んでご案内いたします。",
   },
 } as const;
 
@@ -210,6 +250,8 @@ export default function TourDetailPage() {
             srcHd={tour.hero.imageHd}
             srcWebp={tour.hero.imageWebp}
             alt={t(tour.hero.title, lang)}
+            objectPosition={tour.hero.imageObjectPosition}
+            objectScale={tour.hero.imageObjectScale}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-stone-950/95 via-stone-950/40 to-stone-950/10" />
         </div>
@@ -247,7 +289,7 @@ export default function TourDetailPage() {
                           {item.label}
                         </span>
                       </div>
-                      <p className="text-sm font-medium leading-snug text-stone-900 sm:text-base">
+                      <p className="whitespace-pre-line text-sm font-medium leading-snug text-stone-900 sm:text-base">
                         {item.value}
                       </p>
                     </CardContent>
@@ -336,7 +378,7 @@ export default function TourDetailPage() {
                         {item.label}
                       </span>
                     </div>
-                    <p className="text-sm font-medium leading-snug text-stone-900 sm:text-base">
+                    <p className="whitespace-pre-line text-sm font-medium leading-snug text-stone-900 sm:text-base">
                       {item.value}
                     </p>
                   </CardContent>
@@ -529,14 +571,11 @@ export default function TourDetailPage() {
                         {t(tier.groupSize, lang)}
                       </p>
                       <p
-                        className={`text-2xl md:text-3xl font-bold mb-1 ${
+                        className={`text-2xl md:text-3xl font-bold ${
                           featured ? "text-white" : "text-stone-900"
                         }`}
                       >
                         {t(tier.pricePerPerson, lang)}
-                      </p>
-                      <p className={`text-xs ${featured ? "text-stone-400" : "text-stone-500"}`}>
-                        {L.perPerson}
                       </p>
                     </CardContent>
                   </Card>
