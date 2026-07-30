@@ -6,6 +6,17 @@ export interface IStorage {
   createBooking(data: typeof bookings.$inferInsert): Promise<Booking>;
 }
 
+type StorageEnvironment = {
+  [key: string]: string | undefined;
+  BOOKING_STORAGE?: string;
+  DATABASE_URL?: string;
+  NODE_ENV?: string;
+};
+
+function isProduction(env: StorageEnvironment): boolean {
+  return env.NODE_ENV === "production";
+}
+
 export class MemoryStorage implements IStorage {
   private items: Booking[] = [];
 
@@ -51,16 +62,22 @@ function isMissingTableError(error: unknown): boolean {
 }
 
 /** DB алдаа гарвал memory руу fallback — dev-д bookings хүснэгт байхгүй үед */
-class ResilientStorage implements IStorage {
+export class ResilientStorage implements IStorage {
   private memory = new MemoryStorage();
-  private db: DatabaseStorage | null = null;
+  private db: IStorage | null = null;
+  private env: StorageEnvironment;
 
-  constructor(pool: pg.Pool | null) {
-    if (pool) this.db = new DatabaseStorage(pool);
+  constructor(db: IStorage | null, env: StorageEnvironment = process.env) {
+    this.db = db;
+    this.env = env;
   }
 
   async createBooking(data: typeof bookings.$inferInsert): Promise<Booking> {
-    if (!this.db || process.env.BOOKING_STORAGE === "memory") {
+    if (!this.db || this.env.BOOKING_STORAGE === "memory") {
+      if (isProduction(this.env)) {
+        throw new Error("Durable booking storage is required in production.");
+      }
+
       return this.memory.createBooking(data);
     }
 
@@ -68,6 +85,13 @@ class ResilientStorage implements IStorage {
       return await this.db.createBooking(data);
     } catch (error) {
       if (isMissingTableError(error)) {
+        if (isProduction(this.env)) {
+          throw new Error(
+            "PostgreSQL bookings table is missing; run `npm run db:push` before accepting bookings.",
+            { cause: error },
+          );
+        }
+
         console.warn(
           "[storage] bookings table missing — saved in memory. Production: run `npm run db:push`",
         );
@@ -78,16 +102,26 @@ class ResilientStorage implements IStorage {
   }
 }
 
-function createStorage(): IStorage {
-  if (process.env.BOOKING_STORAGE === "memory" || !process.env.DATABASE_URL) {
-    if (!process.env.DATABASE_URL) {
+export function createStorage(env: StorageEnvironment = process.env): IStorage {
+  if (isProduction(env)) {
+    if (env.BOOKING_STORAGE === "memory") {
+      throw new Error("BOOKING_STORAGE=memory is disabled in production.");
+    }
+
+    if (!env.DATABASE_URL) {
+      throw new Error("DATABASE_URL is required for production booking storage.");
+    }
+  }
+
+  if (env.BOOKING_STORAGE === "memory" || !env.DATABASE_URL) {
+    if (!env.DATABASE_URL) {
       console.warn("[storage] DATABASE_URL not set — using in-memory bookings.");
     }
     return new MemoryStorage();
   }
 
-  const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
-  return new ResilientStorage(pool);
+  const pool = new pg.Pool({ connectionString: env.DATABASE_URL });
+  return new ResilientStorage(new DatabaseStorage(pool), env);
 }
 
 export const storage = createStorage();
