@@ -27,11 +27,12 @@ type BookingConfig = {
     titleMn: string;
     titleKo: string;
     titleEn: string;
+    titleJa: string;
     bookable: boolean;
     hasPricing: boolean;
     maxPeople: number;
   }[];
-  depositRate: number;
+  depositAmountKrw: number;
   bank: {
     bankName: string;
     accountNumber: string;
@@ -82,7 +83,7 @@ const labels = {
     selectTour: "Аялал сонгоно уу",
     selectNationality: "Иргэншил сонгоно уу",
     newBooking: "Шинэ захиалга",
-    maxPeople: "Энэ аялалд хамгийн ихдээ 3 хүн захиална",
+    maxPeople: "Энэ аялалд хамгийн ихдээ 5 хүн захиална",
   },
   ko: {
     fullName: "성명",
@@ -113,7 +114,7 @@ const labels = {
     selectTour: "투어를 선택하세요",
     selectNationality: "국적을 선택하세요",
     newBooking: "새 예약",
-    maxPeople: "이 투어는 최대 3명까지 예약 가능합니다",
+    maxPeople: "이 투어는 최대 5명까지 예약 가능합니다",
   },
   en: {
     fullName: "Full name",
@@ -144,22 +145,55 @@ const labels = {
     selectTour: "Select a tour",
     selectNationality: "Select nationality",
     newBooking: "New booking",
-    maxPeople: "This tour allows a maximum of 3 guests",
+    maxPeople: "This tour allows a maximum of 5 guests",
+  },
+  ja: {
+    fullName: "氏名",
+    nationality: "国籍",
+    phone: "電話番号",
+    kakaoId: "KakaoTalk ID",
+    email: "メールアドレス",
+    tour: "ツアーを選択",
+    people: "人数",
+    travelDate: "旅行日",
+    specialRequests: "特別なご要望",
+    submit: "予約を送信",
+    submitting: "送信中...",
+    depositEstimate: "予約金（目安）",
+    pricingNote: "このツアーの料金はメールでご案内いたします。",
+    successTitle: "予約が正常に送信されました",
+    successDesc:
+      "予約金のお支払い情報をメールとKakaoTalkでお送りします。下記の口座へお振込みください。",
+    emailNotSent:
+      "メールが自動送信されませんでした。下記の情報を保存のうえ、直接お問い合わせください。",
+    bookingNo: "予約番号",
+    bankTitle: "銀行振込",
+    bank: "銀行",
+    account: "口座番号",
+    holder: "口座名義",
+    deadline: "期限",
+    hours: "時間以内",
+    selectTour: "ツアーを選択してください",
+    selectNationality: "国籍を選択してください",
+    newBooking: "新規予約",
+    maxPeople: "このツアーは最大5名まで予約可能です",
   },
 } as const;
 
 function bookingTourLabel(
-  tour: { titleMn: string; titleKo: string; titleEn: string },
+  tour: { titleMn: string; titleKo: string; titleEn: string; titleJa: string },
   lang: Lang,
 ): string {
   if (lang === "ko") return tour.titleKo;
   if (lang === "en") return tour.titleEn;
+  if (lang === "ja") return tour.titleJa;
   return tour.titleMn;
 }
 
 function peopleSuffix(lang: Lang): string {
   if (lang === "ko") return "명";
   if (lang === "en") return " guests";
+  if (lang === "ja") return "名";
   return " хүн";
 }
 
@@ -175,15 +209,6 @@ const formSchema = z
     travelDate: z.string().min(1),
     specialRequests: z.string().optional(),
   })
-  .superRefine((data, ctx) => {
-    if (data.tourSlug === "bird-photography" && data.numberOfPeople > 3) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["numberOfPeople"],
-        message: "max3",
-      });
-    }
-  });
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -285,7 +310,9 @@ export function BookingForm({ defaultTourSlug, compact }: Props) {
           ? "제출에 실패했습니다. 잠시 후 다시 시도해 주세요."
           : lang === "en"
             ? "Submission failed. Please try again shortly."
-            : "Илгээхэд алдаа гарлаа. Дахин оролдоно уу.";
+            : lang === "ja"
+              ? "送信に失敗しました。しばらくしてから再度お試しください。"
+              : "Илгээхэд алдаа гарлаа. Дахин оролдоно уу.";
 
       if (err instanceof Error) {
         try {
@@ -387,11 +414,7 @@ export function BookingForm({ defaultTourSlug, compact }: Props) {
       <div className={grid}>
         <FormField
           label={L.people}
-          error={
-            errors.numberOfPeople?.message === "max3"
-              ? { message: L.maxPeople }
-              : errors.numberOfPeople
-          }
+          error={errors.numberOfPeople}
         >
           <Input
             {...register("numberOfPeople")}

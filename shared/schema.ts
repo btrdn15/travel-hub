@@ -37,7 +37,7 @@ export const bookingSubmitSchema = z.object({
   travelDate: z.string().min(1, "Travel date is required"),
   specialRequests: z.string().optional(),
   airportPickup: z.boolean(),
-  lang: z.enum(["mn", "ko", "en"]),
+  lang: z.enum(["mn", "ko", "en", "ja"]),
 });
 
 export type BookingSubmit = z.infer<typeof bookingSubmitSchema>;

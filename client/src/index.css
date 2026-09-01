@@ -197,6 +197,15 @@
     padding-right: max(0.75rem, env(safe-area-inset-right));
   }
 
+  .floating-social-dock {
+    right: max(0.75rem, env(safe-area-inset-right));
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  .floating-social-panel {
+    max-width: calc(100vw - 1.5rem - env(safe-area-inset-right, 0px));
+  }
+
   .tracking-label {
     letter-spacing: 0.2em;
   }
@@ -317,5 +326,27 @@
   .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
     inset: -1px;
+  }
+}
+
+@keyframes announcement-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.announcement-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: announcement-marquee 40s linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .announcement-marquee-track {
+    animation: none;
   }
 }

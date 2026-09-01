@@ -6,6 +6,7 @@ export type LocalizedString = {
   mn: string;
   ko: string;
   en?: string;
+  ja?: string;
 };
 
 export type ScheduleItem = {
@@ -53,6 +54,10 @@ export type Tour = {
     /** 1920px+ for sharp full-width hero; falls back to `image` */
     imageHd?: string;
     imageWebp?: string;
+    /** CSS object-position when cover crop should favor part of the frame (e.g. `center top`) */
+    imageObjectPosition?: string;
+    /** Zoom out hero cover crop so portrait subjects keep headroom (e.g. 0.88) */
+    imageObjectScale?: number;
   };
   overview: {
     duration: LocalizedString;
@@ -111,16 +116,19 @@ export const tours: Tour[] = [
       image: birdPhotographyHero,
       imageHd: birdPhotographyHeroHd,
       imageWebp: birdPhotographyHeroWebp,
+      imageObjectPosition: "center 32%",
     },
     overview: {
       duration: { mn: "5 өдөр / 4 шөнө", ko: "5일 / 4박", en: "5 Days / 4 Nights" },
       target: {
-        mn: "Солонгосын шувууны гэрэл зурагчид",
-        ko: "한국 조류 사진가",
+        mn: "Солонгосын шувууны гэрэл зурагчид\n/ Аялагчдын тоо хязгаартай /",
+        ko: "한국 조류 사진가\n/ 여행자 수 제한 /",
+        en: "Korean Bird Photographers\n/ Limited number of travelers /",
       },
       crew: {
-        mn: "Мэргэжлийн шувуу судлаач хөтөч + Жолооч + Тогооч",
-        ko: "전문 조류학자 가이드 + 운전기사 + 요리사",
+        mn: "Мэргэжлийн шувуу судлаач, Хөтөч + Жолооч + Тогооч",
+        ko: "전문 조류학자, 가이드 + 운전기사 + 요리사",
+        en: "Professional Ornithologist, Guide + Driver + Chef",
       },
       route: {
         mn: "Улаанбаатар → Хөх бүрд → Эрдэнэсант → Жаргалант → Баян нуур → Улаанбаатар",
@@ -128,8 +136,9 @@ export const tours: Tour[] = [
       },
     },
     description: {
-      mn: "Говийн хээр, намгархаг нуур, ойт уулс зэрэг Монголын шувуудын олон төрөл зүйл нутагладаг бүс нутгуудаар 5 өдрийн аялал хийнэ. Мэргэжлийн шувуу судлаач хөтөчийн хамт нар мандах, жаргах үеийн хамгийн таатай гэрэлд ховор болон онцгой шувуудыг ажиглаж, гэрэл зурагт мөнхлөх боломжтой.",
-      ko: "고비 초원에서 습지대, 침엽수림에 이르기까지 몽골 조류의 다양한 서식지를 5일에 걸쳐 안내합니다. 전문 가이드가 동행하여 일출과 일몰의 최적의 촬영 순간을 찾아드립니다.",
+      mn: "Говь хээр, намагт нуур, ой модод зэрэг Монголын ховор нандин шувуудын гэрэл зургийг хальснаа буулгах 5 өдрийн аялал. Мэргэжлийн шувуу судлаач, хөтчийн хамт нар мандах, жаргах үед ховор болон онцгой агшинг зургийн цомогтоо нэмэх боломжтой.",
+      ko: "고비 초원, 습지 호수, 숲 속 나무 등 몽골의 희귀하고 소중한 조류 사진을 렌즈에 담는 5일 여정. 전문 조류학자와 가이드가 함께 일출·일몰 때 희귀하고 특별한 순간을 사진 앨범에 담을 수 있습니다.",
+      en: "A five-day journey capturing Mongolia's rare and precious birds on camera—from Gobi steppe and wetland lakes to forest woodland. With a professional ornithologist and guide, add rare and special moments to your photo album at sunrise and sunset.",
     },
     days: [
       {
@@ -143,19 +152,30 @@ export const tours: Tour[] = [
           ko: "고비 초원과 습지 조류",
         },
         schedule: [
-          { time: "06:30", text: { mn: "Улаанбаатараас хөдөлнө.", ko: "울란바토르에서 출발.", en: "Depart from Ulaanbaatar." } },
           {
-            time: "11:30–12:00",
+            time: "Өглөө",
             text: {
-              mn: "\"Хөх бүрд\" жуулчны баазад ирнэ.",
-              ko: "\"숨 훕 부르드\" 캠프 도착.",
-              en: "Arrive at the \"Khokh Burd\" tourist camp.",
+              mn: "Улаанбаатараас хөдөлнө. \"Хөх бүрд\" жуулчны баазад ирнэ.",
+              ko: "울란바토르에서 출발. \"숨 훕 부르드\" 관광기지 도착.",
+              en: "Depart from Ulaanbaatar and arrive at the \"Khokh Burd\" tourist base.",
             },
           },
-          { time: "12:00–13:00", text: { mn: "Өдрийн хоол (Баазад).", ko: "점심 식사 (캠프).", en: "Lunch (at camp)." } },
-          { time: "14:00–16:00", text: { mn: "Амралт, бэлтгэл.", ko: "휴식 및 장비 준비.", en: "Rest and equipment preparation." } },
-          { time: "16:00–20:00", text: { mn: "Говь хээрийн болон цөөрмийн шувуудын зураг авах.", ko: "초원 및 습지 조류 촬영.", en: "Photograph steppe and wetland birds." } },
-          { time: "20:00", text: { mn: "Оройн хоол (Баазад).", ko: "저녁 식사 (캠프).", en: "Dinner (at camp)." } },
+          {
+            time: "Үд",
+            text: {
+              mn: "Өдрийн хоол (Жуулчны баазад). Амралт, бэлтгэл.",
+              ko: "점심 식사 (관광기지). 휴식 및 장비 준비.",
+              en: "Lunch at the base. Rest and equipment preparation.",
+            },
+          },
+          {
+            time: "Орой",
+            text: {
+              mn: "Говь хээрийн болон цөөрмийн шувуудын зураг авах. Оройн хоол (Жуулчны баазад).",
+              ko: "초원 및 습지 조류 촬영. 저녁 식사 (관광기지).",
+              en: "Photograph steppe and wetland birds. Dinner at the base.",
+            },
+          },
           {
             time: "Шөнө",
             text: {
@@ -175,15 +195,40 @@ export const tours: Tour[] = [
         },
         subtitle: { mn: "Хээр тал, малчин айл", ko: "초원과 유목민 가정", en: "Open Steppe & Nomadic Family" },
         schedule: [
-          { time: "05:30–07:00", text: { mn: "Үүр цайх үеийн зураглал, говь хээрийн шувууд.", ko: "새벽 촬영, 초원 조류.", en: "Dawn photography and Gobi steppe birds." } },
-          { time: "07:00", text: { mn: "Өглөөний цай.", ko: "아침 식사.", en: "Breakfast." } },
-          { time: "08:00", text: { mn: "Төв аймаг, Бүрэн сум руу хөдөлнө (120 км). Замдаа шувуу харах 1–2 зогсолттой.", ko: "투브 아이막 부렌 솜으로 이동 (120km). 도중 1–2회 조류 관찰.", en: "Drive to Tuv Province, Buren Soum (120 km) with 1–2 birdwatching stops en route." } },
-          { time: "12:00–13:00", text: { mn: "Бүрэн сумын орчим хээрийн өдрийн хоол.", ko: "부렌 솜 근처 들판 점심.", en: "Picnic lunch near Buren Soum." } },
-          { time: "15:30–16:00", text: { mn: "Эрдэнэсант суманд ирж малчин айлд буудаллан, хөнгөн цайлна.", ko: "에르덴산트 도착, 유목민 가정 도착 후 차 한잔.", en: "Arrive in Erdene Santi Soum; visit a nomadic family and enjoy tea." } },
-          { time: "16:30–19:30", text: { mn: "Малчны хот, ахуй амьдралын зураг авах. Ойр орчимд шувуу ажиглах.", ko: "유목민 일상 촬영 및 주변 조류 관찰.", en: "Photograph nomadic daily life and observe nearby birds." } },
-          { time: "19:30", text: { mn: "Оройн хоол (Малчин айлын уламжлалт монгол хоол).", ko: "저녁 식사 (전통 몽골 가정식).", en: "Dinner (traditional Mongolian meal at a nomadic home)." } },
+          {
+            time: "Өглөө",
+            text: {
+              mn: "Үүр цайх үеийн зураглал, говь хээрийн шувууд. Өглөөний цай. Төв аймаг, Бүрэн сум руу хөдөлнө (120 км). Замдаа шувуу харах 1–2 зогсолттой.",
+              ko: "새벽 촬영, 초원 조류. 아침 식사. 투브 아이막 부렌 솜으로 이동 (120km). 도중 1–2회 조류 관찰.",
+              en: "Dawn photography and Gobi steppe birds. Breakfast. Drive to Tuv Province, Buren Soum (120 km) with 1–2 birdwatching stops en route.",
+            },
+          },
+          {
+            time: "Үд",
+            text: {
+              mn: "Бүрэн сумын орчим хээрийн өдрийн хоол.",
+              ko: "부렌 솜 근처 들판 점심.",
+              en: "Picnic lunch near Buren Soum.",
+            },
+          },
+          {
+            time: "Үдээс хойш",
+            text: {
+              mn: "Эрдэнэсант суманд ирж малчин айлд буудаллана, хөнгөн цайлна. Малчны хот, ахуй амьдралын зураг авах. Ойр орчимд шувуу ажиглах.",
+              ko: "에르덴산트 도착, 유목민 가정 방문 후 차 한잔. 유목민 일상 촬영 및 주변 조류 관찰.",
+              en: "Arrive in Erdene Santi Soum; visit a nomadic family and enjoy tea. Photograph nomadic daily life and observe nearby birds.",
+            },
+          },
+          {
+            time: "Орой",
+            text: {
+              mn: "Оройн хоол (Малчин айлын уламжлалт монгол хоол).",
+              ko: "저녁 식사 (전통 몽골 가정식).",
+              en: "Dinner (traditional Mongolian meal at a nomadic home).",
+            },
+          },
         ],
-        overnight: { mn: "Малчин айлд (Nomadic Homestay)", ko: "유목민 가정 홈스테이", en: "Nomadic Homestay" },
+        overnight: { mn: "Малчин айлд.", ko: "유목민 가정", en: "Nomadic family home" },
       },
       {
         day: 3,
@@ -191,16 +236,48 @@ export const tours: Tour[] = [
           mn: "Эрдэнэсант → Жаргалант",
           ko: "에르덴산트 → 자르갈란트",
         },
-        subtitle: { mn: "Баян-Уул уулын бүс", ko: "바얀-올 산악 지대", en: "Bayan-Uul Mountain Region" },
+        subtitle: { mn: "Баян-Уул ойн бүс", ko: "바얀-올 산림 지대", en: "Bayan-Uul Forest Region" },
         schedule: [
-          { time: "05:30–08:30", text: { mn: "Өндөр хад асгаар нутаглах махчин шувууд (Тас, Ёл г.м) зураг авах.", ko: "절벽 맹금류 (Cinereous Vulture, Lammergeier) 촬영.", en: "Photograph cliff-dwelling raptors (Cinereous Vulture, Lammergeier, etc.)." } },
-          { time: "08:30–09:30", text: { mn: "Өглөөний цай (Айлдаа).", ko: "아침 식사 (가정에서).", en: "Breakfast (at the family home)." } },
-          { time: "10:00", text: { mn: "Цэцэрлэг хот руу хөдөлнө.", ko: "체체를렉 시로 이동.", en: "Drive to Tsetserleg city." } },
-          { time: "13:30–14:30", text: { mn: "Өдрийн хоол (Цэцэрлэг хотод).", ko: "점심 식사 (체체를렉).", en: "Lunch (in Tsetserleg)." } },
-          { time: "17:00", text: { mn: "Жаргалант суманд ирж, баазад буудаллана.", ko: "자르갈란트 도착, 캠프 체크인.", en: "Arrive in Jargalant Soum and check in at camp." } },
-          { time: "17:30–20:30", text: { mn: "Ойн шувуудын зураг авах.", ko: "산림 조류 촬영.", en: "Photograph forest birds." } },
-          { time: "20:30", text: { mn: "Оройн хоол (Баазад халуун хоол).", ko: "저녁 식사 (캠프 따뜻한 식사).", en: "Dinner (hot meal at camp)." } },
-          { time: "Шөнө", text: { mn: "Гэрэл зургийн талаар ярилцлага, дүгнэлт.", ko: "사진 리뷰 및 피드백 세션.", en: "Photo review and feedback session." } },
+          {
+            time: "Өглөө",
+            text: {
+              mn: "Өндөр хад асгаар нутаглах махчин шувууд (Тас, Ёл ) зураг авах. Өглөөний цай (Айлдаа). Цэцэрлэг хот руу хөдөлнө.",
+              ko: "절벽 맹금류 (Cinereous Vulture, Lammergeier) 촬영. 아침 식사 (가정에서). 체체를렉 시로 이동.",
+              en: "Photograph cliff-dwelling raptors (Cinereous Vulture, Lammergeier, etc.). Breakfast at the family home. Drive to Tsetserleg city.",
+            },
+          },
+          {
+            time: "Үд",
+            text: {
+              mn: "Өдрийн хоол (Цэцэрлэг хотод).",
+              ko: "점심 식사 (체체를렉).",
+              en: "Lunch in Tsetserleg.",
+            },
+          },
+          {
+            time: "Үдээс хойш",
+            text: {
+              mn: "Жаргалант суманд ирж, жуулчны баазад буудаллана. Ойн шувуудын зураг авах.",
+              ko: "자르갈란트 도착, 관광기지 체크인. 산림 조류 촬영.",
+              en: "Arrive in Jargalant Soum and check in at the base. Photograph forest birds.",
+            },
+          },
+          {
+            time: "Орой",
+            text: {
+              mn: "Оройн хоол (Жуулчны баазад).",
+              ko: "저녁 식사 (관광기지).",
+              en: "Dinner at the tourist base.",
+            },
+          },
+          {
+            time: "Шөнө",
+            text: {
+              mn: "Гэрэл зургийн талаар ярилцлага, дүгнэлт.",
+              ko: "사진 리뷰 및 피드백 세션.",
+              en: "Photo review and feedback session.",
+            },
+          },
         ],
         overnight: { mn: "Жуулчны баазад", ko: "관광 캠프 숙박", en: "Tourist Camp Accommodation" },
       },
@@ -210,15 +287,40 @@ export const tours: Tour[] = [
           mn: "Жаргалант → Баян нуур",
           ko: "자르갈란트 → 바얀 누르",
         },
-        subtitle: { mn: "Нуур, шилжилтийн бүс", ko: "호수와 이주 조류 지대", en: "Lake & Migration Zone" },
+        subtitle: { mn: "Ой моддоос намагт нуур луу", ko: "숲에서 습지 호수로", en: "From forest woodland to wetland lake" },
         schedule: [
-          { time: "05:00–07:00", text: { mn: "Үүр цайх үеийн ойн зураг авалт.", ko: "새벽 산림 촬영.", en: "Dawn forest photography." } },
-          { time: "07:00", text: { mn: "Өглөөний цай.", ko: "아침 식사.", en: "Breakfast." } },
-          { time: "08:00", text: { mn: "Баян нуур руу хөдөлнө.", ko: "바얀 누르로 이동.", en: "Drive to Bayan Nuur." } },
-          { time: "12:00–13:30", text: { mn: "Баян нуурт ирж, хээрийн өдрийн хоол идэх.", ko: "바얀 누르 도착, 야외 점심.", en: "Arrive at Bayan Nuur and enjoy an outdoor lunch." } },
-          { time: "13:30–17:30", text: { mn: "Намгархаг газар болон хээрийн шувуудын зураг авах.", ko: "습지 및 초원 조류 촬영.", en: "Photograph wetland and steppe birds." } },
-          { time: "17:30–19:00", text: { mn: "Нар жаргах үеийн шувууны зураг авалт.", ko: "황혼녘 조류 촬영.", en: "Sunset bird photography." } },
-          { time: "19:00", text: { mn: "Оройн хоол (Хээрийн).", ko: "저녁 식사 (야외).", en: "Dinner (outdoors)." } },
+          {
+            time: "Өглөө",
+            text: {
+              mn: "Үүр цайх үеийн ойн зураг авалт. Өглөөний цай. Баян нуур луу хөдөлнө.",
+              ko: "새벽 산림 촬영. 아침 식사. 바얀 누르로 이동.",
+              en: "Dawn forest photography. Breakfast. Drive to Bayan Nuur.",
+            },
+          },
+          {
+            time: "Үд",
+            text: {
+              mn: "Баян нуурт ирж, хээрийн өдрийн хоол идэх.",
+              ko: "바얀 누르 도착, 야외 점심.",
+              en: "Arrive at Bayan Nuur and enjoy an outdoor lunch.",
+            },
+          },
+          {
+            time: "Үдээс хойш",
+            text: {
+              mn: "Намгархаг газар болон хээрийн шувуудын зураг авах.",
+              ko: "습지 및 초원 조류 촬영.",
+              en: "Photograph wetland and steppe birds.",
+            },
+          },
+          {
+            time: "Орой",
+            text: {
+              mn: "Нар жаргах үеийн шувууны зураг авалт. Оройн хоол (Хээрийн).",
+              ko: "황혼녘 조류 촬영. 저녁 식사 (야외).",
+              en: "Sunset bird photography. Dinner outdoors.",
+            },
+          },
         ],
         overnight: { mn: "Майханд хононо", ko: "텐트 숙박", en: "Tent Camping" },
       },
@@ -230,11 +332,30 @@ export const tours: Tour[] = [
         },
         subtitle: { mn: "Нар мандах · буцах өдөр", ko: "일출 촬영 · 귀환", en: "Sunrise · Return Day" },
         schedule: [
-          { time: "05:30–07:00", text: { mn: "Нар мандах үеийн сүүлчийн зураг авалт.", ko: "일출 마지막 촬영.", en: "Final sunrise photography session." } },
-          { time: "07:30", text: { mn: "Өглөөний цай (Хээрийн).", ko: "아침 식사 (야외).", en: "Breakfast (outdoors)." } },
-          { time: "08:00", text: { mn: "Улаанбаатар руу хөдөлнө.", ko: "울란바토르로 출발.", en: "Drive to Ulaanbaatar." } },
-          { time: "Өдөр", text: { mn: "Лүн суманд өдрийн хоол.", ko: "런 솜에서 점심.", en: "Lunch in Lun Soum." } },
-          { time: "13:00–15:00", text: { mn: "Улаанбаатарт ирж аялал өндөрлөнө. Шууд нисэх хүмүүсийг нисэх буудалд хүргэнэ.", ko: "울란바토르 도착, 투어 종료. 직항 이용 손님은 공항까지 모셔다 드립니다.", en: "Arrive in Ulaanbaatar and conclude the tour. Direct-flight guests are transferred to the airport." } },
+          {
+            time: "Өглөө",
+            text: {
+              mn: "Нар мандах үеийн сүүлчийн зураг авалт. Өглөөний цай (Хээрийн). Улаанбаатар руу хөдөлнө.",
+              ko: "일출 마지막 촬영. 아침 식사 (야외). 울란바토르로 출발.",
+              en: "Final sunrise photography session. Breakfast outdoors. Drive to Ulaanbaatar.",
+            },
+          },
+          {
+            time: "Үд",
+            text: {
+              mn: "Лүн суманд өдрийн хоол.",
+              ko: "런 솜에서 점심.",
+              en: "Lunch in Lun Soum.",
+            },
+          },
+          {
+            time: "Үдээс хойш",
+            text: {
+              mn: "Улаанбаатарт ирж аялал өндөрлөнө. Шууд нисэх хүмүүсийг нисэх буудалд хүргэнэ.",
+              ko: "울란바토르 도착, 투어 종료. 직항 이용 손님은 공항까지 모셔다 드립니다.",
+              en: "Arrive in Ulaanbaatar and conclude the tour. Direct-flight guests are transferred to the airport.",
+            },
+          },
         ],
       },
     ],
@@ -263,26 +384,26 @@ export const tours: Tour[] = [
       { mn: "4WD бартаат замын автомашинаар аялна.", ko: "4WD 오프로드 차량으로 이동.", en: "Travel by 4WD off-road vehicle." },
       { mn: "Хээрийн хоногуудад кэмпийн тоног төхөөрөмж бэлэн байна.", ko: "야외 숙박 시 캠핑 장비 완비.", en: "Full camping equipment provided for outdoor nights." },
       { mn: "Эрдэнэсантад малчин айлд хононо.", ko: "에르덴산트에서 유목민 가정 홈스테이.", en: "Overnight at a nomadic family home in Erdene Santi." },
-      { mn: "Мэргэжлийн шувуу судлаач хөтөч болон хээрийн тогооч ажиллана.", ko: "전문 조류학자 가이드와 야외 요리사 동행.", en: "Professional ornithologist guide and field chef included." },
+      { mn: "Мэргэжлийн шувуу судлаач, хөтөч болон хээрийн тогооч ажиллана.", ko: "전문 조류학자, 가이드와 야외 요리사 동행.", en: "Professional ornithologist, guide and field chef included." },
     ],
     pricing: {
       note: {
-        mn: "Хүний тоогоор үнэ өөрчлөгдөнө.",
-        ko: "인원 수에 따라 요금이 달라집니다.",
-        en: "Price varies by group size.",
+        mn: "Аялал 4–5 хүн бүрдсэн үед эхэлнэ.",
+        ko: "투어는 4–5명 모집 시 출발합니다.",
+        en: "Tour departs when 4–5 participants are confirmed.",
       },
       tiers: [
         {
-          groupSize: { mn: "3 хүн", ko: "3명", en: "3 People" },
-          pricePerPerson: { mn: "₩2,000,000 / хүн", ko: "1인 ₩2,000,000", en: "₩2,000,000 per person" },
+          groupSize: { mn: "5 хүнтэй баг", ko: "5명 그룹", en: "Group of 5" },
+          pricePerPerson: { mn: "₩2,000,000 / 1 хүн", ko: "1인 ₩2,000,000", en: "₩2,000,000 per person" },
         },
         {
-          groupSize: { mn: "2 хүн", ko: "2명", en: "2 People" },
-          pricePerPerson: { mn: "₩2,200,000 / хүн", ko: "1인 ₩2,200,000", en: "₩2,200,000 per person" },
+          groupSize: { mn: "4 хүнтэй баг", ko: "4명 그룹", en: "Group of 4" },
+          pricePerPerson: { mn: "₩2,200,000 / 1 хүн", ko: "1인 ₩2,200,000", en: "₩2,200,000 per person" },
         },
         {
-          groupSize: { mn: "1 хүн", ko: "1명", en: "1 Person" },
-          pricePerPerson: { mn: "₩2,600,000 / хүн", ko: "1인 ₩2,600,000", en: "₩2,600,000 per person" },
+          groupSize: { mn: "3 хүн хүртэл", ko: "3명까지", en: "Up to 3 People" },
+          pricePerPerson: { mn: "₩2,600,000 / 1 хүн", ko: "1인 ₩2,600,000", en: "₩2,600,000 per person" },
         },
       ],
       included: [
@@ -429,8 +550,8 @@ export const tours: Tour[] = [
           {
             time: "Замдаа",
             text: {
-              mn: "Том маркет дээр зогсоод кампэд хэрэгтэй зүйлсээ худалдан авна.",
-              ko: "대형 마트에서 캠프에 필요한 물품 구매.",
+              mn: "Дэлгүүр орж хувийн хэрэглээгээ хангана.",
+              ko: "매장에서 개인용품 구입.",
             },
           },
           {
@@ -443,21 +564,21 @@ export const tours: Tour[] = [
           {
             time: "Үдээс хойш",
             text: {
-              mn: "Мөнгөн морт суманд ирж, загасчны кампын модон байшинд check-in.",
-              ko: "뭉궁 모르트 작은 마을 도착 후 어부 캠프 통나무집 체크인.",
+              mn: "Мөнгөн морьт суманд ирж, загасчны отогт (модон байшинд) байрлана.",
+              ko: "뭉궁 모르트 작은 마을 도착 후 어부 오톡(통나무집)에 숙박.",
             },
           },
           {
             time: "Орой",
             text: {
-              mn: "Хэрлэн голд анхны загасчлал, оройн хоолны хамт нэг шил архи зооглон, шөнийн оддыг сонирхоно.",
-              ko: "헤를렌강에서 첫 낚시, 저녁 식사와 함께 술 한잔을 즐기며 밤하늘의 별을 감상.",
+              mn: "Хэрлэн голд анхны загасчлал, оройн хоолны хамт түүдэг галын дэргэд шөнийн оддыг сонирхоно.",
+              ko: "헤를렌강에서 첫 낚시, 저녁 식사 후 모닥불 앞에서 밤하늘의 별을 감상.",
             },
           },
         ],
         overnight: {
-          mn: "Загасчны кампын модон байшин (4/3 хүн нэг өрөө, нийтийн ариун цэвэр ба усанд орох газартай)",
-          ko: "어부 캠프 통나무집 (4인/3인 1실, 공용 화장실 및 샤워실)",
+          mn: "Загасчны отог.",
+          ko: "어부 오톡.",
         },
       },
       {
@@ -488,8 +609,8 @@ export const tours: Tour[] = [
           {
             time: "Орой",
             text: {
-              mn: "Уламжлалт хорхог зооглож, найзуудтайгаа сонгины архи дагалдуулсан оройн хоол.",
-              ko: "전통 음식 허르헉을 맛보고, 친구들과 함께 소주를 곁들인 저녁 식사.",
+              mn: "Найзуудтайгаа уламжлалт Монгол хоол зооглоно.",
+              ko: "친구들과 함께 전통 몽골 음식을 즐깁니다.",
             },
           },
           {
@@ -500,7 +621,7 @@ export const tours: Tour[] = [
             },
           },
         ],
-        overnight: { mn: "Загасчны кампын модон байшин", ko: "어부 캠프 통나무집", en: "Fisherman's Camp Log Cabin" },
+        overnight: { mn: "Загасчны отог.", ko: "어부 오톡.", en: "Fisherman's otog." },
       },
       {
         day: 3,
@@ -509,8 +630,8 @@ export const tours: Tour[] = [
           ko: "뭉궁 모르트 → 울란바토르",
         },
         subtitle: {
-          mn: "~180 км · хотын аялал ба шөнийн харагдац",
-          ko: "~180km · 시내 투어 및 야경",
+          mn: "~180 км · хотын аялал",
+          ko: "~180km · 시내 투어",
         },
         schedule: [
           {
@@ -539,9 +660,9 @@ export const tours: Tour[] = [
       },
     ],
     meals: {
-      breakfast: { mn: "Дэлгүүрийн зууш / кампын хоол", ko: "편의점식 / 캠프식", en: "Convenience-store snacks / camp meals" },
-      lunch: { mn: "Орон нутгийн хоол / кампын хоол", ko: "현지식 / 캠프식", en: "Local cuisine / camp meals" },
-      dinner: { mn: "Кампын хоол · сүүлийн өдөр шарсан мах", ko: "캠프식 · 마지막 날 샤브샤브", en: "Camp meals · hot pot on the final day" },
+      breakfast: { mn: "Дэлгүүрийн зууш / отгийн хоол", ko: "편의점식 / 오톡식", en: "Convenience-store snacks / otog meals" },
+      lunch: { mn: "Орон нутгийн хоол / отгийн хоол", ko: "현지식 / 오톡식", en: "Local cuisine / otog meals" },
+      dinner: { mn: "Отгийн хоол · сүүлийн өдөр шарсан мах", ko: "오톡식 · 마지막 날 샤브샤브", en: "Otog meals · hot pot on the final day" },
       special: {
         mn: "2 дахь өдөр уламжлалт хорхог",
         ko: "2일째 전통 음식 허르헉",
@@ -553,20 +674,22 @@ export const tours: Tour[] = [
         { mn: "Хэрлэн голд бүтэн 1 өдрийн загасчлал", ko: "헤를렌강에서 종일 낚시", en: "Full day of fishing on the Kherlen River" },
         { mn: "Чингис хааны морьт хөшөөгөөр зочлох ба музей", ko: "칭기즈 칸 기마 동상 및 박물관 방문", en: "Visit the Chinggis Khaan equestrian statue and museum" },
         { mn: "Уламжлалт хорхог зооглох", ko: "전통 허르헉 시식", en: "Traditional khorhog dining experience" },
-        { mn: "Оддын дор задгай karaoke ба сонгины архи", ko: "별 아래 야외 노래방과 소주 한잔", en: "Open-air karaoke and soju under the stars" },
+        { mn: "Оддын дор задгай karaoke", ko: "별 아래 야외 노래방", en: "Open-air karaoke under the stars" },
         { mn: "Зайсан толгойноос УБ-ын шөнийн харагдац", ko: "자이산 언덕에서 울란바토르 야경", en: "Ulaanbaatar night views from Zaisan Hill" },
         { mn: "Их Дэлгүүр ба Нарантуул захын худалдан авалт", ko: "국영 백화점 및 나란뚤 시장 쇼핑", en: "Shopping at the State Department Store and Narantuul Market" },
       ],
     },
     logistics: [
       {
-        mn: "Тусгай зориулалтын автомашин: 1–4 хүний бүлэгт SUV, 5–6 хүний бүлэгт Пүргон / Alphard / Starex.",
-        ko: "전용 차량: 1–4인 SUV, 5–6인 푸르공 / 알파드 / 스타렉스.",
+        mn: "4WD бартаат замын автомашинаар аялна.",
+        ko: "4WD 오프로드 차량으로 이동.",
+        en: "Travel by 4WD off-road vehicle.",
       },
       { mn: "Солонгос хэлтэй хөтөч хамт явна.", ko: "한국어 가이드 동행.", en: "Korean-speaking guide accompanies the group." },
       {
-        mn: "Кампын байр (4/3 хүн нэг өрөө), нийтийн ариун цэвэр ба усанд орох газартай.",
-        ko: "캠프 숙박 (4인/3인 1실), 공용 화장실 및 샤워실 이용.",
+        mn: "Загасчны отог.",
+        ko: "어부 오톡.",
+        en: "Fisherman's otog.",
       },
       {
         mn: "Загасчны хэрэгсэл бэлэн (хувийн тоног хэрэгслээ авч ирж болно).",
@@ -575,18 +698,41 @@ export const tours: Tour[] = [
     ],
     pricing: {
       note: {
-        mn: "Аяллын идэвхтэй улирал: 2026 оны 5 сарын 20 — 9 сарын 30. Үнийн талаарх дэлгэрэнгүйг бидэнтэй холбогдон асууна уу.",
-        ko: "운영 기간: 2026년 5월 20일 ~ 9월 30일. 가격은 문의 바랍니다.",
+        mn: "Аяллын идэвхтэй улирал: 2026 оны 5 сарын 20 — 9 сарын 30. Хүний тоогоор үнэ өөрчлөгдөнө.",
+        ko: "운영 기간: 2026년 5월 20일 ~ 9월 30일. 인원 수에 따라 요금이 달라집니다.",
+        en: "Operating season: May 20 – Sep 30, 2026. Price varies by group size.",
       },
-      tiers: [],
+      tiers: [
+        {
+          groupSize: { mn: "5 хүн", ko: "5명", en: "5 People" },
+          pricePerPerson: { mn: "₩890,000 / 1 хүн", ko: "1인 ₩890,000", en: "₩890,000 per person" },
+        },
+        {
+          groupSize: { mn: "4 хүн", ko: "4명", en: "4 People" },
+          pricePerPerson: { mn: "₩990,000 / 1 хүн", ko: "1인 ₩990,000", en: "₩990,000 per person" },
+        },
+        {
+          groupSize: { mn: "3 хүн", ko: "3명", en: "3 People" },
+          pricePerPerson: { mn: "₩1,190,000 / 1 хүн", ko: "1인 ₩1,190,000", en: "₩1,190,000 per person" },
+        },
+        {
+          groupSize: { mn: "2 хүн", ko: "2명", en: "2 People" },
+          pricePerPerson: { mn: "₩1,390,000 / 1 хүн", ko: "1인 ₩1,390,000", en: "₩1,390,000 per person" },
+        },
+        {
+          groupSize: { mn: "1 хүн", ko: "1명", en: "1 Person" },
+          pricePerPerson: { mn: "₩1,490,000 / 1 хүн", ko: "1인 ₩1,490,000", en: "₩1,490,000 per person" },
+        },
+      ],
       included: [
         {
-          mn: "Тусгай зориулалтын автомашин (шатахуун, замын төлбөр).",
-          ko: "전용 차량 (유류대, 도로비).",
+          mn: "4WD бартаат замын автомашинаар аялна.",
+          ko: "4WD 오프로드 차량으로 이동.",
+          en: "Travel by 4WD off-road vehicle.",
         },
         { mn: "Солонгос хэлтэй хөтөч.", ko: "한국어 가이드.", en: "Korean-speaking guide." },
         { mn: "Бүх хоол.", ko: "모든 식사.", en: "All meals." },
-        { mn: "Зочид буудал ба кампын байр.", ko: "호텔 및 캠프 숙박.", en: "Hotel and camp accommodation." },
+        { mn: "Зочид буудал ба загасчны отог.", ko: "호텔 및 어부 오톡.", en: "Hotel and fisherman's otog." },
       ],
       excluded: [
         {
@@ -601,7 +747,7 @@ export const tours: Tour[] = [
     },
   },
   // ─────────────────────────────────────────────────────────────────────
-  // АЯЛАЛ #3 — Арбурд элс ба говийн адал явдал
+  // АЯЛАЛ #3 — Арбүрд элс ба говийн адал явдал
   // ─────────────────────────────────────────────────────────────────────
   {
     slug: "arburd-gobi",
@@ -609,11 +755,13 @@ export const tours: Tour[] = [
     hero: {
       title: {
         mn: "Нүүдэлчдийн соёлын аялал",
-        ko: "유목 문화 체험",
+        ko: "아르부르드 고비 3박4일 투어",
+        en: "Arburd Gobi · 3 Nights 4 Days",
       },
       subtitle: {
-        mn: "Улаанбаатар → Арбурд → Баян Өнжүүл → Чингис хааны хөшөө → УБ · 3 шөнө 4 өдөр",
-        ko: "울란바토르 → 아르부르드 → 바양 운줄 → 칭기즈 칸 기마 동상 → 울란바토르 · 3박 4일",
+        mn: "Чингис хаан нисэх буудал → Арбүрд → Баян Өнжүүл → Чингис хааны хөшөө → УБ · 3 шөнө 4 өдөр",
+        ko: "칭기스칸공항 → 아르부르드 → 바양 은줄 → 칭기즈 칸 기마 동상 → 울란바토르 · 3박 4일",
+        en: "Chinggis Khaan Airport → Arburd → Bayan Onjuul → Chinggis Khaan Statue → UB · 3 Nights 4 Days",
       },
       image: nomadicCultureHero,
       imageHd: nomadicCultureHeroHd,
@@ -622,133 +770,146 @@ export const tours: Tour[] = [
     overview: {
       duration: { mn: "4 өдөр / 3 шөнө", ko: "3박 4일", en: "4 Days / 3 Nights" },
       target: {
-        mn: "Гэр бүл, найз нөхдийн баг (хамгийн ихдээ 6 хүн)",
-        ko: "가족, 친구 모임 (최대 6인)",
+        mn: "Гэр бүл, найз нөхөд",
+        ko: "가족, 친구",
+        en: "Families & Friends",
       },
       crew: { mn: "Солонгос хэлтэй хөтөч + жолооч", ko: "한국어 가이드 + 운전기사", en: "Korean-speaking Guide + Driver" },
       route: {
-        mn: "УБ → Арбурд (~170 км) → Баян Өнжүүл (~30 км) → Чингис хааны хөшөө → УБ (~210 км)",
-        ko: "울란바토르 → 아르부르드 (~170km) → 바양 운줄 (~30km) → 칭기즈 칸 기마 동상 → 울란바토르 (~210km)",
+        mn: "Чингис хаан нисэх буудал → Арбүрд (~150 км) → Баян Өнжүүл (~30 км) → Чингис хааны хөшөө (~160 км) → УБ (~50 км)",
+        ko: "칭기스칸공항 → 아르부르드 (약 150km) → 바양 은줄 (약 30km) → 칭기즈 칸 기마 동상 (약 160km) → 울란바토르 (약 50km)",
+        en: "Chinggis Khaan Airport → Arburd (~150 km) → Bayan Onjuul (~30 km) → Chinggis Khaan Statue (~160 km) → UB (~50 km)",
       },
     },
     description: {
-      mn: "Арбурд элсний нар жаргахыг тэмээгээр бялхуулан, элсэн дээр чарга гулгаж, шөнийн моддогийн дор оддыг ширтэнэ. Маргааш нь Баян Өнжүүлд морь унаж, малчин гэр бүлийн ам бүлийн амьдралыг таньж, уламжлалт хорхог зооглоно. Эцэст нь Чингис хааны морьт хөшөө болон Улаанбаатар хотын соёлоор танилцана.",
-      ko: "아르부르드 모래언덕에서 낙타를 타고 일몰을 감상하고, 모래 썰매와 모닥불 옆에서 별을 즐깁니다. 다음 날 바양 운줄 유목민 가정에서 승마와 허르헉을 체험하고, 마지막에는 칭기즈 칸 기마 동상과 울란바토르 시내 문화 체험까지 — 가장 몽골다운 클래식 일정입니다.",
+      mn: "Чингис хаан олон улсын нисэх буудал дээр угтан авч, Арбүрдын жуулчны баазад байрлан одтой тэнгэрийн дор дуу хуурын үдэшлэгт оролцоно. Маргааш нь тэмээ унах, элсэн чаргаар гулгах, морин аялал хийх, уламжлалт хорхог амтлах зэрэг үйл ажиллагаагаар дамжуулан нүүдэлчин ахуй, соёлтой танилцана. Аяллын төгсгөлд Чингис хааны морьт хөшөөг үзэж, Улаанбаатар хотын түүх, соёлын онцлох газруудаар аялна.",
+      ko: "칭기스칸 국제공항에서 픽업한 뒤 아르부르드 관광기지에서 묵으며 별이 빛나는 밤하늘 아래 마두금 연주의 저녁 행사에 참여합니다. 다음 날 낙타 체험, 모래 썰매, 승마, 전통 허르헉 시식 등을 통해 유목민의 생활과 문화를 만납니다. 여행의 마무리는 칭기즈 칸 기마 동상 관람과 울란바토르의 역사·문화 명소 투어입니다.",
+      en: "Greeted at Chinggis Khaan International Airport, you stay at the Arburd tourist base and join an evening morin khuur performance under the starry sky. The next day, camel riding, sand sledding, horseback riding, and traditional khorhog introduce nomadic life and culture. The journey concludes with the Chinggis Khaan equestrian statue and a tour of Ulaanbaatar's historic and cultural highlights.",
     },
     days: [
       {
         day: 1,
         title: {
-          mn: "Улаанбаатар → Арбурд",
-          ko: "울란바토르 → 아르부르드",
+          mn: "Чингис хаан нисэх буудал → Арбүрд",
+          ko: "칭기스칸공항 → 아르부르드",
+          en: "Chinggis Khaan Airport → Arburd",
         },
-        subtitle: { mn: "~170 км · Тусгай зориулалтын автомашин", ko: "~170km · 전용 차량", en: "~170 km · Private Vehicle" },
+        subtitle: {
+          mn: "~150 км",
+          ko: "약 150km",
+          en: "~150 km",
+        },
         schedule: [
           {
             time: "Өглөө",
             text: {
-              mn: "Чингис хаан Олон Улсын Нисэх Буудал дээр хүлээн авч, хөтөчтэй танилцана.",
-              ko: "칭기즈 칸 국제공항 도착 후 가이드 미팅.",
+              mn: "Чингис хаан Олон Улсын Нисэх Буудал дээр хүлээн авч, хөтөчтэй танилцана. Арбүрд руу хөдөлж, том худалдааны төвөөс шаардлагатай зүйлс худалдан авна.",
+              ko: "공항 도착 후 가이드 미팅. 아르부르드로 이동. 대형 마트에서 필요한 물품 구매.",
+              en: "Airport pickup and guide meeting. Drive to Arburd and shop for supplies at a large supermarket.",
             },
           },
           {
             time: "Үд",
-            text: { mn: "Арбурд руу хөдөлнө.", ko: "아르부르드로 이동.", en: "Drive to Arburd." },
-          },
-          {
-            time: "Үдээс хойш",
             text: {
-              mn: "Кампад ирээд оройн хоол ба гэрт check-in.",
-              ko: "도착 후 석식 및 게르 체크인.",
+              mn: "Замд явахдаа орон нутгийн хоол.",
+              ko: "이동 중 현지식 점심.",
+              en: "Local lunch en route.",
             },
           },
           {
             time: "Орой",
             text: {
-              mn: "Элсэн дээр тэмээгээр зугаалж, нар жаргахын гайхамшгийг буулгана.",
-              ko: "낙타를 타고 일몰을 감상.",
+              mn: "Жуулчны баазад ирж байрлаад, хоолонд орно.",
+              ko: "관광기지 도착 후 숙박하고 식사합니다.",
+              en: "Arrive at the tourist base, settle in, and have dinner.",
             },
           },
           {
             time: "Шөнө",
             text: {
-              mn: "Моддогийн дор оддыг ширтэн, найз нөхдийн дунд дуу дуулна.",
-              ko: "모닥불 옆에서 별을 감상하며 노래를 즐깁니다.",
+              mn: "Моддын дэргэд, оддын дор найз нөхдийн хамт дуу дуулна.",
+              ko: "나무 옆, 별 아래에서 친구들과 함께 노래를 부릅니다.",
+              en: "By the trees, under the stars, sing together with friends.",
             },
           },
         ],
         overnight: {
-          mn: "Жуулчны кампын гэр (4/3 хүн нэг өрөө, нийтийн ариун цэвэр ба усанд орох газартай)",
-          ko: "관광 캠프 게르 (4인/3인 1실, 공용 화장실 및 샤워실)",
+          mn: "Жуулчны баазад (3-4 хүн нэг өрөөнд, нийтийн ариун цэвэр ба усанд орох газартай)",
+          ko: "관광기지 (3-4인 1실, 공용 화장실 및 샤워실)",
+          en: "Tourist base (3-4 guests per room, shared bathroom and shower)",
         },
       },
       {
         day: 2,
         title: {
-          mn: "Арбурд → Баян Өнжүүл",
-          ko: "아르부르드 → 바양 운줄",
+          mn: "Арбүрд → Баян Өнжүүл",
+          ko: "아르부르드 → 바양 은줄",
+          en: "Arburd → Bayan Onjuul",
         },
-        subtitle: { mn: "~30 км · Тэмээ ба морь, малчин ажил", ko: "~30km · 낙타와 말, 유목 체험", en: "~30 km · Camels, Horses & Nomadic Life" },
+        subtitle: {
+          mn: "~30 км · Тэмээ, морь, малчин амьдрал",
+          ko: "약 30km · 낙타, 승마, 유목 체험",
+          en: "~30 km · Camels, Horses & Nomadic Life",
+        },
         schedule: [
           {
             time: "Өглөө",
-            text: { mn: "Хоолны дараа хөдөлнө.", ko: "조식 후 이동.", en: "Depart after breakfast." },
-          },
-          {
-            time: "09:00–10:00",
             text: {
-              mn: "Арбурд элсэн дунд тэмээгээр 1 цаг аялах туршлага.",
-              ko: "아르부르드 낙타 체험 (1시간).",
-            },
-          },
-          {
-            time: "10:00–12:00",
-            text: {
-              mn: "Цөл дунд гэрэл зураг авах, элсэн чарга гулгах, тэмээтэй ойртон танилцах.",
-              ko: "사막에서 사진 촬영 및 모래 썰매 체험, 낙타와 교감.",
+              mn: "Хоолны дараа элсэн дээр аялаж, хөгжилтэй үеээ гэрэл зурагт буулгана.",
+              ko: "식사 후 모래언덕에서 산책하며 즐거운 순간을 사진에 담습니다.",
+              en: "After a meal, stroll on the sand dunes and capture fun moments in photos.",
             },
           },
           {
             time: "Үд",
-            text: { mn: "Баян Өнжүүл рүү шилжинэ.", ko: "점심 후 바양 운줄로 이동.", en: "Transfer to Bayan Onjuul after lunch." },
+            text: {
+              mn: "Өдрийн хоолны дараа Баян Өнжүүл рүү хөдөлнө.",
+              ko: "중식 후 바양 은줄 이동.",
+              en: "Transfer to Bayan Onjuul after lunch.",
+            },
           },
           {
             time: "Үдээс хойш",
             text: {
-              mn: "Жуулчны кампад check-in, морин аялал.",
-              ko: "여행자 캠프 체크인 및 승마 체험.",
+              mn: "Малчин айлын дэргэд гэр барин хоноглоно.",
+              ko: "유목민 가정 옆에서 게르를 짓고 숙박합니다.",
+              en: "Set up a ger beside a herder family and stay overnight.",
             },
           },
           {
             time: "Орой",
             text: {
-              mn: "Уламжлалт монгол хоол хорхог амтлан, малаа маллан, нүүдэлчин соёлыг таньж мэднэ.",
-              ko: "허르헉(몽골 전통 음식)을 맛보고, 가축들을 돌보며 몽골 유목민 문화를 체험.",
+              mn: "Уламжлалт Монгол хоол болох хорхог зооглож, мал адгуулж, нүүдэлчин соёлыг мэдэрнэ.",
+              ko: "전통 몽골 음식인 허르헉(호르호그)을 맛보고, 가축을 돌보며 유목민 문화를 체험합니다.",
+              en: "Enjoy traditional Mongolian khorhog, tend livestock, and experience nomadic culture.",
             },
           },
         ],
         overnight: {
-          mn: "Жуулчны кампын гэр (6/4/3 хүн нэг өрөө, нийтийн ариун цэвэр ба усанд орох газартай)",
-          ko: "여행자 캠프 게르 (6인/4인/3인 1실, 공용 화장실, 샤워실)",
+          mn: "Жуулчны баазад (3, 4, 6 хүн нэг өрөөнд, нийтийн ариун цэврийн өрөөтэй)",
+          ko: "관광기지 (3인, 4인, 6인 1실, 공용 화장실)",
+          en: "Tourist base (3, 4, 6 guests per room, with shared restroom facilities)",
         },
       },
       {
         day: 3,
         title: {
           mn: "Баян Өнжүүл → Чингис хааны хөшөө → Улаанбаатар",
-          ko: "바양 운줄 → 칭기즈 칸 기마 동상 → 울란바토르",
+          ko: "바양 은줄 → 칭기즈 칸 기마 동상 → 울란바토르",
+          en: "Bayan Onjuul → Chinggis Khaan Statue → Ulaanbaatar",
         },
-        subtitle: { mn: "~160 км + ~50 км", ko: "~160km + ~50km", en: "~160 km + ~50 km" },
+        subtitle: {
+          mn: "~160 км + ~50 км",
+          ko: "약 160km + 약 50km",
+          en: "~160 km + ~50 km",
+        },
         schedule: [
           {
             time: "Өглөө",
-            text: { mn: "Хоолны дараа хөдөлнө.", ko: "조식 후 이동.", en: "Depart after breakfast." },
-          },
-          {
-            time: "Замдаа",
             text: {
-              mn: "Замын дунд агуйн доторх савлуурын туршлага.",
-              ko: "이동하는 길에 동굴 안 그네 체험.",
+              mn: "Хоолны дараа хөдөлнө. Явах замдаа Баян Өнжүүл Хайрханд савлуурт зугаацаж чилээгээ гаргана.",
+              ko: "식사 후 이동. 이동하는 길 바양 은줄 헤이르한에서 그네를 타며 즐깁니다.",
+              en: "Depart after breakfast. En route, enjoy the swing at Bayan Onjuul Khairkhan and have fun.",
             },
           },
           {
@@ -756,39 +917,51 @@ export const tours: Tour[] = [
             text: {
               mn: "Чингис хааны морьт хөшөөгөөр зочлон, дотор үзэж, тэнгэрийн харааны тавцангаас дурсгалын зураг авч, бяцхан музей үзнэ.",
               ko: "칭기즈 칸 기마 동상 방문, 내부 관람 후 전망대에서 기념 촬영 및 소규모 박물관 관람.",
+              en: "Visit the Chinggis Khaan equestrian statue, interior tour, viewpoint photos, and small museum.",
             },
           },
           {
             time: "Орой",
             text: {
-              mn: "Улаанбаатар руу шилжиж, шөнийн харагдацыг сонирхон, зочид буудалд хононо.",
-              ko: "울란바토르로 이동 후 야경을 감상하고 호텔에서 숙박.",
+              mn: "Улаанбаатар руу хөдөлж, шөнийн хотыг сонирхон, зочид буудалд хоноглоно.",
+              ko: "울란바토르로 이동해 야경을 감상하고 호텔에서 숙박합니다.",
+              en: "Travel to Ulaanbaatar, explore the city at night, and stay at a hotel.",
             },
           },
         ],
-        overnight: { mn: "Улаанбаатар хотын зочид буудал", ko: "울란바토르 시내 호텔", en: "Ulaanbaatar City Hotel" },
+        overnight: {
+          mn: "Улаанбаатар хотын зочид буудал",
+          ko: "울란바토르 시내 호텔",
+          en: "Ulaanbaatar City Hotel",
+        },
       },
       {
         day: 4,
         title: {
           mn: "Улаанбаатар хотын аялал",
           ko: "울란바토르 시내 투어",
+          en: "Ulaanbaatar City Tour",
         },
-        subtitle: { mn: "Соёл, түүх, худалдан авалт", ko: "문화·역사·쇼핑", en: "Culture, History & Shopping" },
+        subtitle: {
+          mn: "Соёл, түүх, худалдан авалт",
+          ko: "문화·역사·쇼핑",
+          en: "Culture, History & Shopping",
+        },
         schedule: [
           {
             time: "Өглөө",
-            text: { mn: "Хоолны дараа хөдөлнө.", ko: "조식 후 이동.", en: "Depart after breakfast." },
-          },
-          {
-            time: "Үд дунд",
-            text: { mn: "Сүхбаатарын талбайгаар зочилно.", ko: "수흐바타르 광장 관람.", en: "Visit Sukhbaatar Square." },
+            text: {
+              mn: "Хоолны дараа хөдөлнө. Сүхбаатарын талбайгаар зочилно.",
+              ko: "조식 후 이동. 수흐바타르 광장 관람.",
+              en: "After breakfast, visit Sukhbaatar Square.",
+            },
           },
           {
             time: "Үдээс хойш",
             text: {
               mn: "Гандан хийдэд зочлон, Буддын соёлтой танилцана.",
               ko: "간단 사원 방문 및 불교 문화 체험.",
+              en: "Visit Gandantegchinlen Monastery and learn about Buddhist culture.",
             },
           },
           {
@@ -796,33 +969,48 @@ export const tours: Tour[] = [
             text: {
               mn: "Музей эсвэл ардын урлагийн тоглолт (сонголтоор).",
               ko: "박물관 또는 민속공연 관람 (선택).",
+              en: "Museum or folk performance (optional).",
             },
           },
           {
             time: "Орой",
             text: {
-              mn: "Их Дэлгүүрт зочлон, бэлэг дурсгалын худалдан авалт хийнэ.",
-              ko: "국영 백화점 방문 및 쇼핑.",
+              mn: "Их Дэлгүүрт зочлон, бэлэг дурсгалын худалдан авалт хийнэ. Оройн хоол: Халуун тогоо.",
+              ko: "국영 백화점 방문 및 쇼핑. 석식: 핫팟.",
+              en: "State Department Store shopping. Dinner: hot pot.",
             },
           },
         ],
       },
     ],
     meals: {
-      breakfast: { mn: "Дэлгүүрийн зууш / кампын хоол / зочид буудлын хоол", ko: "편의점식 / 캠프식 / 호텔식", en: "Convenience-store snacks / camp meals / hotel meals" },
-      lunch: { mn: "Орон нутгийн хоол / кампын хоол", ko: "현지식 / 캠프식", en: "Local cuisine / camp meals" },
-      dinner: { mn: "Кампын хоол", ko: "캠프식", en: "Camp meals" },
+      breakfast: {
+        mn: "1-р өдөр: дэлгүүрийн зууш · 2-р өдөр: баазын хоол · 3-р өдөр: баазын хоол · 4-р өдөр: зочид буудлын хоол",
+        ko: "1일: 편의점식 · 2일: 기지식 · 3일: 기지식 · 4일: 호텔식",
+        en: "Day 1: convenience-store snacks · Day 2: base · Day 3: base · Day 4: hotel",
+      },
+      lunch: {
+        mn: "1-р өдөр: орон нутгийн хоол · 2-р өдөр: баазын хоол · 3-р өдөр: орон нутгийн хоол · 4-р өдөр: орон нутгийн хоол",
+        ko: "1일: 현지식 · 2일: 기지식 · 3일: 현지식 · 4일: 현지식",
+        en: "Day 1: local · Day 2: base · Day 3: local · Day 4: local",
+      },
+      dinner: {
+        mn: "1-р өдөр: баазын хоол · 2-р өдөр: хорхог (баазын хоол) · 3-р өдөр: баазын хоол · 4-р өдөр: Халуун тогоо",
+        ko: "1일: 기지식 · 2일: 허르헉(기지식) · 3일: 기지식 · 4일: 핫팟",
+        en: "Day 1: base · Day 2: khorhog (base) · Day 3: base · Day 4: hot pot",
+      },
       special: {
-        mn: "2 дахь өдөр малчин айлд уламжлалт хорхог",
-        ko: "2일째 유목민 가정에서 전통 허르헉",
+        mn: "2 дахь өдөр уламжлалт хорхог",
+        ko: "2일째 전통 허르헉",
+        en: "Traditional khorhog on Day 2",
       },
     },
     highlights: {
       title: { mn: "Аяллын онцлох мөчүүд", ko: "투어 하이라이트", en: "Tour Highlights" },
       items: [
-        { mn: "Арбурд элсэн дунд тэмээгээр аялах", ko: "아르부르드 모래언덕에서 낙타 체험", en: "Camel trek through the Arburd dunes" },
-        { mn: "Элсэн чарга ба моддогийн дор одод", ko: "모래 썰매와 모닥불 아래 별 감상", en: "Sand sledding and stargazing by the campfire" },
-        { mn: "Баян Өнжүүлд морь унаж нүүдэлчин соёлыг мэдрэх", ko: "바양 운줄에서 승마와 유목민 문화 체험", en: "Horseback riding and nomadic culture in Bayan Onjuul" },
+        { mn: "Арбүрд элсэн дунд тэмээгээр аялах", ko: "아르부르드 모래언덕에서 낙타 체험", en: "Camel trek through the Arburd dunes" },
+        { mn: "Элсэн чаргаар гулгах ба говийн одтой шөнө", ko: "모래 썰매 타기와 고비의 별이 빛나는 밤", en: "Gliding on sand sleds and a starry Gobi night" },
+        { mn: "Баян Өнжүүлд морь унаж нүүдэлчин соёлыг мэдрэх", ko: "바양 은줄에서 승마와 유목민 문화 체험", en: "Horseback riding and nomadic culture in Bayan Onjuul" },
         { mn: "Уламжлалт хорхог зооглох", ko: "전통 음식 허르헉 시식", en: "Traditional khorhog dining experience" },
         { mn: "Чингис хааны морьт хөшөөгөөр зочлох", ko: "칭기즈 칸 기마 동상 방문", en: "Visit the Chinggis Khaan equestrian statue" },
         { mn: "Сүхбаатарын талбай ба Гандан хийдийн соёлоор танилцах", ko: "수흐바타르 광장 및 간단 사원 문화 체험", en: "Sukhbaatar Square and Gandantegchinlen Monastery cultural tour" },
@@ -831,30 +1019,55 @@ export const tours: Tour[] = [
     },
     logistics: [
       {
-        mn: "Тусгай зориулалтын автомашин: 1–4 хүний бүлэгт SUV, 5–6 хүний бүлэгт Пүргон / Alphard / Starex.",
-        ko: "전용 차량: 1–4인 SUV, 5–6인 푸르공 / 알파드 / 스타렉스.",
+        mn: "4WD бартаат замын автомашинаар аялна.",
+        ko: "4WD 오프로드 차량으로 이동합니다.",
+        en: "Travel by 4WD off-road vehicle.",
       },
       { mn: "Солонгос хэлтэй хөтөч хамт явна.", ko: "한국어 가이드 동행.", en: "Korean-speaking guide accompanies the group." },
       {
-        mn: "Жуулчны кампад гэр байр (нийтийн ариун цэвэр ба усанд орох газартай).",
-        ko: "관광 캠프 게르 숙박 (공용 화장실 및 샤워실).",
+        mn: "Жуулчны баазын гэр байр (нийтийн ариун цэвэр ба усанд орох газартай).",
+        ko: "관광기지 게르 숙박 (공용 화장실 및 샤워실).",
+        en: "Tourist base ger accommodation (shared bathroom and shower).",
       },
       { mn: "Эцсийн шөнө Улаанбаатар хотын зочид буудалд хононо.", ko: "마지막 밤은 울란바토르 시내 호텔에서 숙박.", en: "Final night at a Ulaanbaatar city hotel." },
     ],
     pricing: {
       note: {
-        mn: "Аяллын идэвхтэй улирал: 2026 оны 5 сарын 20 — 9 сарын 30. Үнийн талаарх дэлгэрэнгүйг бидэнтэй холбогдон асууна уу.",
-        ko: "운영 기간: 2026년 5월 20일 ~ 9월 30일. 가격은 문의 바랍니다.",
+        mn: "Аяллын идэвхтэй улирал: 2026 оны 5 сарын 20 — 9 сарын 30. Хүний тоогоор үнэ өөрчлөгдөнө.",
+        ko: "운영 기간: 2026년 5월 20일 ~ 9월 30일. 인원 수에 따라 요금이 달라집니다.",
+        en: "Operating season: May 20 – Sep 30, 2026. Price varies by group size.",
       },
-      tiers: [],
+      tiers: [
+        {
+          groupSize: { mn: "5 хүн", ko: "5명", en: "5 People" },
+          pricePerPerson: { mn: "₩890,000 / 1 хүн", ko: "1인 ₩890,000", en: "₩890,000 per person" },
+        },
+        {
+          groupSize: { mn: "4 хүн", ko: "4명", en: "4 People" },
+          pricePerPerson: { mn: "₩990,000 / 1 хүн", ko: "1인 ₩990,000", en: "₩990,000 per person" },
+        },
+        {
+          groupSize: { mn: "3 хүн", ko: "3명", en: "3 People" },
+          pricePerPerson: { mn: "₩1,090,000 / 1 хүн", ko: "1인 ₩1,090,000", en: "₩1,090,000 per person" },
+        },
+        {
+          groupSize: { mn: "2 хүн", ko: "2명", en: "2 People" },
+          pricePerPerson: { mn: "₩1,300,000 / 1 хүн", ko: "1인 ₩1,300,000", en: "₩1,300,000 per person" },
+        },
+        {
+          groupSize: { mn: "1 хүн", ko: "1명", en: "1 Person" },
+          pricePerPerson: { mn: "₩1,500,000 / 1 хүн", ko: "1인 ₩1,500,000", en: "₩1,500,000 per person" },
+        },
+      ],
       included: [
         {
-          mn: "Тусгай зориулалтын автомашин (шатахуун, замын төлбөр).",
-          ko: "전용 차량 (유류대, 도로비).",
+          mn: "4WD бартаат замын автомашин (шатахуун, замын төлбөр).",
+          ko: "4WD 오프로드 차량 (유류대, 도로비).",
+          en: "4WD off-road vehicle (fuel and road tolls included).",
         },
         { mn: "Солонгос хэлтэй хөтөч.", ko: "한국어 가이드.", en: "Korean-speaking guide." },
         { mn: "Бүх хоол.", ko: "모든 식사.", en: "All meals." },
-        { mn: "Кампын ба зочид буудлын байр.", ko: "캠프 및 호텔 숙박.", en: "Camp and hotel accommodation." },
+        { mn: "Жуулчны бааз ба зочид буудал.", ko: "관광기지 및 호텔 숙박.", en: "Tourist base and hotel accommodation." },
       ],
       excluded: [
         {
@@ -862,8 +1075,9 @@ export const tours: Tour[] = [
           ko: "개인 음료(물, 주류 등) 및 간식.",
         },
         {
-          mn: "Кампын өглөө ба оройн хоолыг 2 хоногийн өмнө захиалж, 1 хоногийн өмнө дахин баталгаажуулна.",
-          ko: "조식과 석식은 캠프 숙박 이틀 전에 미리 예약하고, 하루 전에 다시 확정해야 합니다.",
+          mn: "Жуулчны бааз өглөө ба оройн хоолыг 2 хоногийн өмнө захиалж, 1 хоногийн өмнө дахин баталгаажуулна.",
+          ko: "조식과 석식은 관광기지 숙박 이틀 전에 미리 예약하고, 하루 전에 다시 확정해야 합니다.",
+          en: "Tourist base breakfast and dinner must be booked 2 days in advance and reconfirmed 1 day prior.",
         },
       ],
     },

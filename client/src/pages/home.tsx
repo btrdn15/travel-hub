@@ -1,8 +1,10 @@
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { useLang, type Lang } from "@/lib/lang";
+import { useLang } from "@/lib/lang";
 import { localize } from "@/lib/localize";
 import { brand } from "@/lib/brand";
-import { SiteNavbar, SITE_NAVBAR_OFFSET } from "@/components/site-navbar";
+import { SiteNavbar } from "@/components/site-navbar";
+import { AnnouncementBanner, SITE_HOME_WITH_BANNER_OFFSET } from "@/components/announcement-banner";
 import { tours, type Tour } from "@/data/tours";
 import {
   CONTACT,
@@ -19,22 +21,12 @@ import {
   Camera,
   Fish,
   Mountain,
-  Shield,
-  Users,
-  UserCheck,
-  Leaf,
-  Car,
   Tent,
   Crosshair,
 } from "lucide-react";
-import brochureMn from "@assets/brochure-mn.png";
-import brochureKo from "@assets/brochure-ko.png";
-import brochureEn from "@assets/brochure-en.png";
 import olonNuurLogo from "@assets/olon_nuur_travel_logo.png";
-import heroCover from "@assets/hero-cover.png";
 import nomadicCultureHero from "@assets/nomadic-culture-hero-1920.jpg";
-import freshwaterFishingHero from "@assets/freshwater-fishing-hero-1920.jpg";
-import birdPhotographyHero from "@assets/bird-photography-hero-1920.jpg";
+import { HERO_SLIDES, HERO_SLIDE_INTERVAL_MS } from "@/data/hero-slides";
 
 const TOUR_ICONS = {
   "bird-photography": Camera,
@@ -42,21 +34,6 @@ const TOUR_ICONS = {
   "kherlen-fishing": Fish,
   "winter-hunting": Crosshair,
 } as const;
-
-const WHY_ICONS = {
-  experts: UserCheck,
-  groups: Users,
-  safety: Shield,
-  comfort: Car,
-  responsible: Leaf,
-  memories: Camera,
-} as const;
-
-function brochureImage(lang: Lang) {
-  if (lang === "mn") return brochureMn;
-  if (lang === "ko") return brochureKo;
-  return brochureEn;
-}
 
 function getOrderedTours(): Tour[] {
   const bySlug = Object.fromEntries(tours.map((tour) => [tour.slug, tour]));
@@ -114,17 +91,33 @@ function SectionHeading({
 function HeroSection() {
   const { lang } = useLang();
   const tr = getWebsiteCopy(lang);
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  useEffect(() => {
+    if (HERO_SLIDES.length <= 1) return;
+    const timer = window.setInterval(() => {
+      setActiveSlide((current) => (current + 1) % HERO_SLIDES.length);
+    }, HERO_SLIDE_INTERVAL_MS);
+    return () => window.clearInterval(timer);
+  }, []);
 
   return (
-    <section className={`relative flex min-h-[100dvh] items-center overflow-hidden ${SITE_NAVBAR_OFFSET}`}>
-      <img
-        src={heroCover}
-        alt=""
-        fetchPriority="high"
-        decoding="async"
-        className="absolute inset-0 h-full w-full object-cover object-[72%_42%] sm:object-[68%_40%] md:object-[65%_38%]"
-        data-testid="img-hero-bg"
-      />
+    <section className={`relative flex min-h-[100dvh] items-center overflow-hidden ${SITE_HOME_WITH_BANNER_OFFSET}`}>
+      <div className="absolute inset-0" aria-hidden>
+        {HERO_SLIDES.map((src, index) => (
+          <img
+            key={src}
+            src={src}
+            alt=""
+            fetchPriority={index === 0 ? "high" : "low"}
+            decoding="async"
+            className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-1000 ease-in-out ${
+              index === activeSlide ? "opacity-100" : "opacity-0"
+            }`}
+            data-testid={index === 0 ? "img-hero-bg" : undefined}
+          />
+        ))}
+      </div>
       <div
         className="absolute inset-0"
         style={{
@@ -200,6 +193,11 @@ function ToursSection() {
                       src={imgSrc}
                       alt=""
                       className="aspect-[4/5] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                      style={
+                        tour.hero.imageObjectPosition
+                          ? { objectPosition: tour.hero.imageObjectPosition }
+                          : undefined
+                      }
                     />
                   </div>
                   <div
@@ -273,107 +271,49 @@ function WhySection() {
       className="scroll-mt-20 px-4 py-16 sm:scroll-mt-24 sm:px-6 sm:py-20 md:py-28"
       style={{ backgroundColor: brand.forest }}
     >
-      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(0,1fr)_1.4fr] lg:gap-16 lg:items-start">
-        <div className="text-white lg:sticky lg:top-28">
-          <h2 className="font-serif text-3xl leading-tight sm:text-4xl md:text-[2.5rem] md:leading-[1.15]">
-            {tr.whyTravelTitle}
-          </h2>
-          <p className="mt-6 max-w-md text-sm leading-7 text-white/75 sm:text-base">
-            {tr.whyTravelDesc}
-          </p>
-          <a
-            href="#brochure"
-            className="mt-8 inline-flex border px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] transition-colors hover:bg-white/5"
-            style={{ borderColor: brand.gold, color: brand.gold }}
-          >
-            {tr.aboutUsBtn}
-          </a>
-        </div>
+      <div className="mx-auto max-w-4xl">
+        <p
+          className="text-center text-[11px] font-semibold uppercase tracking-[0.28em]"
+          style={{ color: brand.gold }}
+        >
+          {tr.aboutLabel}
+        </p>
+        <h2 className="mt-3 text-center font-serif text-3xl leading-tight text-white sm:text-4xl md:text-[2.5rem]">
+          {tr.aboutTitle}
+        </h2>
 
-        <div className="grid gap-8 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10 lg:grid-cols-3">
-          {tr.whyItems.map(([key, title, text]) => {
-            const Icon = WHY_ICONS[key as keyof typeof WHY_ICONS] ?? Shield;
-            return (
-              <div key={key}>
-                <Icon className="h-6 w-6" style={{ color: brand.gold }} strokeWidth={1.5} />
-                <h3 className="mt-4 font-serif text-lg uppercase tracking-[0.08em] text-white sm:text-xl">
-                  {title}
-                </h3>
-                <p className="mt-2 text-xs leading-6 text-white/70 sm:text-sm">{text}</p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function GallerySection() {
-  const { lang } = useLang();
-  const tr = getWebsiteCopy(lang);
-  const ordered = getOrderedTours();
-  const galleryImages = [
-    heroCover,
-    ordered[0]?.hero.imageHd ?? ordered[0]?.hero.image,
-    nomadicCultureHero,
-    ordered[1]?.hero.imageHd ?? ordered[1]?.hero.image,
-    birdPhotographyHero,
-    freshwaterFishingHero,
-  ];
-
-  return (
-    <section
-      id="gallery"
-      className="scroll-mt-20 px-4 py-16 sm:scroll-mt-24 sm:px-6 sm:py-20 md:py-28"
-      style={{ backgroundColor: brand.cream }}
-    >
-      <div className="mx-auto max-w-7xl">
-        <SectionHeading title={tr.galleryTitle} />
-
-        <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-6">
-          {galleryImages.map((src, i) => (
-            <div
-              key={i}
-              className="group relative aspect-square overflow-hidden sm:aspect-[4/5]"
-            >
-              <img
-                src={src}
-                alt={tr.galleryItems[i] ?? ""}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-            </div>
+        <div className="mt-10 space-y-5 text-sm leading-7 text-white/80 sm:text-base sm:leading-8">
+          {tr.aboutIntro.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
           ))}
         </div>
-      </div>
-    </section>
-  );
-}
 
-function BrochureSection() {
-  const { lang } = useLang();
-  const tr = getWebsiteCopy(lang);
-  const src = brochureImage(lang);
-
-  return (
-    <section
-      id="brochure"
-      className="scroll-mt-20 border-t px-4 py-14 sm:px-6 sm:py-20"
-      style={{ backgroundColor: brand.cream, borderColor: `${brand.forest}10` }}
-    >
-      <div className="mx-auto max-w-4xl">
-        <SectionHeading title={tr.brochureTitle} subtitle={tr.brochureDesc} />
-        <div className="overflow-hidden bg-white shadow-md ring-1 ring-black/5">
-          <div className="p-3 sm:p-6 md:p-8" style={{ backgroundColor: brand.cream }}>
-            <img
-              key={lang}
-              src={src}
-              alt={tr.brochureTitle}
-              className="mx-auto h-auto w-full max-w-3xl"
-              data-testid="img-brochure"
-            />
-          </div>
+        <div className="mt-8">
+          <p className="text-sm font-semibold uppercase tracking-[0.12em] text-white/90 sm:text-base">
+            {tr.aboutExperiencesLabel}
+          </p>
+          <ul className="mt-4 space-y-2">
+            {tr.aboutExperiences.map((item) => (
+              <li key={item} className="flex items-start gap-3 text-sm text-white/80 sm:text-base">
+                <span
+                  className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: brand.gold }}
+                />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
         </div>
+
+        <div className="mt-8 space-y-5 text-sm leading-7 text-white/80 sm:text-base sm:leading-8">
+          {tr.aboutBody.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+        </div>
+
+        <p className="mt-10 text-center font-serif text-xl sm:text-2xl" style={{ color: brand.gold }}>
+          {tr.aboutTagline}
+        </p>
       </div>
     </section>
   );
@@ -490,7 +430,8 @@ function SiteFooter() {
     { href: "/", label: tr.navHome },
     { href: "#tours", label: tr.navJourneys },
     { href: "#why", label: tr.navAbout },
-    { href: "#gallery", label: tr.navGallery },
+    { href: "/gallery", label: tr.navGallery, isRoute: true },
+    { href: "/comic", label: tr.navBlog, isRoute: true },
     { href: "#contact", label: tr.navContact },
   ];
 
@@ -509,15 +450,25 @@ function SiteFooter() {
           </span>
         </Link>
         <nav className="flex flex-wrap justify-center gap-4 md:gap-6">
-          {footerLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/45 transition-colors hover:text-white/80"
-            >
-              {link.label}
-            </a>
-          ))}
+          {footerLinks.map((link) =>
+            "isRoute" in link && link.isRoute ? (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/45 transition-colors hover:text-white/80"
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <a
+                key={link.href}
+                href={link.href}
+                className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/45 transition-colors hover:text-white/80"
+              >
+                {link.label}
+              </a>
+            ),
+          )}
         </nav>
         <p className="text-center text-[10px] text-white/40 md:text-right">{tr.copyright}</p>
       </div>
@@ -529,12 +480,11 @@ export default function HomePage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: brand.cream, color: brand.forest }}>
       <SiteNavbar />
+      <AnnouncementBanner />
       <main>
         <HeroSection />
         <ToursSection />
         <WhySection />
-        <GallerySection />
-        <BrochureSection />
         <FooterCtaSection />
         <SiteFooter />
       </main>

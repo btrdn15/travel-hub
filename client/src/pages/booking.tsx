@@ -25,6 +25,12 @@ const copy = {
     title: "Book a tour",
     desc: "Complete the form below. We will send deposit payment details by email and KakaoTalk.",
   },
+  ja: {
+    back: "ホームに戻る",
+    tag: "予約",
+    title: "ツアーを予約する",
+    desc: "下記のフォームにご記入ください。予約金のお支払い情報をメールとKakaoTalkでお送りします。",
+  },
 } as const;
 
 function useTourFromQuery(): string | undefined {
