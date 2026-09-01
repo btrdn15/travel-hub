@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /ont1
+Disallow: /ont2
+Disallow: /ont3
+Disallow: /on1
+Disallow: /on2
+Disallow: /on3
