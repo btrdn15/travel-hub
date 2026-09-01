@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { bookingSubmitSchema } from "@shared/schema";
-import { BOOKING_TOUR_OPTIONS, DEPOSIT_RATE, getBankTransferInfo, getMaxPeopleForTour } from "@shared/booking-config";
+import { BOOKING_TOUR_OPTIONS, DEPOSIT_AMOUNT_KRW, getBankTransferInfo, getMaxPeopleForTour } from "@shared/booking-config";
 import { resolveNationalityId } from "@shared/nationalities";
 import {
   calculateBookingAmounts,
@@ -11,11 +11,14 @@ import {
   notifyBookingChannels,
   resolveTourTitle,
 } from "./booking";
+import { registerAuthRoutes } from "./auth";
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express,
 ): Promise<Server> {
+  registerAuthRoutes(app);
+
   app.get("/api/bookings/config", (_req: Request, res: Response) => {
     const bank = getBankTransferInfo();
     return res.json({
@@ -24,11 +27,12 @@ export async function registerRoutes(
         titleMn: t.titleMn,
         titleKo: t.titleKo,
         titleEn: t.titleEn,
+        titleJa: t.titleJa,
         bookable: t.bookable,
         hasPricing: Boolean(t.priceTiers?.length),
         maxPeople: getMaxPeopleForTour(t.slug),
       })),
-      depositRate: DEPOSIT_RATE,
+      depositAmountKrw: DEPOSIT_AMOUNT_KRW,
       bank,
     });
   });
@@ -57,7 +61,9 @@ export async function registerRoutes(
               ? `최대 ${maxPeople}명까지 예약 가능합니다.`
               : data.lang === "en"
                 ? `Maximum ${maxPeople} guest(s) for this tour.`
-                : `Энэ аялалд хамгийн ихдээ ${maxPeople} хүн захиална.`,
+                : data.lang === "ja"
+                  ? `このツアーは最大${maxPeople}名まで予約可能です。`
+                  : `Энэ аялалд хамгийн ихдээ ${maxPeople} хүн захиална.`,
         });
       }
 
@@ -69,7 +75,9 @@ export async function registerRoutes(
               ? "국적을 선택해 주세요."
               : data.lang === "en"
                 ? "Please select a valid nationality."
-                : "Иргэншлээ сонгоно уу.",
+                : data.lang === "ja"
+                  ? "国籍を選択してください。"
+                  : "Иргэншлээ сонгоно уу.",
         });
       }
 
