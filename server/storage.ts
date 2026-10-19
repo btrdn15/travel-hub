@@ -50,6 +50,16 @@ function isMissingTableError(error: unknown): boolean {
   );
 }
 
+function isProduction(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
+function productionStorageError(message: string): Error {
+  return new Error(
+    `${message} Production booking storage must be durable; set DATABASE_URL and run the bookings migration before accepting bookings.`,
+  );
+}
+
 /** DB алдаа гарвал memory руу fallback — dev-д bookings хүснэгт байхгүй үед */
 class ResilientStorage implements IStorage {
   private memory = new MemoryStorage();
@@ -61,13 +71,16 @@ class ResilientStorage implements IStorage {
 
   async createBooking(data: typeof bookings.$inferInsert): Promise<Booking> {
     if (!this.db || process.env.BOOKING_STORAGE === "memory") {
+      if (isProduction()) {
+        throw productionStorageError("In-memory booking storage is disabled in production.");
+      }
       return this.memory.createBooking(data);
     }
 
     try {
       return await this.db.createBooking(data);
     } catch (error) {
-      if (isMissingTableError(error)) {
+      if (isMissingTableError(error) && !isProduction()) {
         console.warn(
           "[storage] bookings table missing — saved in memory. Production: run `npm run db:push`",
         );
@@ -79,6 +92,15 @@ class ResilientStorage implements IStorage {
 }
 
 function createStorage(): IStorage {
+  if (isProduction()) {
+    if (process.env.BOOKING_STORAGE === "memory") {
+      throw productionStorageError("BOOKING_STORAGE=memory is not allowed.");
+    }
+    if (!process.env.DATABASE_URL) {
+      throw productionStorageError("DATABASE_URL is required.");
+    }
+  }
+
   if (process.env.BOOKING_STORAGE === "memory" || !process.env.DATABASE_URL) {
     if (!process.env.DATABASE_URL) {
       console.warn("[storage] DATABASE_URL not set — using in-memory bookings.");
