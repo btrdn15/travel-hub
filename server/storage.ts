@@ -50,17 +50,24 @@ function isMissingTableError(error: unknown): boolean {
   );
 }
 
-/** DB алдаа гарвал memory руу fallback — dev-д bookings хүснэгт байхгүй үед */
-class ResilientStorage implements IStorage {
-  private memory = new MemoryStorage();
-  private db: DatabaseStorage | null = null;
+function isProduction(): boolean {
+  return process.env.NODE_ENV === "production";
+}
 
-  constructor(pool: pg.Pool | null) {
-    if (pool) this.db = new DatabaseStorage(pool);
-  }
+/** DB алдаа гарвал memory руу fallback — зөвхөн development-д bookings хүснэгт байхгүй үед */
+export class ResilientStorage implements IStorage {
+  private memory = new MemoryStorage();
+
+  constructor(
+    private db: IStorage | null,
+    private allowMemoryFallback: boolean,
+  ) {}
 
   async createBooking(data: typeof bookings.$inferInsert): Promise<Booking> {
     if (!this.db || process.env.BOOKING_STORAGE === "memory") {
+      if (!this.allowMemoryFallback) {
+        throw new Error("Durable booking storage is required in production.");
+      }
       return this.memory.createBooking(data);
     }
 
@@ -68,6 +75,12 @@ class ResilientStorage implements IStorage {
       return await this.db.createBooking(data);
     } catch (error) {
       if (isMissingTableError(error)) {
+        if (!this.allowMemoryFallback) {
+          throw new Error(
+            "Bookings table is missing in production. Run `npm run db:push` before accepting bookings.",
+          );
+        }
+
         console.warn(
           "[storage] bookings table missing — saved in memory. Production: run `npm run db:push`",
         );
@@ -78,16 +91,24 @@ class ResilientStorage implements IStorage {
   }
 }
 
-function createStorage(): IStorage {
-  if (process.env.BOOKING_STORAGE === "memory" || !process.env.DATABASE_URL) {
-    if (!process.env.DATABASE_URL) {
-      console.warn("[storage] DATABASE_URL not set — using in-memory bookings.");
+export function createStorage(): IStorage {
+  if (process.env.BOOKING_STORAGE === "memory") {
+    if (isProduction()) {
+      throw new Error("BOOKING_STORAGE=memory cannot be used in production.");
     }
     return new MemoryStorage();
   }
 
+  if (!process.env.DATABASE_URL) {
+    if (isProduction()) {
+      throw new Error("DATABASE_URL is required for durable booking storage in production.");
+    }
+    console.warn("[storage] DATABASE_URL not set — using in-memory bookings.");
+    return new MemoryStorage();
+  }
+
   const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
-  return new ResilientStorage(pool);
+  return new ResilientStorage(new DatabaseStorage(pool), !isProduction());
 }
 
 export const storage = createStorage();
