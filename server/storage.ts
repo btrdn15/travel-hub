@@ -6,6 +6,10 @@ export interface IStorage {
   createBooking(data: typeof bookings.$inferInsert): Promise<Booking>;
 }
 
+function isProductionEnvironment(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
 export class MemoryStorage implements IStorage {
   private items: Booking[] = [];
 
@@ -50,17 +54,23 @@ function isMissingTableError(error: unknown): boolean {
   );
 }
 
-/** DB алдаа гарвал memory руу fallback — dev-д bookings хүснэгт байхгүй үед */
-class ResilientStorage implements IStorage {
-  private memory = new MemoryStorage();
-  private db: DatabaseStorage | null = null;
+type ResilientStorageOptions = {
+  allowMemoryFallback: boolean;
+};
 
-  constructor(pool: pg.Pool | null) {
-    if (pool) this.db = new DatabaseStorage(pool);
+export class ResilientStorage implements IStorage {
+  private memory = new MemoryStorage();
+  private db: IStorage | null;
+
+  constructor(db: IStorage | null, private options: ResilientStorageOptions) {
+    this.db = db;
   }
 
   async createBooking(data: typeof bookings.$inferInsert): Promise<Booking> {
-    if (!this.db || process.env.BOOKING_STORAGE === "memory") {
+    if (!this.db) {
+      if (!this.options.allowMemoryFallback) {
+        throw new Error("[storage] Durable booking storage is required in production.");
+      }
       return this.memory.createBooking(data);
     }
 
@@ -68,8 +78,14 @@ class ResilientStorage implements IStorage {
       return await this.db.createBooking(data);
     } catch (error) {
       if (isMissingTableError(error)) {
+        if (!this.options.allowMemoryFallback) {
+          throw new Error(
+            "[storage] The bookings table is missing; run `npm run db:push` before accepting production bookings.",
+            { cause: error },
+          );
+        }
         console.warn(
-          "[storage] bookings table missing — saved in memory. Production: run `npm run db:push`",
+          "[storage] bookings table missing — saved in memory. Run `npm run db:push` to enable durable bookings.",
         );
         return this.memory.createBooking(data);
       }
@@ -78,16 +94,28 @@ class ResilientStorage implements IStorage {
   }
 }
 
-function createStorage(): IStorage {
-  if (process.env.BOOKING_STORAGE === "memory" || !process.env.DATABASE_URL) {
-    if (!process.env.DATABASE_URL) {
-      console.warn("[storage] DATABASE_URL not set — using in-memory bookings.");
+export function createStorage(): IStorage {
+  const isProduction = isProductionEnvironment();
+
+  if (process.env.BOOKING_STORAGE === "memory") {
+    if (isProduction) {
+      throw new Error("[storage] BOOKING_STORAGE=memory is not allowed in production.");
     }
     return new MemoryStorage();
   }
 
+  if (!process.env.DATABASE_URL) {
+    if (isProduction) {
+      throw new Error("[storage] DATABASE_URL is required for durable production bookings.");
+    }
+    console.warn("[storage] DATABASE_URL not set — using in-memory bookings.");
+    return new MemoryStorage();
+  }
+
   const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
-  return new ResilientStorage(pool);
+  return new ResilientStorage(new DatabaseStorage(pool), {
+    allowMemoryFallback: !isProduction,
+  });
 }
 
 export const storage = createStorage();
