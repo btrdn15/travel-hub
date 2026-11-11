@@ -79,6 +79,7 @@ import freshwaterFishingHero from "@assets/freshwater-fishing-hero.jpg";
 import freshwaterFishingHeroHd from "@assets/freshwater-fishing-hero-1920.jpg";
 import freshwaterFishingHeroWebp from "@assets/freshwater-fishing-hero-1920.webp";
 import winterHuntingHero from "@assets/winter-hunting-hero.png";
+import tourPlaceholder from "@assets/tour-placeholder.svg";
 
 // ─── Баримтын нийтлэг мөрүүд ─────────────────────────────────────────────
 
@@ -107,7 +108,7 @@ export const tours: Tour[] = [
   // ─────────────────────────────────────────────────────────────────────
   // Wildlife & Nature Photography (хуучин: bird-photography)
   // Маршрут, 5D4N баримттай таарч байгаа тул өдөр тутмын хөтөлбөрийг үлдээв.
-  // Хонох газрыг баримтын "3 шөнө майхан, 1 шөнө гэр бааз"-аар засав.
+  // Хонох газрыг өдөр тус бүрээр биш, ерөнхийд нь (accommodation) бичив: баримтад аль шөнө гэрт хонохыг заагаагүй.
   // ─────────────────────────────────────────────────────────────────────
   {
     slug: "wildlife-photography",
@@ -202,7 +203,6 @@ export const tours: Tour[] = [
             },
           },
         ],
-        overnight: { mn: "Гэр бааз", ko: "게르 캠프", en: "Ger camp", ja: "ゲルキャンプ" },
       },
       {
         day: 2,
@@ -247,7 +247,6 @@ export const tours: Tour[] = [
             },
           },
         ],
-        overnight: { mn: "Майхан", ko: "텐트", en: "Tent", ja: "テント" },
       },
       {
         day: 3,
@@ -301,7 +300,6 @@ export const tours: Tour[] = [
             },
           },
         ],
-        overnight: { mn: "Майхан", ko: "텐트", en: "Tent", ja: "テント" },
       },
       {
         day: 4,
@@ -344,7 +342,6 @@ export const tours: Tour[] = [
             },
           },
         ],
-        overnight: { mn: "Майхан", ko: "텐트", en: "Tent", ja: "テント" },
       },
       {
         day: 5,
@@ -519,7 +516,7 @@ export const tours: Tour[] = [
   // ─────────────────────────────────────────────────────────────────────
   // Winter Ice Fishing — ШИНЭ аялал (2027)
   // TODO(content): өдөрчилсөн хөтөлбөр, байршил, багийн бүрэлдэхүүн, хоол.
-  // TODO(content): өвлийн мөсөн загасчлалын бодит, лицензтэй зураг (одоогоор зуны загасчлалын зураг).
+  // TODO(content: real winter ice fishing photo) — одоогоор neutral placeholder.
   // ─────────────────────────────────────────────────────────────────────
   {
     slug: "winter-ice-fishing",
@@ -536,9 +533,8 @@ export const tours: Tour[] = [
         mn: "4 өдөр / 3 шөнө · 1–6 хүн · 12–2-р сар",
         ja: "4日間 / 3泊 · 1〜6名 · 12月〜2月",
       },
-      image: freshwaterFishingHero,
-      imageHd: freshwaterFishingHeroHd,
-      imageWebp: freshwaterFishingHeroWebp,
+      // TODO(content: real winter ice fishing photo)
+      image: tourPlaceholder,
     },
     overview: {
       duration: { mn: "4 өдөр / 3 шөнө", ko: "3박 4일", en: "4 days / 3 nights", ja: "4日間 / 3泊" },

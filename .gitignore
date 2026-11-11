@@ -12,3 +12,6 @@ vite.config.ts.*
 # Node төсөлд хамаагүй орчны файлууд
 homebrew/
 .venv/
+
+# Дотоод баримт бичиг (commit хийхгүй)
+docs/
