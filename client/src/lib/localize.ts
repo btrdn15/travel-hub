@@ -42,8 +42,17 @@ const SCHEDULE_TIME_LABELS: Record<string, LocalizedString> = {
   Шөнө: { mn: "Шөнө", ko: "밤", en: "Night", ja: "夜" },
 };
 
-/** Олон хэлтэй текст */
-export function localize(str: LocalizedString, lang: Lang): string {
+/**
+ * Олон хэлтэй текст. undefined/null ирвэл crash хийхгүй "" буцаана,
+ * гэхдээ dev горимд console.warn гаргаж алдааг далдлахгүй.
+ */
+export function localize(str: LocalizedString | null | undefined, lang: Lang): string {
+  if (str == null) {
+    if (import.meta.env.DEV) {
+      console.warn(`[localize] missing LocalizedString (lang=${lang})`, new Error().stack);
+    }
+    return "";
+  }
   if (lang === "en") {
     return resolveEnglish(str);
   }
