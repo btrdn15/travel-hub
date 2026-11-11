@@ -5,7 +5,7 @@
 // `ja` талбаруудыг баримтад байхгүй тул орчуулсан — мэргэжлийн хүнээр шалгуулах.
 // `en`/`ja` байхгүй хуучин мөрүүдийг tour-en-by-mn.ts / tour-ja-by-en.ts-ээр орчуулна.
 
-import type { TourSlug } from "@shared/tours-2027";
+import { TOURS_2027, type TourSlug } from "@shared/tours-2027";
 
 export type LocalizedString = {
   mn: string;
@@ -684,4 +684,9 @@ export const tours: Tour[] = [
 
 export function getTourBySlug(slug: string): Tour | undefined {
   return tours.find((tour) => tour.slug === slug);
+}
+
+/** Баримтын дарааллаар (shared/tours-2027.ts-ийн TOURS_2027) */
+export function toursInCatalogOrder(): Tour[] {
+  return TOURS_2027.map((c) => getTourBySlug(c.slug)).filter((t): t is Tour => Boolean(t));
 }

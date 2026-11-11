@@ -16,6 +16,12 @@ import BookingPage from "@/pages/booking";
 import GalleryPage from "@/pages/gallery";
 import ComicPage from "@/pages/comic";
 import NotFound from "@/pages/not-found";
+import ToursPage from "@/pages/tours";
+import DeparturesPage from "@/pages/departures";
+import AboutPage from "@/pages/about";
+import TravelInfoPage from "@/pages/travel-info";
+import FaqPage from "@/pages/faq";
+import PrivacyPage from "@/pages/privacy";
 
 export const PAGES: Record<string, ComponentType> = {
   home: HomePage,
@@ -24,6 +30,12 @@ export const PAGES: Record<string, ComponentType> = {
   gallery: GalleryPage,
   comic: ComicPage,
   notFound: NotFound,
+  tours: ToursPage,
+  departures: DeparturesPage,
+  about: AboutPage,
+  travelInfo: TravelInfoPage,
+  faq: FaqPage,
+  privacy: PrivacyPage,
 };
 
 export function render(pageKey: string, path: string): string {

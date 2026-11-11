@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { Link } from "wouter";
-import { useLang, usePaths } from "@/lib/lang";
+import { useLang } from "@/lib/lang";
 import { brand } from "@/lib/brand";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteNavbar, SITE_NAVBAR_OFFSET } from "@/components/site-navbar";
 import { getGalleryImages } from "@/data/gallery-images";
 import { getWebsiteCopy } from "@/data/website-content";
-import olonNuurLogo from "@assets/olon_nuur_travel_logo.png";
 
 function SectionOrnament() {
   return (
@@ -23,7 +22,6 @@ function SectionOrnament() {
 
 export default function GalleryPage() {
   const { lang } = useLang();
-  const paths = usePaths();
   const tr = getWebsiteCopy(lang);
   const [activeId, setActiveId] = useState<(typeof tr.galleryCategories)[number]["id"]>(tr.galleryCategories[0]?.id ?? "birds");
   const activeCategory = tr.galleryCategories.find((c) => c.id === activeId);
@@ -91,22 +89,7 @@ export default function GalleryPage() {
           )}
         </div>
 
-        <footer style={{ backgroundColor: brand.forestDark }}>
-          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-7 sm:px-6 md:flex-row">
-            <Link href={paths.page("home")} className="flex shrink-0 items-center gap-2.5">
-              <img
-                src={olonNuurLogo}
-                alt=""
-                className="h-9 w-9 rounded-full object-cover object-top"
-                aria-hidden
-              />
-              <span className="font-serif text-xs uppercase tracking-[0.12em] text-white/80">
-                Olon Nuur Travel
-              </span>
-            </Link>
-            <p className="text-center text-[10px] text-white/40 md:text-right">{tr.copyright}</p>
-          </div>
-        </footer>
+        <SiteFooter />
       </main>
     </div>
   );

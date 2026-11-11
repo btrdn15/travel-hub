@@ -21,6 +21,12 @@ function cases(): Case[] {
     out.push({ page: "contact", path: `/${lang}/contact` });
     out.push({ page: "gallery", path: `/${lang}/gallery` });
     out.push({ page: "comic", path: `/${lang}/comic` });
+    out.push({ page: "tours", path: `/${lang}/tours` });
+    out.push({ page: "departures", path: `/${lang}/departures` });
+    out.push({ page: "about", path: `/${lang}/about` });
+    out.push({ page: "travelInfo", path: `/${lang}/travel-information` });
+    out.push({ page: "faq", path: `/${lang}/faq` });
+    out.push({ page: "privacy", path: `/${lang}/privacy` });
     for (const tour of TOURS_2027) {
       out.push({
         page: "tour",

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link, Redirect, useRoute } from "wouter";
 import { SiteNavbar, SITE_NAVBAR_OFFSET } from "@/components/site-navbar";
+import { SiteFooter } from "@/components/site-footer";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -37,7 +38,6 @@ import {
 } from "@shared/tours-2027";
 import { CONTACT } from "@/data/website-content";
 import NotFound from "@/pages/not-found";
-import olonNuurLogo from "@assets/olon_nuur_travel_logo.png";
 
 const t = (str: LocalizedString | undefined, lang: Lang) => localize(str, lang);
 
@@ -195,20 +195,6 @@ const labels = {
     ctaHint: "ご希望の日程と人数をお送りください。24時間以内にご返信します。",
   },
 } as const satisfies Record<Lang, Record<string, string>>;
-
-function Footer() {
-  return (
-    <footer className="py-8 px-6 bg-stone-950 border-t border-stone-800">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="flex items-center gap-2.5">
-          <img src={olonNuurLogo} alt="" className="h-8 w-8 rounded-md object-cover object-top" aria-hidden />
-          <span className="text-sm font-bold text-stone-300 tracking-tight">OLON NUUR TRAVEL LLC</span>
-        </div>
-        <p className="text-xs text-stone-500">© {new Date().getFullYear()} Olon Nuur Travel LLC.</p>
-      </div>
-    </footer>
-  );
-}
 
 function SectionTitle({ icon: Icon, children }: { icon: typeof Clock; children: React.ReactNode }) {
   return (
@@ -547,7 +533,7 @@ export default function TourDetailPage() {
         </main>
       </div>
 
-      <Footer />
+      <SiteFooter />
     </div>
   );
 }

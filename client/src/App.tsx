@@ -15,6 +15,12 @@ import BookingPage from "@/pages/booking";
 import GalleryPage from "@/pages/gallery";
 import ComicPage from "@/pages/comic";
 import NotFound from "@/pages/not-found";
+import ToursPage from "@/pages/tours";
+import DeparturesPage from "@/pages/departures";
+import AboutPage from "@/pages/about";
+import TravelInfoPage from "@/pages/travel-info";
+import FaqPage from "@/pages/faq";
+import PrivacyPage from "@/pages/privacy";
 import { FloatingSocialLinks } from "@/components/floating-chat";
 import { GoogleAnalytics } from "@/components/google-analytics";
 
@@ -29,6 +35,12 @@ function langRoute(Page: ComponentType) {
 const LANG_PAGES = (
   [
     ["/:lang/tours/:slug", TourDetailPage],
+    ["/:lang/tours", ToursPage],
+    ["/:lang/departures", DeparturesPage],
+    ["/:lang/about", AboutPage],
+    ["/:lang/travel-information", TravelInfoPage],
+    ["/:lang/faq", FaqPage],
+    ["/:lang/privacy", PrivacyPage],
     ["/:lang/contact", BookingPage],
     ["/:lang/gallery", GalleryPage],
     ["/:lang/comic", ComicPage],
