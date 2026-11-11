@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { useLang } from "@/lib/lang";
+import { useLang, usePaths } from "@/lib/lang";
 import { brand } from "@/lib/brand";
 import { SiteNavbar, SITE_NAVBAR_OFFSET } from "@/components/site-navbar";
 import { getComicImages } from "@/data/comic-images";
@@ -23,6 +23,7 @@ function SectionOrnament() {
 
 export default function ComicPage() {
   const { lang } = useLang();
+  const paths = usePaths();
   const tr = getWebsiteCopy(lang);
   const [activeId, setActiveId] = useState<(typeof tr.comicEpisodes)[number]["id"]>(tr.comicEpisodes[0]?.id ?? "episode-01");
   const activeEpisode = tr.comicEpisodes.find((episode) => episode.id === activeId);
@@ -89,7 +90,7 @@ export default function ComicPage() {
 
         <footer style={{ backgroundColor: brand.forestDark }}>
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-7 sm:px-6 md:flex-row">
-            <Link href="/" className="flex shrink-0 items-center gap-2.5">
+            <Link href={paths.page("home")} className="flex shrink-0 items-center gap-2.5">
               <img
                 src={olonNuurLogo}
                 alt=""

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useLang, LANG_LABELS, type Lang } from "@/lib/lang";
+import { useLang, usePaths, LANG_LABELS, type Lang } from "@/lib/lang";
 import { getWebsiteCopy } from "@/data/website-content";
 import { brand } from "@/lib/brand";
 import { tours } from "@/data/tours";
@@ -65,21 +65,23 @@ export type SiteNavbarProps = {
 
 export function SiteNavbar({ backLink }: SiteNavbarProps) {
   const { lang } = useLang();
+  const paths = usePaths();
   const [location] = useLocation();
   const t = getWebsiteCopy(lang);
   const [mobileNav, setMobileNav] = useState(false);
 
-  const onHome = location === "/";
-  const anchor = (hash: string) => (onHome ? hash : `/${hash}`);
+  const homePath = paths.page("home");
+  const onHome = location === "/" || location === homePath || `${location}/` === homePath;
+  const anchor = (hash: string) => (onHome ? hash : paths.homeAnchor(hash));
 
   const isPageRoute = (href: string) => href.startsWith("/") && href.length > 1;
 
   const navLinks = [
-    { href: "/", label: t.navHome, isHome: true },
+    { href: homePath, label: t.navHome, isHome: true },
     { href: anchor("#tours"), label: t.navJourneys, hasExpeditions: true },
     { href: anchor("#why"), label: t.navAbout },
-    { href: "/gallery", label: t.navGallery },
-    { href: "/comic", label: t.navBlog },
+    { href: paths.page("gallery"), label: t.navGallery },
+    { href: paths.page("comic"), label: t.navBlog },
     { href: anchor("#contact"), label: t.navContact },
   ];
 
@@ -103,7 +105,7 @@ export function SiteNavbar({ backLink }: SiteNavbarProps) {
       style={{ backgroundColor: brand.white, borderColor: `${brand.forest}12` }}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4">
-        <Link href="/" className="flex min-w-0 shrink-0 items-center gap-2.5 sm:gap-3">
+        <Link href={homePath} className="flex min-w-0 shrink-0 items-center gap-2.5 sm:gap-3">
           <img
             src={olonNuurLogo}
             alt="Olon Nuur Travel"
@@ -142,7 +144,7 @@ export function SiteNavbar({ backLink }: SiteNavbarProps) {
                     {tours.map((tour) => (
                       <DropdownMenuItem key={tour.slug} asChild>
                         <Link
-                          href={`/tours/${tour.slug}`}
+                          href={paths.tour(tour.slug)}
                           className="cursor-pointer"
                         >
                           {localize(tour.hero.title, lang)}
@@ -208,7 +210,7 @@ export function SiteNavbar({ backLink }: SiteNavbarProps) {
             </Link>
           )}
           <Link
-            href="/book"
+            href={paths.contact()}
             className={bookBtnClass}
             style={{ backgroundColor: brand.forest }}
           >
@@ -270,7 +272,7 @@ export function SiteNavbar({ backLink }: SiteNavbarProps) {
               ),
             )}
             <Link
-              href="/book"
+              href={paths.contact()}
               className={`mt-2 text-center text-white ${mobileNavLinkClass} font-bold`}
               style={{ backgroundColor: brand.forest }}
               onClick={closeMobile}

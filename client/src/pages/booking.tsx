@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { ArrowLeft } from "lucide-react";
-import { useLang } from "@/lib/lang";
+import { useLang, usePaths } from "@/lib/lang";
 import { BookingForm } from "@/components/booking-form";
 import { SiteNavbar, SITE_NAVBAR_OFFSET } from "@/components/site-navbar";
 import olonNuurLogo from "@assets/olon_nuur_travel_logo.png";
@@ -44,16 +44,17 @@ function useTourFromQuery(): string | undefined {
 
 export default function BookingPage() {
   const { lang } = useLang();
+  const paths = usePaths();
   const t = copy[lang];
   const tourSlug = useTourFromQuery();
 
   return (
     <div className="min-h-screen bg-stone-100">
-      <SiteNavbar backLink={{ href: "/", label: t.back }} />
+      <SiteNavbar backLink={{ href: paths.page("home"), label: t.back }} />
 
       <main className={`mx-auto max-w-2xl px-4 py-10 pb-24 sm:px-6 sm:py-12 md:py-16 sm:pb-16 ${SITE_NAVBAR_OFFSET}`}>
         <Link
-          href="/"
+          href={paths.page("home")}
           className="inline-flex items-center gap-2 text-sm text-stone-600 hover:text-amber-700 mb-8"
         >
           <ArrowLeft className="h-4 w-4" />

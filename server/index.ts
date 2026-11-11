@@ -1,9 +1,9 @@
 import "dotenv/config";
-import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { setupSession } from "./auth";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
+import { registerLegacyRedirects } from "./redirects";
 import { createServer } from "http";
 import net from "node:net";
 /** When PORT is unset in development, pick first free port from startPort (avoids macOS AirPlay on 5000 and busy 5001). */
@@ -97,6 +97,7 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  registerLegacyRedirects(app);
   await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { useLang } from "@/lib/lang";
+import { useLang, usePaths } from "@/lib/lang";
 import { brand } from "@/lib/brand";
 import { SiteNavbar, SITE_NAVBAR_OFFSET } from "@/components/site-navbar";
 import { getGalleryImages } from "@/data/gallery-images";
@@ -23,6 +23,7 @@ function SectionOrnament() {
 
 export default function GalleryPage() {
   const { lang } = useLang();
+  const paths = usePaths();
   const tr = getWebsiteCopy(lang);
   const [activeId, setActiveId] = useState<(typeof tr.galleryCategories)[number]["id"]>(tr.galleryCategories[0]?.id ?? "birds");
   const activeCategory = tr.galleryCategories.find((c) => c.id === activeId);
@@ -92,7 +93,7 @@ export default function GalleryPage() {
 
         <footer style={{ backgroundColor: brand.forestDark }}>
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-7 sm:px-6 md:flex-row">
-            <Link href="/" className="flex shrink-0 items-center gap-2.5">
+            <Link href={paths.page("home")} className="flex shrink-0 items-center gap-2.5">
               <img
                 src={olonNuurLogo}
                 alt=""

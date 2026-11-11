@@ -204,7 +204,7 @@ function Footer() {
 }
 
 export default function TourDetailPage() {
-  const [, params] = useRoute<{ slug: string }>("/tours/:slug");
+  const [, params] = useRoute<{ lang: string; slug: string }>("/:lang/tours/:slug");
   const { lang } = useLang();
   const slug = params?.slug ?? "";
   const tour = getTourBySlug(slug);

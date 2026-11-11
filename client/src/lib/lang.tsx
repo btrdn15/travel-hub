@@ -1,101 +1,113 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import { useAuth } from "@/lib/auth";
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
+import { useLocation } from "wouter";
+import { SITE_LANGS, isSiteLang, type SiteLang } from "@shared/tours-2027";
+import {
+  contactPath,
+  langFromPath,
+  localizedPath,
+  switchLangPath,
+  tourPath,
+  type PageKey,
+} from "@shared/site-routes";
 
-export type Lang = "mn" | "ko" | "en" | "ja";
+/**
+ * Хэл нь URL-аас тодорхойлогдоно: /en/…, /ko/…, /mn/…, /ja/….
+ * "/" нь үргэлж англи (redirect хийхгүй). Хэлгүй бусад зам (/ont1 гэх мэт)
+ * сүүлд сонгосон хэлийг localStorage-аас авна.
+ */
+export type Lang = SiteLang;
 
-export const PUBLIC_LANG_ORDER: Lang[] = ["en", "ko", "ja"];
-export const ADMIN_LANG_ORDER: Lang[] = ["en", "ko", "ja", "mn"];
-
-/** @deprecated Use getLangOrder(isAdmin) or useLang().availableLangs */
-export const LANG_ORDER: Lang[] = ADMIN_LANG_ORDER;
+/** Хэл солигч дээрх дараалал */
+export const LANG_ORDER: readonly Lang[] = SITE_LANGS;
 
 export const LANG_LABELS: Record<Lang, string> = {
-  mn: "Монгол",
-  ko: "한국어",
   en: "English",
+  ko: "한국어",
+  mn: "Монгол",
   ja: "日本語",
 };
 
-export function getLangOrder(isAdmin: boolean): Lang[] {
-  return isAdmin ? ADMIN_LANG_ORDER : PUBLIC_LANG_ORDER;
-}
-
-export function nextLang(current: Lang, isAdmin: boolean): Lang {
-  const order = getLangOrder(isAdmin);
-  const i = order.indexOf(current);
-  return order[(i + 1) % order.length];
-}
-
 type LangContextValue = {
   lang: Lang;
+  /** Одоогийн хуудасны сонгосон хэлний хувилбар руу шилжинэ */
   setLang: (lang: Lang) => void;
-  availableLangs: Lang[];
+  availableLangs: readonly Lang[];
 };
 
 const LangContext = createContext<LangContextValue>({
   lang: "en",
   setLang: () => {},
-  availableLangs: PUBLIC_LANG_ORDER,
+  availableLangs: LANG_ORDER,
 });
 
 const STORAGE_KEY = "olon-nuur-lang";
 
+function readStoredLang(): Lang | null {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return isSiteLang(saved) ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
+function storeLang(lang: Lang) {
+  try {
+    localStorage.setItem(STORAGE_KEY, lang);
+  } catch {
+    // ignore storage errors
+  }
+}
+
+export function resolveLang(pathname: string): Lang {
+  const fromPath = langFromPath(pathname);
+  if (fromPath) return fromPath;
+  if (pathname === "/" || pathname === "") return "en";
+  return readStoredLang() ?? "en";
+}
+
 export function LangProvider({ children }: { children: ReactNode }) {
-  const { isAdmin, isLoading } = useAuth();
-  const [lang, setLangState] = useState<Lang>("en");
-  const availableLangs = getLangOrder(isAdmin);
+  const [location, navigate] = useLocation();
+  const lang = resolveLang(location);
 
   useEffect(() => {
-    if (isLoading) return;
+    document.documentElement.lang = lang;
+    if (langFromPath(location)) storeLang(lang);
+  }, [lang, location]);
 
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY) as Lang | null;
-      if (saved === "ko" || saved === "en" || saved === "ja") {
-        setLangState(saved);
-        return;
-      }
-      if (saved === "mn" && isAdmin) {
-        setLangState("mn");
-        return;
-      }
-      setLangState("en");
-      if (saved === "mn" && !isAdmin) {
-        localStorage.setItem(STORAGE_KEY, "en");
-      }
-    } catch {
-      setLangState("en");
-    }
-  }, [isLoading, isAdmin]);
-
-  useEffect(() => {
-    if (isLoading) return;
-    if (!isAdmin && lang === "mn") {
-      setLangState("en");
-      try {
-        localStorage.setItem(STORAGE_KEY, "en");
-      } catch {
-        // ignore
-      }
-    }
-  }, [isAdmin, isLoading, lang]);
-
-  const setLang = (next: Lang) => {
-    if (next === "mn" && !isAdmin) return;
-    setLangState(next);
-    try {
-      localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      // ignore storage errors
-    }
-  };
-
-  return (
-    <LangContext.Provider value={{ lang, setLang, availableLangs }}>
-      {children}
-    </LangContext.Provider>
+  const value = useMemo<LangContextValue>(
+    () => ({
+      lang,
+      availableLangs: LANG_ORDER,
+      setLang: (next: Lang) => {
+        storeLang(next);
+        const target = switchLangPath(location, next);
+        if (target !== location) {
+          navigate(`${target}${window.location.search}${window.location.hash}`);
+        }
+      },
+    }),
+    [lang, location, navigate],
   );
+
+  return <LangContext.Provider value={value}>{children}</LangContext.Provider>;
 }
 
 export function useLang() {
   return useContext(LangContext);
+}
+
+/** Одоогийн хэлээр дотоод холбоос үүсгэх */
+export function usePaths() {
+  const { lang } = useLang();
+  return useMemo(
+    () => ({
+      page: (page: PageKey = "home") => localizedPath(lang, page),
+      tour: (slug: string) => tourPath(lang, slug),
+      contact: (tourSlug?: string) => contactPath(lang, tourSlug),
+      /** Нүүр хуудасны anchor (#tours гэх мэт) */
+      homeAnchor: (hash: string) => `${localizedPath(lang, "home")}${hash}`,
+    }),
+    [lang],
+  );
 }
