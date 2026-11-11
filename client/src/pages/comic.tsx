@@ -24,7 +24,7 @@ function SectionOrnament() {
 export default function ComicPage() {
   const { lang } = useLang();
   const tr = getWebsiteCopy(lang);
-  const [activeId, setActiveId] = useState(tr.comicEpisodes[0]?.id ?? "episode-01");
+  const [activeId, setActiveId] = useState<(typeof tr.comicEpisodes)[number]["id"]>(tr.comicEpisodes[0]?.id ?? "episode-01");
   const activeEpisode = tr.comicEpisodes.find((episode) => episode.id === activeId);
   const images = activeEpisode ? getComicImages(activeEpisode.id) : [];
 

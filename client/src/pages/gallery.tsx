@@ -24,7 +24,7 @@ function SectionOrnament() {
 export default function GalleryPage() {
   const { lang } = useLang();
   const tr = getWebsiteCopy(lang);
-  const [activeId, setActiveId] = useState(tr.galleryCategories[0]?.id ?? "birds");
+  const [activeId, setActiveId] = useState<(typeof tr.galleryCategories)[number]["id"]>(tr.galleryCategories[0]?.id ?? "birds");
   const activeCategory = tr.galleryCategories.find((c) => c.id === activeId);
   const images = activeCategory ? getGalleryImages(activeCategory.id) : [];
 
