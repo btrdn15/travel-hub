@@ -7,7 +7,7 @@ import { formatDepartureRange } from "@/lib/format";
 import { TOURS_2027 } from "@shared/tours-2027";
 import { brand } from "@/lib/brand";
 
-/** 2027 Departures: зөвхөн баталгаажсан фото аяллын 2 гаралт; бусад нь "dates on request" */
+/** 2027 Departures: зөвхөн баталгаажсан фото аяллын 2 огноо; бусад нь "dates on request" */
 export default function DeparturesPage() {
   const { lang } = useLang();
   const paths = usePaths();

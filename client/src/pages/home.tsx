@@ -15,7 +15,7 @@ import { getTour2027 } from "@shared/tours-2027";
 
 /**
  * Нүүр хуудас — brief §3-ийн дараалал:
- * Hero → 5 аяллын карт → Why us → 2027 гаралт → How it works → Footer.
+ * Hero → 5 аяллын карт → Why us → 2027 оны аялал → How it works → Footer.
  * Хуурамч үнэлгээ, од, статистик, QR код байхгүй. Review хэсэг Phase 2.
  */
 
