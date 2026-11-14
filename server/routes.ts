@@ -2,7 +2,13 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { bookingSubmitSchema } from "@shared/schema";
-import { BOOKING_TOUR_OPTIONS, DEPOSIT_AMOUNT_KRW, getBankTransferInfo, getMaxPeopleForTour } from "@shared/booking-config";
+import {
+  BOOKING_TOUR_OPTIONS,
+  DEPOSIT_AMOUNT_KRW,
+  getBankTransferInfo,
+  getMaxPeopleForTour,
+  getMinPeopleForTour,
+} from "@shared/booking-config";
 import { resolveNationalityId } from "@shared/nationalities";
 import {
   calculateBookingAmounts,
@@ -29,8 +35,10 @@ export async function registerRoutes(
         titleEn: t.titleEn,
         titleJa: t.titleJa,
         bookable: t.bookable,
+        inquiryOnly: t.inquiryOnly,
         hasPricing: Boolean(t.priceTiers?.length),
-        maxPeople: getMaxPeopleForTour(t.slug),
+        minPeople: t.minPeople,
+        maxPeople: t.maxPeople,
       })),
       depositAmountKrw: DEPOSIT_AMOUNT_KRW,
       bank,
@@ -47,10 +55,25 @@ export async function registerRoutes(
         });
       }
 
-      const data = parsed.data;
-      const tour = getBookingTour(data.tourSlug);
+      // Хуучин slug (bird-photography гэх мэт) ирвэл шинэ slug руу хөрвүүлнэ
+      const tour = getBookingTour(parsed.data.tourSlug);
       if (!tour || !tour.bookable) {
         return res.status(400).json({ message: "Invalid or unavailable tour" });
+      }
+      const data = { ...parsed.data, tourSlug: tour.slug };
+
+      const minPeople = getMinPeopleForTour(data.tourSlug);
+      if (data.numberOfPeople < minPeople) {
+        return res.status(400).json({
+          message:
+            data.lang === "ko"
+              ? `이 투어는 최소 ${minPeople}명부터 예약 가능합니다.`
+              : data.lang === "en"
+                ? `Minimum ${minPeople} guest(s) for this tour.`
+                : data.lang === "ja"
+                  ? `このツアーは${minPeople}名様から承ります。`
+                  : `Энэ аялалд хамгийн багадаа ${minPeople} хүн байна.`,
+        });
       }
 
       const maxPeople = getMaxPeopleForTour(data.tourSlug);
@@ -101,7 +124,8 @@ export async function registerRoutes(
         pricePerPersonKrw: amounts.pricePerPersonKrw,
         totalAmountKrw: amounts.totalKrw,
         depositAmountKrw: amounts.depositKrw,
-        status: "deposit_pending",
+        // Hunting (inquiryOnly): төлбөргүй мэдээллийн хүсэлт
+        status: tour.inquiryOnly ? "info_request" : "deposit_pending",
       });
 
       const { emailSent } = await notifyBookingChannels(booking);
@@ -116,7 +140,8 @@ export async function registerRoutes(
         depositAmountKrw: booking.depositAmountKrw,
         status: booking.status,
         emailSent,
-        bank: getBankTransferInfo(),
+        // Мэдээллийн хүсэлтэд банкны мэдээлэл илгээхгүй
+        bank: tour.inquiryOnly ? null : getBankTransferInfo(),
       });
     } catch (error) {
       console.error("Booking failed:", error);

@@ -20,7 +20,8 @@ type TourCopy = {
 };
 
 const TOUR_COPY: Record<string, TourCopy> = {
-  "bird-photography": {
+  // хуучин slug: bird-photography
+  "wildlife-photography": {
     duration: {
       mn: "5 өдөр / 4 шөнө",
       ko: "5일 / 4박",
@@ -193,6 +194,8 @@ export function buildBookingConfirmation(
   const L = lang;
   const copy = TOUR_COPY[booking.tourSlug] ?? DEFAULT_COPY;
   const bank = getBankTransferInfo();
+  // Winter Hunting: зөвхөн мэдээллийн хүсэлт — үнэ, урьдчилгаа, банкны данс илгээхгүй
+  const inquiryOnly = getBookingTour(booking.tourSlug)?.inquiryOnly === true;
   const dateStr = formatDate(booking.travelDate, L);
   const depositLabel = formatKrw(DEPOSIT_AMOUNT_KRW);
 
@@ -341,10 +344,9 @@ export function buildBookingConfirmation(
     }`,
     sections.requests ?? "",
     "",
-    `【${sections.price}】`,
-    `${sections.total}: ${totalStr}`,
-    `${sections.deposit}: ${depositStr}`,
-    "",
+    ...(inquiryOnly
+      ? []
+      : [`【${sections.price}】`, `${sections.total}: ${totalStr}`, `${sections.deposit}: ${depositStr}`, ""]),
     `【${sections.included}】`,
     bullets(copy.included[L]),
     "",
@@ -357,11 +359,9 @@ export function buildBookingConfirmation(
     `【${sections.pack}】`,
     bullets(copy.packing[L]),
     "",
-    `【${sections.bank}】`,
-    `${bank.bankName}`,
-    `${bank.accountNumber}`,
-    `${bank.accountHolder}`,
-    "",
+    ...(inquiryOnly
+      ? []
+      : [`【${sections.bank}】`, `${bank.bankName}`, `${bank.accountNumber}`, `${bank.accountHolder}`, ""]),
     sections.thanks,
     "",
     COMPANY[L],

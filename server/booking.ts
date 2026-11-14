@@ -43,7 +43,11 @@ export async function notifyMakeWebhook(booking: Booking): Promise<void> {
     return;
   }
 
-  const bank = getBankTransferInfo();
+  // Мэдээллийн хүсэлт (Winter Hunting) дээр банкны мэдээлэл дамжуулахгүй
+  const inquiryOnly = getBookingTour(booking.tourSlug)?.inquiryOnly === true;
+  const bank = inquiryOnly
+    ? { bankName: null, accountNumber: null, accountHolder: null, transferDeadlineHours: null }
+    : getBankTransferInfo();
   const kakaoMessage = buildKakaoMessage(booking);
   const customerEmail = buildCustomerBookingEmail(booking);
 

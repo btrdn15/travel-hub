@@ -29,7 +29,9 @@ type BookingConfig = {
     titleEn: string;
     titleJa: string;
     bookable: boolean;
+    inquiryOnly: boolean;
     hasPricing: boolean;
+    minPeople: number;
     maxPeople: number;
   }[];
   depositAmountKrw: number;
@@ -50,7 +52,8 @@ type BookingSuccess = {
   totalAmountKrw: number | null;
   depositAmountKrw: number | null;
   emailSent?: boolean;
-  bank: BookingConfig["bank"];
+  /** Мэдээллийн хүсэлтэд (Winter Hunting) null */
+  bank: BookingConfig["bank"] | null;
 };
 
 const labels = {
@@ -212,6 +215,14 @@ const formSchema = z
 
 type FormValues = z.infer<typeof formSchema>;
 
+/** Winter Hunting: 2027 баримтын FAQ хариулт (захиалга, төлбөр байхгүй) */
+const INFO_ONLY_NOTE: Record<Lang, string> = {
+  en: "Not yet bookable; information inquiries only pending legal and safety clearance.",
+  ko: "아직 예약 불가하며 정보 문의만 가능합니다.",
+  mn: "Одоогоор зөвхөн мэдээллийн хүсэлт авч байна.",
+  ja: "まだご予約いただけません。法的・安全上の確認が完了するまで、情報のお問い合わせのみ承ります。",
+};
+
 function formatKrw(n: number) {
   return `₩${n.toLocaleString("ko-KR")}`;
 }
@@ -279,6 +290,7 @@ export function BookingForm({ defaultTourSlug, compact }: Props) {
   const numberOfPeople = form.watch("numberOfPeople");
   const selectedTour = config?.tours.find((t) => t.slug === tourSlug);
   const maxPeople = selectedTour?.maxPeople ?? 20;
+  const minPeople = selectedTour?.minPeople ?? 1;
 
   const {
     register,
@@ -291,8 +303,10 @@ export function BookingForm({ defaultTourSlug, compact }: Props) {
     const people = Number(numberOfPeople);
     if (people > maxPeople) {
       setValue("numberOfPeople", maxPeople, { shouldValidate: true });
+    } else if (people < minPeople) {
+      setValue("numberOfPeople", minPeople, { shouldValidate: true });
     }
-  }, [tourSlug, maxPeople, numberOfPeople, setValue]);
+  }, [tourSlug, minPeople, maxPeople, numberOfPeople, setValue]);
 
   const onSubmit = async (values: FormValues) => {
     setServerError(null);
@@ -419,7 +433,7 @@ export function BookingForm({ defaultTourSlug, compact }: Props) {
           <Input
             {...register("numberOfPeople")}
             type="number"
-            min={1}
+            min={minPeople}
             max={maxPeople}
             className={inputClass}
           />
@@ -429,7 +443,13 @@ export function BookingForm({ defaultTourSlug, compact }: Props) {
         </FormField>
       </div>
 
-      {selectedTour && !selectedTour.hasPricing && (
+      {selectedTour?.inquiryOnly && (
+        <p className="text-sm text-amber-400/90 bg-amber-950/30 border border-amber-800/40 rounded-lg px-4 py-3">
+          {INFO_ONLY_NOTE[lang]}
+        </p>
+      )}
+
+      {selectedTour && !selectedTour.inquiryOnly && !selectedTour.hasPricing && (
         <p className="text-sm text-amber-400/90 bg-amber-950/30 border border-amber-800/40 rounded-lg px-4 py-3">
           {L.pricingNote}
         </p>
@@ -504,7 +524,7 @@ function BookingSuccessView({
         )}
       </dl>
 
-      {success.depositAmountKrw != null && (
+      {success.depositAmountKrw != null && bank && (
         <BankBlock bank={bank} L={L} />
       )}
 
@@ -524,7 +544,7 @@ function Row({ label, value, highlight }: { label: string; value: string; highli
   );
 }
 
-function BankBlock({ bank, L }: { bank: BookingSuccess["bank"]; L: (typeof labels)[keyof typeof labels] }) {
+function BankBlock({ bank, L }: { bank: BookingConfig["bank"]; L: (typeof labels)[keyof typeof labels] }) {
   return (
     <div className="rounded-xl border border-stone-700 bg-stone-900/80 p-4 space-y-2 text-sm">
       <p className="font-semibold text-amber-500">{L.bankTitle}</p>

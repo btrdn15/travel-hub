@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useLang, usePaths } from "@/lib/lang";
+import { resolveTourSlug } from "@shared/tours-2027";
 import { BookingForm } from "@/components/booking-form";
 import { SiteNavbar, SITE_NAVBAR_OFFSET } from "@/components/site-navbar";
 import olonNuurLogo from "@assets/olon_nuur_travel_logo.png";
@@ -37,7 +38,9 @@ function useTourFromQuery(): string | undefined {
   const [slug, setSlug] = useState<string | undefined>();
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    setSlug(params.get("tour") || undefined);
+    const raw = params.get("tour");
+    // Хуучин slug (?tour=bird-photography) → шинэ slug
+    setSlug(raw ? (resolveTourSlug(raw) ?? raw) : undefined);
   }, []);
   return slug;
 }

@@ -1,4 +1,16 @@
-/** Урьдчилгаа — бүх захиалгад тогтмол дүн (KRW) */
+/**
+ * Booking form-ийн аяллын жагсаалт.
+ *
+ * Аялал, нэр (4 хэл), хүний тооны хязгаар, статусыг гараар бичихгүй —
+ * shared/tours-2027.ts (TOURS_2027)-аас үүсгэнэ. Ингэснээр сайт дээрх аяллууд
+ * болон захиалгын dropdown дахин зөрөхгүй.
+ *
+ * TODO(4–5-р алхам): энэ KRW урсгалыг (DEPOSIT_AMOUNT_KRW, банкны данс) USD inquiry
+ * урсгалаар солино (30% урьдчилгаа, банкны мэдээлэл quote-ийн дараа).
+ */
+import { TOURS_2027, resolveTourSlug, type SiteLang } from "./tours-2027";
+
+/** Урьдчилгаа — бүх захиалгад тогтмол дүн (KRW). 2027 баримтад 30% гэж заасан — 4–5-р алхамд солигдоно. */
 export const DEPOSIT_AMOUNT_KRW = 50_000;
 
 export type PriceTier = {
@@ -14,79 +26,64 @@ export type BookingTourOption = {
   titleEn: string;
   titleJa: string;
   bookable: boolean;
-  /** Захиалгын хамгийн их хүний тоо (байхгүй бол 20) */
-  maxPeople?: number;
+  /** true = зөвхөн мэдээллийн хүсэлт (Winter Hunting): үнэ, урьдчилгаа, банкны мэдээлэл байхгүй */
+  inquiryOnly: boolean;
+  minPeople: number;
+  maxPeople: number;
+  /**
+   * TODO(content): 2027 баримтад зөвхөн USD үнэ байгаа (shared/tours-2027.ts → pricesUsd).
+   * KRW үнийг таамаглахгүйн тулд хоосон үлдээв. 4–5-р алхамд USD тооцоолуураар солигдоно.
+   */
   priceTiers?: PriceTier[];
 };
 
-export const BOOKING_TOUR_OPTIONS: BookingTourOption[] = [
-  {
-    slug: "bird-photography",
-    titleMn: "Шувуудын гэрэл зургийн аялал",
-    titleKo: "조류 사진 탐험",
-    titleEn: "Bird Photography Expedition",
-    titleJa: "野鳥写真エクスペディション",
-    bookable: true,
-    maxPeople: 5,
-    priceTiers: [
-      { minPeople: 1, maxPeople: 3, pricePerPersonKrw: 2_600_000 },
-      { minPeople: 4, maxPeople: 4, pricePerPersonKrw: 2_200_000 },
-      { minPeople: 5, maxPeople: 5, pricePerPersonKrw: 2_000_000 },
-    ],
-  },
-  {
-    slug: "kherlen-fishing",
-    titleMn: "Цэнгэг усны загасчлалын аялал",
-    titleKo: "민물 낚시 탐험",
-    titleEn: "Freshwater Fishing Expedition",
-    titleJa: "淡水釣りエクスペディション",
-    bookable: true,
-    maxPeople: 5,
-    priceTiers: [
-      { minPeople: 1, maxPeople: 1, pricePerPersonKrw: 1_490_000 },
-      { minPeople: 2, maxPeople: 2, pricePerPersonKrw: 1_390_000 },
-      { minPeople: 3, maxPeople: 3, pricePerPersonKrw: 1_190_000 },
-      { minPeople: 4, maxPeople: 4, pricePerPersonKrw: 990_000 },
-      { minPeople: 5, maxPeople: 5, pricePerPersonKrw: 890_000 },
-    ],
-  },
-  {
-    slug: "arburd-gobi",
-    titleMn: "Нүүдэлчдийн соёлын аялал",
-    titleKo: "아르부르드 고비 3박4일 투어",
-    titleEn: "Arburd Gobi · 3 Nights 4 Days",
-    titleJa: "アルブルド・ゴビ 3泊4日",
-    bookable: true,
-    maxPeople: 5,
-    priceTiers: [
-      { minPeople: 1, maxPeople: 1, pricePerPersonKrw: 1_500_000 },
-      { minPeople: 2, maxPeople: 2, pricePerPersonKrw: 1_300_000 },
-      { minPeople: 3, maxPeople: 3, pricePerPersonKrw: 1_090_000 },
-      { minPeople: 4, maxPeople: 4, pricePerPersonKrw: 990_000 },
-      { minPeople: 5, maxPeople: 5, pricePerPersonKrw: 890_000 },
-    ],
-  },
-];
+export const BOOKING_TOUR_OPTIONS: BookingTourOption[] = TOURS_2027.map((tour) => ({
+  slug: tour.slug,
+  titleMn: tour.name.mn,
+  titleKo: tour.name.ko,
+  titleEn: tour.name.en,
+  titleJa: tour.name.ja,
+  // Hunting-ийг dropdown-д харуулж мэдээллийн хүсэлт авна, гэхдээ төлбөр тооцохгүй
+  bookable: true,
+  inquiryOnly: tour.status === "info_only",
+  minPeople: tour.minPeople,
+  maxPeople: tour.maxPeople,
+  priceTiers: undefined,
+}));
 
+/** Хуучин slug (bird-photography гэх мэт) ирвэл шинэ slug руу хөрвүүлнэ */
 export function getBookingTour(slug: string): BookingTourOption | undefined {
-  return BOOKING_TOUR_OPTIONS.find((t) => t.slug === slug);
+  const resolved = resolveTourSlug(slug) ?? slug;
+  return BOOKING_TOUR_OPTIONS.find((t) => t.slug === resolved);
 }
 
 export function getMaxPeopleForTour(slug: string): number {
   return getBookingTour(slug)?.maxPeople ?? 20;
 }
 
+export function getMinPeopleForTour(slug: string): number {
+  return getBookingTour(slug)?.minPeople ?? 1;
+}
+
+export function getBookingTourTitle(slug: string, lang: SiteLang): string | undefined {
+  const tour = getBookingTour(slug);
+  if (!tour) return undefined;
+  return { mn: tour.titleMn, ko: tour.titleKo, en: tour.titleEn, ja: tour.titleJa }[lang];
+}
+
 export function getPricePerPersonKrw(slug: string, people: number): number | null {
   const tour = getBookingTour(slug);
   if (!tour?.priceTiers?.length) return null;
-
-  const tier = tour.priceTiers.find(
-    (t) => people >= t.minPeople && people <= t.maxPeople,
-  );
+  const tier = tour.priceTiers.find((t) => people >= t.minPeople && people <= t.maxPeople);
   return tier?.pricePerPersonKrw ?? null;
 }
 
 export function calculateBookingAmounts(slug: string, people: number) {
+  const tour = getBookingTour(slug);
+  // Мэдээллийн хүсэлт: үнэ, урьдчилгаа огт тооцохгүй
+  if (!tour || tour.inquiryOnly) {
+    return { pricePerPersonKrw: null, totalKrw: null, depositKrw: null };
+  }
   const pricePerPerson = getPricePerPersonKrw(slug, people);
   const depositKrw = DEPOSIT_AMOUNT_KRW;
   if (pricePerPerson === null) {
