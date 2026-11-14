@@ -1,5 +1,12 @@
 import type { Booking } from "@shared/schema";
-import { DEPOSIT_AMOUNT_KRW, formatKrw, getBankTransferInfo, getBookingTour } from "@shared/booking-config";
+import {
+  DEPOSIT_AMOUNT_USD,
+  calculateBookingAmounts,
+  formatKrw,
+  formatUsd,
+  getBankTransferInfo,
+  getBookingTour,
+} from "@shared/booking-config";
 import { emailLangFromNationality } from "@shared/nationalities";
 
 type Lang = "mn" | "ko" | "en" | "ja";
@@ -197,7 +204,8 @@ export function buildBookingConfirmation(
   // Winter Hunting: зөвхөн мэдээллийн хүсэлт — үнэ, урьдчилгаа, банкны данс илгээхгүй
   const inquiryOnly = getBookingTour(booking.tourSlug)?.inquiryOnly === true;
   const dateStr = formatDate(booking.travelDate, L);
-  const depositLabel = formatKrw(DEPOSIT_AMOUNT_KRW);
+  const depositLabel = formatUsd(DEPOSIT_AMOUNT_USD);
+  const { depositUsd } = calculateBookingAmounts(booking.tourSlug, booking.numberOfPeople);
 
   const totalStr = booking.totalAmountKrw
     ? formatKrw(booking.totalAmountKrw)
@@ -208,8 +216,8 @@ export function buildBookingConfirmation(
         : L === "ja"
           ? "別途ご案内"
           : "Тусгайлан мэдэгдэнэ";
-  const depositStr = booking.depositAmountKrw
-    ? formatKrw(booking.depositAmountKrw)
+  const depositStr = depositUsd != null
+    ? formatUsd(depositUsd)
     : L === "ko"
       ? "별도 안내"
       : L === "en"

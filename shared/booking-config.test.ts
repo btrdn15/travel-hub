@@ -6,6 +6,8 @@ import {
   getBookingTour,
   getMaxPeopleForTour,
   getMinPeopleForTour,
+  DEPOSIT_AMOUNT_USD,
+  formatUsd,
 } from "./booking-config";
 import { TOURS_2027 } from "./tours-2027";
 
@@ -44,12 +46,23 @@ test("winter hunting is information-only: no price, no deposit", () => {
   assert.deepEqual(calculateBookingAmounts("winter-hunting", 2), {
     pricePerPersonKrw: null,
     totalKrw: null,
-    depositKrw: null,
+    depositUsd: null,
   });
 });
 
 test("no KRW prices are guessed for the 2027 tours", () => {
   for (const opt of BOOKING_TOUR_OPTIONS) {
     assert.equal(opt.priceTiers, undefined, opt.slug);
+  }
+});
+
+test("deposit is a flat $10 USD on every bookable (non info-only) tour", () => {
+  assert.equal(DEPOSIT_AMOUNT_USD, 10);
+  assert.equal(formatUsd(DEPOSIT_AMOUNT_USD), "$10");
+  for (const opt of BOOKING_TOUR_OPTIONS) {
+    for (let people = opt.minPeople; people <= opt.maxPeople; people++) {
+      const { depositUsd } = calculateBookingAmounts(opt.slug, people);
+      assert.equal(depositUsd, opt.inquiryOnly ? null : 10, `${opt.slug} × ${people}`);
+    }
   }
 });

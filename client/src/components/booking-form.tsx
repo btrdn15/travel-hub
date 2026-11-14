@@ -20,6 +20,7 @@ import {
   NATIONALITY_OPTIONS,
   type NationalityId,
 } from "@shared/nationalities";
+import { formatUsd } from "@shared/tours-2027";
 
 type BookingConfig = {
   tours: {
@@ -34,7 +35,7 @@ type BookingConfig = {
     minPeople: number;
     maxPeople: number;
   }[];
-  depositAmountKrw: number;
+  depositAmountUsd: number;
   bank: {
     bankName: string;
     accountNumber: string;
@@ -50,7 +51,7 @@ type BookingSuccess = {
   travelDate: string;
   numberOfPeople: number;
   totalAmountKrw: number | null;
-  depositAmountKrw: number | null;
+  depositAmountUsd: number | null;
   emailSent?: boolean;
   /** Мэдээллийн хүсэлтэд (Winter Hunting) null */
   bank: BookingConfig["bank"] | null;
@@ -223,9 +224,7 @@ const INFO_ONLY_NOTE: Record<Lang, string> = {
   ja: "まだご予約いただけません。法的・安全上の確認が完了するまで、情報のお問い合わせのみ承ります。",
 };
 
-function formatKrw(n: number) {
-  return `₩${n.toLocaleString("ko-KR")}`;
-}
+
 
 function FormField({
   label,
@@ -519,12 +518,12 @@ function BookingSuccessView({
         <Row label={L.tour} value={tourDisplay} />
         <Row label={L.travelDate} value={success.travelDate} />
         <Row label={L.people} value={`${success.numberOfPeople}${peopleSuffix(lang)}`} />
-        {success.depositAmountKrw != null && (
-          <Row label={L.depositEstimate} value={formatKrw(success.depositAmountKrw)} highlight />
+        {success.depositAmountUsd != null && (
+          <Row label={L.depositEstimate} value={formatUsd(success.depositAmountUsd)} highlight />
         )}
       </dl>
 
-      {success.depositAmountKrw != null && bank && (
+      {success.depositAmountUsd != null && bank && (
         <BankBlock bank={bank} L={L} />
       )}
 

@@ -5,13 +5,19 @@
  * shared/tours-2027.ts (TOURS_2027)-аас үүсгэнэ. Ингэснээр сайт дээрх аяллууд
  * болон захиалгын dropdown дахин зөрөхгүй.
  *
- * TODO(4–5-р алхам): энэ KRW урсгалыг (DEPOSIT_AMOUNT_KRW, банкны данс) USD inquiry
+ * TODO(4–5-р алхам): энэ урсгалыг (KRW нийт үнэ, банкны данс) USD inquiry
  * урсгалаар солино (30% урьдчилгаа, банкны мэдээлэл quote-ийн дараа).
  */
-import { TOURS_2027, resolveTourSlug, type SiteLang } from "./tours-2027";
+import { TOURS_2027, formatUsd, resolveTourSlug, type SiteLang } from "./tours-2027";
 
-/** Урьдчилгаа — бүх захиалгад тогтмол дүн (KRW). 2027 баримтад 30% гэж заасан — 4–5-р алхамд солигдоно. */
-export const DEPOSIT_AMOUNT_KRW = 50_000;
+export { formatUsd };
+
+/**
+ * Урьдчилгаа — бүх аялалд тогтмол дүн (USD). Хуучин: ₩50,000.
+ * Анхаар: 2027 баримтын FAQ/Payment-д "30% deposit" гэж бичсэн хэвээр.
+ * Нийт үнэ (priceTiers) KRW хэвээр.
+ */
+export const DEPOSIT_AMOUNT_USD = 10;
 
 export type PriceTier = {
   minPeople: number;
@@ -82,15 +88,15 @@ export function calculateBookingAmounts(slug: string, people: number) {
   const tour = getBookingTour(slug);
   // Мэдээллийн хүсэлт: үнэ, урьдчилгаа огт тооцохгүй
   if (!tour || tour.inquiryOnly) {
-    return { pricePerPersonKrw: null, totalKrw: null, depositKrw: null };
+    return { pricePerPersonKrw: null, totalKrw: null, depositUsd: null };
   }
   const pricePerPerson = getPricePerPersonKrw(slug, people);
-  const depositKrw = DEPOSIT_AMOUNT_KRW;
+  const depositUsd = DEPOSIT_AMOUNT_USD;
   if (pricePerPerson === null) {
-    return { pricePerPersonKrw: null, totalKrw: null, depositKrw };
+    return { pricePerPersonKrw: null, totalKrw: null, depositUsd };
   }
   const totalKrw = pricePerPerson * people;
-  return { pricePerPersonKrw: pricePerPerson, totalKrw, depositKrw };
+  return { pricePerPersonKrw: pricePerPerson, totalKrw, depositUsd };
 }
 
 export type BankTransferInfo = {

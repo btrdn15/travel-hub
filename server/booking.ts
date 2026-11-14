@@ -3,6 +3,7 @@ import {
   getBankTransferInfo,
   getBookingTour,
   formatKrw,
+  formatUsd,
 } from "@shared/booking-config";
 import type { Booking } from "@shared/schema";
 import { buildCustomerBookingEmail, buildKakaoMessage } from "./booking-messages";
@@ -48,6 +49,7 @@ export async function notifyMakeWebhook(booking: Booking): Promise<void> {
   const bank = inquiryOnly
     ? { bankName: null, accountNumber: null, accountHolder: null, transferDeadlineHours: null }
     : getBankTransferInfo();
+  const { depositUsd } = calculateBookingAmounts(booking.tourSlug, booking.numberOfPeople);
   const kakaoMessage = buildKakaoMessage(booking);
   const customerEmail = buildCustomerBookingEmail(booking);
 
@@ -70,10 +72,8 @@ export async function notifyMakeWebhook(booking: Booking): Promise<void> {
     totalAmountFormatted: booking.totalAmountKrw
       ? formatKrw(booking.totalAmountKrw)
       : null,
-    depositAmountKrw: booking.depositAmountKrw,
-    depositAmountFormatted: booking.depositAmountKrw
-      ? formatKrw(booking.depositAmountKrw)
-      : null,
+    depositAmountUsd: depositUsd,
+    depositAmountFormatted: depositUsd != null ? formatUsd(depositUsd) : null,
     status: booking.status,
     bankName: bank.bankName,
     accountNumber: bank.accountNumber,

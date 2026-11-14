@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { bookingSubmitSchema } from "@shared/schema";
 import {
   BOOKING_TOUR_OPTIONS,
-  DEPOSIT_AMOUNT_KRW,
+  DEPOSIT_AMOUNT_USD,
   getBankTransferInfo,
   getMaxPeopleForTour,
   getMinPeopleForTour,
@@ -40,7 +40,7 @@ export async function registerRoutes(
         minPeople: t.minPeople,
         maxPeople: t.maxPeople,
       })),
-      depositAmountKrw: DEPOSIT_AMOUNT_KRW,
+      depositAmountUsd: DEPOSIT_AMOUNT_USD,
       bank,
     });
   });
@@ -123,7 +123,8 @@ export async function registerRoutes(
         lang: data.lang,
         pricePerPersonKrw: amounts.pricePerPersonKrw,
         totalAmountKrw: amounts.totalKrw,
-        depositAmountKrw: amounts.depositKrw,
+        // Урьдчилгаа одоо USD ($10) — KRW баганад бичихгүй (баганын нэр/утга зөрөхөөс сэргийлж)
+        depositAmountKrw: null,
         // Hunting (inquiryOnly): төлбөргүй мэдээллийн хүсэлт
         status: tour.inquiryOnly ? "info_request" : "deposit_pending",
       });
@@ -137,7 +138,7 @@ export async function registerRoutes(
         travelDate: booking.travelDate,
         numberOfPeople: booking.numberOfPeople,
         totalAmountKrw: booking.totalAmountKrw,
-        depositAmountKrw: booking.depositAmountKrw,
+        depositAmountUsd: amounts.depositUsd,
         status: booking.status,
         emailSent,
         // Мэдээллийн хүсэлтэд банкны мэдээлэл илгээхгүй
